@@ -9,6 +9,8 @@ class HttpService {
 
   static Future<List<HistoryModel>> getRecords({
     required String employeeId,
+    required String dateFrom,
+    required String dateTo,
   }) async {
     var response = await http
         .post(
@@ -20,11 +22,38 @@ class HttpService {
           body: json.encode(
             <String, dynamic>{
               'employee_id': employeeId,
+              'date_from': dateFrom,
+              'date_to': dateTo,
             },
           ),
         )
         .timeout(const Duration(seconds: 10));
     debugPrint('getRecords ${response.body}');
     return historyModelFromJson(response.body);
+  }
+
+  static Future<int> getRecordsCount({
+    required String employeeId,
+    required String dateFrom,
+    required String dateTo,
+  }) async {
+    var response = await http
+        .post(
+          Uri.parse('$_serverUrl/get_history_count.php'),
+          headers: <String, String>{
+            'Accept': '*/*',
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: json.encode(
+            <String, dynamic>{
+              'employee_id': employeeId,
+              'date_from': dateFrom,
+              'date_to': dateTo,
+            },
+          ),
+        )
+        .timeout(const Duration(seconds: 10));
+    debugPrint('getRecordsCount ${response.body}');
+    return json.decode(response.body)['count'];
   }
 }

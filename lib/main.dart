@@ -25,14 +25,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      scrollBehavior: const MaterialScrollBehavior().copyWith(
-        dragDevices: {
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.touch,
-          PointerDeviceKind.stylus,
-          PointerDeviceKind.unknown
-        },
-      ),
+      // scrollBehavior: const MaterialScrollBehavior().copyWith(
+      //   dragDevices: {
+      //     PointerDeviceKind.mouse,
+      //     PointerDeviceKind.touch,
+      //     // PointerDeviceKind.stylus,
+      //     // PointerDeviceKind.unknown
+      //   },
+      //   overscroll: true,
+      //   scrollbars: true,
+      // ),
+      scrollBehavior: CustomScrollBehavior(),
+      debugShowCheckedModeBanner: false,
       title: 'UC-1 DTR History',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -40,4 +44,12 @@ class MyApp extends StatelessWidget {
       home: const HomeView(),
     );
   }
+}
+
+class CustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+      };
 }
