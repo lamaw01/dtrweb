@@ -19,7 +19,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
     $sql_get_history = "SELECT tbl_logs.employee_id, tbl_employee.name, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
     FROM tbl_logs LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     WHERE tbl_logs.employee_id = :employee_id AND tbl_logs.time_stamp 
-    BETWEEN '$date_from' AND '$date_to' GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') LIMIT 30;";
+    BETWEEN '$date_from 00:00:00' AND '$date_to 23:59:59' GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') LIMIT 30;";
  
     // $sql_get_logs_within_date = "SELECT time_stamp FROM tbl_logs
     // WHERE employee_id = '01152'
@@ -33,25 +33,33 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
         foreach ($result_get_history as $result) {
             $time_head = $result['time_stamp'];
             $time_tail = $result['time_stamp'];
+            // get logs
             $get_logs_within= $conn->prepare("SELECT time_stamp, log_type FROM tbl_logs
             WHERE employee_id = :employee_id
-            AND time_stamp BETWEEN '$time_head 00:00:00' AND '$time_tail 23:59:59'");
+            AND time_stamp BETWEEN '$time_head 00:00:00' AND '$time_tail 23:59:59' LIMIT 6;");
             $get_logs_within->bindParam(':employee_id', $employee_id, PDO::PARAM_STR);
             $get_logs_within->execute();
             $result_get_logs_within = $get_logs_within->fetchAll(PDO::FETCH_ASSOC);
-            $my_array = array('employee_id'=>$result['employee_id'],'name'=>$result['name'],'date'=>$result['time_stamp'],'logs'=>$result_get_logs_within);
+            // get image
+            $get_image_within= $conn->prepare("SELECT id, selfie_timestamp FROM tbl_logs WHERE employee_id = :employee_id
+            AND is_selfie = 1 AND time_stamp BETWEEN '$time_head 00:00:00' AND '$time_tail 23:59:59' LIMIT 6;");
+            $get_image_within->bindParam(':employee_id', $employee_id, PDO::PARAM_STR);
+            $get_image_within->execute();
+            $result_get_image_within = $get_image_within->fetchAll(PDO::FETCH_ASSOC);
+            // insert array
+            $my_array = array('employee_id'=>$result['employee_id'],'name'=>$result['name'],'date'=>$result['time_stamp'],'image'=>$result_get_image_within,'logs'=>$result_get_logs_within);
             array_push($result_array,$my_array);
         }
         echo json_encode($result_array);
     } catch (PDOException $e) {
-        echo json_encode(array('success'=>false,'message'=>$e->getMessage(),'data'=>$result_array));
+        echo json_encode(array('success'=>false,'message'=>$e->getMessage()));
     } finally{
         // Closing the connection.
         $conn = null;
     }
 }
 else{
-    echo json_encode(array('success'=>false,'message'=>'Error input','data'=>$result_array));
+    echo json_encode(array('success'=>false,'message'=>'Error input'));
     die();
 }
 ?>

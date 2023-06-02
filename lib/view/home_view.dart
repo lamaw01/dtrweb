@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../data/home_data.dart';
+import '../widget/image_widget.dart';
 import '../widget/logs_widget.dart';
 // import '../model/user_model.dart';
 
@@ -29,8 +30,8 @@ class _HomeViewState extends State<HomeView> {
     super.dispose();
   }
 
-  Future<DateTime> showDateDialog({required BuildContext context}) async {
-    DateTime value = DateTime.now();
+  Future<DateTime> showDateFromDialog({required BuildContext context}) async {
+    var instance = Provider.of<HomeData>(context, listen: false);
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -42,9 +43,9 @@ class _HomeViewState extends State<HomeView> {
             width: 300.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
-              initialDateTime: DateTime.now(),
+              initialDateTime: instance.selectedFrom,
               onDateTimeChanged: (DateTime newDateTime) {
-                value = newDateTime;
+                instance.selectedFrom = newDateTime;
               },
               use24hFormat: false,
               minuteInterval: 1,
@@ -69,7 +70,63 @@ class _HomeViewState extends State<HomeView> {
         );
       },
     );
-    return value;
+    return instance.selectedFrom;
+  }
+
+  Future<DateTime> showDateToDialog({required BuildContext context}) async {
+    var instance = Provider.of<HomeData>(context, listen: false);
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Pick Date'),
+          content: SizedBox(
+            height: 200.0,
+            width: 300.0,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: instance.selectedTo,
+              onDateTimeChanged: (DateTime newDateTime) {
+                instance.selectedTo = newDateTime;
+              },
+              use24hFormat: false,
+              minuteInterval: 1,
+              maximumYear: DateTime.now().year,
+              minimumYear: 1999,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                'Ok',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return instance.selectedTo;
+  }
+
+  Color? getDataRowColor(Set<MaterialState> states) {
+    const Set<MaterialState> interactiveStates = <MaterialState>{
+      MaterialState.pressed,
+      MaterialState.hovered,
+      MaterialState.focused,
+      MaterialState.selected
+    };
+    if (states.any(interactiveStates.contains)) {
+      return Colors.green[300];
+    }
+    return null;
   }
 
   @override
@@ -134,7 +191,8 @@ class _HomeViewState extends State<HomeView> {
                                   controller: fromController,
                                   onTap: () async {
                                     instance.selectedFrom =
-                                        await showDateDialog(context: context);
+                                        await showDateFromDialog(
+                                            context: context);
                                     setState(() {
                                       fromController.text = DateFormat.yMEd()
                                           .format(instance.selectedFrom);
@@ -167,7 +225,8 @@ class _HomeViewState extends State<HomeView> {
                                   controller: toController,
                                   onTap: () async {
                                     instance.selectedTo =
-                                        await showDateDialog(context: context);
+                                        await showDateToDialog(
+                                            context: context);
                                     setState(() {
                                       toController.text = DateFormat.yMEd()
                                           .format(instance.selectedTo);
@@ -238,63 +297,69 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
                 if (instance.historyList.isNotEmpty) ...[
-                  SizedBox(
-                    // color: Colors.orange,
-                    // width: 1200.0,
-                    // height: 600.0,
-                    child: DataTable(
-                      columns: const <DataColumn>[
-                        DataColumn(
-                          label: Expanded(
-                            child: Text(
-                              'ID No.',
-                              style: TextStyle(),
-                            ),
+                  DataTable(
+                    showCheckboxColumn: false,
+                    dataRowColor:
+                        MaterialStateProperty.resolveWith(getDataRowColor),
+                    columns: const <DataColumn>[
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'ID No.',
+                            style: TextStyle(),
                           ),
                         ),
-                        DataColumn(
-                          label: Expanded(
-                            child: Text(
-                              'NAME',
-                              style: TextStyle(),
-                            ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'NAME',
+                            style: TextStyle(),
                           ),
                         ),
-                        DataColumn(
-                          label: Expanded(
-                            child: Text(
-                              'DATE',
-                              style: TextStyle(),
-                            ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'DATE',
+                            style: TextStyle(),
                           ),
                         ),
-                        DataColumn(
-                          label: Expanded(
-                            child: Text(
-                              'LOGS',
-                              style: TextStyle(),
-                            ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'IMAGE',
+                            style: TextStyle(),
                           ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'LOGS',
+                            style: TextStyle(),
+                          ),
+                        ),
+                      ),
+                    ],
+                    rows: <DataRow>[
+                      for (int i = 0; i < instance.historyList.length; i++) ...[
+                        DataRow(
+                          onSelectChanged: (value) {},
+                          cells: <DataCell>[
+                            DataCell(Text(instance.historyList[i].employeeId)),
+                            DataCell(Text(instance.historyList[i].name)),
+                            DataCell(Text(DateFormat.yMMMEd()
+                                .format(instance.historyList[i].date))),
+                            DataCell(ImageWidget(
+                                images: instance.historyList[i].image)),
+                            DataCell(
+                                LogsWidget(logs: instance.historyList[i].logs)),
+                          ],
                         ),
                       ],
-                      rows: <DataRow>[
-                        for (int i = 0;
-                            i < instance.historyList.length;
-                            i++) ...[
-                          DataRow(
-                            cells: <DataCell>[
-                              DataCell(
-                                  Text(instance.historyList[i].employeeId)),
-                              DataCell(Text(instance.historyList[i].name)),
-                              DataCell(Text(DateFormat.yMMMEd()
-                                  .format(instance.historyList[i].date))),
-                              DataCell(LogsWidget(
-                                  logs: instance.historyList[i].logs)),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
+                    ],
                   ),
                   const SizedBox(height: 25.0),
                   SizedBox(
@@ -302,7 +367,7 @@ class _HomeViewState extends State<HomeView> {
                     width: 200.0,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.green[300],
                       ),
                       onPressed: () {
                         if (instance.historyList.length < instance.rowCount) {
@@ -327,21 +392,6 @@ class _HomeViewState extends State<HomeView> {
                   Text(
                       'Showing ${instance.historyList.length} out of ${instance.rowCount} entries.'),
                   const SizedBox(height: 50.0),
-                  // ListView.builder(
-                  //   itemCount: instance.historyList.length,
-                  //   itemBuilder: (ctx, i) {
-                  //     return DataRow(
-                  //       cells: <DataCell>[
-                  //         DataCell(Text(instance.historyList[i].employeeId)),
-                  //         DataCell(Text(instance.historyList[i].name)),
-                  //         DataCell(Text(DateFormat.yMMMEd()
-                  //             .format(instance.historyList[i].date))),
-                  //         DataCell(
-                  //             LogsWidget(logs: instance.historyList[i].logs)),
-                  //       ],
-                  //     );
-                  //   },
-                  // ),
                 ],
               ],
             ),

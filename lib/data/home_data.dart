@@ -51,21 +51,4 @@ class HomeData with ChangeNotifier {
       debugPrint('$e');
     }
   }
-
-  // Future<void> getRecordsCount({
-  //   required String employeeId,
-  //   required DateTime dateFrom,
-  //   required String dateTo,
-  // }) async {
-  //   try {
-  //     await HttpService.getRecords(
-  //       employeeId: employeeId,
-  //       dateFrom: DateFormat('yyyy-MM-dd').format(selectedFrom),
-  //       dateTo: DateFormat('yyyy-MM-dd').format(selectedTo),
-  //     );
-  //     notifyListeners();
-  //   } catch (e) {
-  //     debugPrint('$e');
-  //   }
-  // }
 }

@@ -18,7 +18,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
     // get query between dates
     $sql_get_history = "SELECT COUNT(*) as count FROM tbl_logs 
     WHERE tbl_logs.employee_id = :employee_id
-    AND tbl_logs.time_stamp BETWEEN '$date_from' AND '$date_to' GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d');";
+    AND tbl_logs.time_stamp BETWEEN '$date_from 00:00:00' AND '$date_to 23:59:59' GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d');";
 
     try {
         $get_history_count= $conn->prepare($sql_get_history);

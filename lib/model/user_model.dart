@@ -14,32 +14,53 @@ class HistoryModel {
   String employeeId;
   String name;
   DateTime date;
-  List<String> array;
+  List<ImageId> image;
   List<Log> logs;
 
   HistoryModel({
     required this.employeeId,
     required this.name,
     required this.date,
-    required this.array,
+    required this.image,
     required this.logs,
   });
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) => HistoryModel(
         employeeId: json["employee_id"],
         name: json["name"],
-        array: [],
         date: DateTime.parse(json["date"]),
+        image:
+            List<ImageId>.from(json["image"].map((x) => ImageId.fromJson(x))),
         logs: List<Log>.from(json["logs"].map((x) => Log.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
         "employee_id": employeeId,
         "name": name,
-        "array": array,
         "date":
             "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+        "image": List<dynamic>.from(image.map((x) => x.toJson())),
         "logs": List<dynamic>.from(logs.map((x) => x.toJson())),
+      };
+}
+
+class ImageId {
+  String id;
+  DateTime selfieTimestamp;
+
+  ImageId({
+    required this.id,
+    required this.selfieTimestamp,
+  });
+
+  factory ImageId.fromJson(Map<String, dynamic> json) => ImageId(
+        id: json["id"],
+        selfieTimestamp: DateTime.parse(json["selfie_timestamp"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "selfie_timestamp": selfieTimestamp.toIso8601String(),
       };
 }
 
