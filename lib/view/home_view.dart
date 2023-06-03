@@ -4,9 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../data/home_data.dart';
-import '../widget/image_widget.dart';
 import '../widget/logs_widget.dart';
-// import '../model/user_model.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -244,7 +242,7 @@ class _HomeViewState extends State<HomeView> {
                                 child: TextField(
                                   style: const TextStyle(fontSize: 20.0),
                                   decoration: InputDecoration(
-                                    label: const Text('*ID number'),
+                                    label: const Text('*ID number or Name'),
                                     border: const OutlineInputBorder(
                                       borderSide: BorderSide(
                                         color: Colors.grey,
@@ -306,7 +304,7 @@ class _HomeViewState extends State<HomeView> {
                         label: Expanded(
                           child: Text(
                             'ID No.',
-                            style: TextStyle(),
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
@@ -314,7 +312,7 @@ class _HomeViewState extends State<HomeView> {
                         label: Expanded(
                           child: Text(
                             'NAME',
-                            style: TextStyle(),
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
@@ -322,23 +320,15 @@ class _HomeViewState extends State<HomeView> {
                         label: Expanded(
                           child: Text(
                             'DATE',
-                            style: TextStyle(),
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
                       DataColumn(
                         label: Expanded(
                           child: Text(
-                            'IMAGE',
-                            style: TextStyle(),
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'LOGS',
-                            style: TextStyle(),
+                            'TIME',
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
@@ -352,8 +342,6 @@ class _HomeViewState extends State<HomeView> {
                             DataCell(Text(instance.historyList[i].name)),
                             DataCell(Text(DateFormat.yMMMEd()
                                 .format(instance.historyList[i].date))),
-                            DataCell(ImageWidget(
-                                images: instance.historyList[i].image)),
                             DataCell(
                                 LogsWidget(logs: instance.historyList[i].logs)),
                           ],
@@ -362,33 +350,35 @@ class _HomeViewState extends State<HomeView> {
                     ],
                   ),
                   const SizedBox(height: 25.0),
-                  SizedBox(
-                    height: 50.0,
-                    width: 200.0,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.green[300],
-                      ),
-                      onPressed: () {
-                        if (instance.historyList.length < instance.rowCount) {
-                          instance.loadMoreRecords(
-                            employeeId: idController.text.trim(),
-                            dateFrom: instance.historyList.last.date,
-                            dateTo: toController.text,
-                          );
-                        }
-                      },
-                      child: const Text(
-                        'Load more..',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
+                  if (instance.historyList.length < instance.rowCount) ...[
+                    SizedBox(
+                      height: 50.0,
+                      width: 200.0,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.green[300],
+                        ),
+                        onPressed: () {
+                          if (instance.historyList.length < instance.rowCount) {
+                            instance.loadMoreRecords(
+                              employeeId: idController.text.trim(),
+                              dateFrom: instance.historyList.last.date,
+                              dateTo: toController.text,
+                            );
+                          }
+                        },
+                        child: const Text(
+                          'Load more..',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 15.0),
+                    const SizedBox(height: 15.0),
+                  ],
                   Text(
                       'Showing ${instance.historyList.length} out of ${instance.rowCount} entries.'),
                   const SizedBox(height: 50.0),
