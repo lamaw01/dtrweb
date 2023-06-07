@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +10,7 @@ import '../widget/logs_widget.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
-
+  static const String route = '/';
   @override
   State<HomeView> createState() => _HomeViewState();
 }
@@ -19,7 +21,6 @@ class _HomeViewState extends State<HomeView> {
       TextEditingController(text: DateFormat.yMEd().format(DateTime.now()));
   final toController =
       TextEditingController(text: DateFormat.yMEd().format(DateTime.now()));
-  bool valideID = false;
   final scrollController = ScrollController();
 
   @override
@@ -43,7 +44,8 @@ class _HomeViewState extends State<HomeView> {
               mode: CupertinoDatePickerMode.date,
               initialDateTime: instance.selectedFrom,
               onDateTimeChanged: (DateTime newDateTime) {
-                instance.selectedFrom = newDateTime;
+                instance.selectedFrom =
+                    newDateTime.copyWith(hour: 0, minute: 0, second: 0);
               },
               use24hFormat: false,
               minuteInterval: 1,
@@ -86,7 +88,8 @@ class _HomeViewState extends State<HomeView> {
               mode: CupertinoDatePickerMode.date,
               initialDateTime: instance.selectedTo,
               onDateTimeChanged: (DateTime newDateTime) {
-                instance.selectedTo = newDateTime;
+                instance.selectedTo =
+                    newDateTime.copyWith(hour: 23, minute: 59, second: 59);
               },
               use24hFormat: false,
               minuteInterval: 1,
@@ -130,260 +133,273 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     var instance = Provider.of<HomeData>(context);
+    const String title = 'UC-1 DTR History';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('UC-1 DTR History'),
-      ),
-      body: Scrollbar(
-        // thickness: 20,
-        thumbVisibility: true,
-        trackVisibility: true,
-        // interactive: true,
-        // radius: const Radius.circular(15),
-        controller: scrollController,
-        child: SingleChildScrollView(
+    return Title(
+      title: title,
+      color: Theme.of(context).primaryColor,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(title),
+        ),
+        body: Scrollbar(
+          // thickness: 20,
+          thumbVisibility: true,
+          trackVisibility: true,
+          // interactive: true,
+          // radius: const Radius.circular(15),
           controller: scrollController,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 10.0),
-                SizedBox(
-                  height: 250.0,
-                  width: 800.0,
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const Text(
-                                'From :',
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 300.0,
-                                child: TextField(
-                                  style: const TextStyle(fontSize: 20.0),
-                                  readOnly: true,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Colors.grey,
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    contentPadding: EdgeInsets.fromLTRB(
-                                        12.0, 12.0, 12.0, 12.0),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 10.0),
+                  SizedBox(
+                    height: 250.0,
+                    width: 800.0,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'From :',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                  controller: fromController,
-                                  onTap: () async {
-                                    instance.selectedFrom =
-                                        await showDateFromDialog(
-                                            context: context);
-                                    setState(() {
-                                      fromController.text = DateFormat.yMEd()
-                                          .format(instance.selectedFrom);
-                                    });
-                                  },
                                 ),
-                              ),
-                              const Text(
-                                'To :',
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 300.0,
-                                child: TextField(
-                                  style: const TextStyle(fontSize: 20.0),
-                                  readOnly: true,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Colors.grey,
-                                        width: 1.0,
+                                SizedBox(
+                                  width: 300.0,
+                                  child: TextField(
+                                    style: const TextStyle(fontSize: 20.0),
+                                    readOnly: true,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
                                       ),
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 12.0),
                                     ),
-                                    contentPadding: EdgeInsets.fromLTRB(
-                                        12.0, 12.0, 12.0, 12.0),
+                                    controller: fromController,
+                                    onTap: () async {
+                                      instance.selectedFrom =
+                                          await showDateFromDialog(
+                                              context: context);
+                                      setState(() {
+                                        fromController.text = DateFormat.yMEd()
+                                            .format(instance.selectedFrom);
+                                      });
+                                    },
                                   ),
-                                  controller: toController,
-                                  onTap: () async {
-                                    instance.selectedTo =
-                                        await showDateToDialog(
-                                            context: context);
-                                    setState(() {
-                                      toController.text = DateFormat.yMEd()
-                                          .format(instance.selectedTo);
-                                    });
-                                  },
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10.0),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  style: const TextStyle(fontSize: 20.0),
-                                  decoration: InputDecoration(
-                                    label: const Text('*ID number or Name'),
-                                    border: const OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Colors.grey,
-                                        width: 1.0,
+                                const Text(
+                                  'To :',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 300.0,
+                                  child: TextField(
+                                    style: const TextStyle(fontSize: 20.0),
+                                    readOnly: true,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
                                       ),
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 12.0),
                                     ),
-                                    errorText: valideID
-                                        ? 'Value Can\'t Be Empty'
-                                        : null,
-                                    contentPadding: const EdgeInsets.fromLTRB(
-                                        12.0, 12.0, 12.0, 12.0),
+                                    controller: toController,
+                                    onTap: () async {
+                                      instance.selectedTo =
+                                          await showDateToDialog(
+                                              context: context);
+                                      setState(() {
+                                        toController.text = DateFormat.yMEd()
+                                            .format(instance.selectedTo);
+                                      });
+                                    },
                                   ),
-                                  controller: idController,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.done,
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 15.0),
-                          Container(
-                            color: Colors.green[300],
-                            width: double.infinity,
-                            height: 50.0,
-                            child: TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  idController.text.isEmpty
-                                      ? valideID = true
-                                      : valideID = false;
-                                });
-                                if (idController.text.isNotEmpty) {
-                                  instance.getRecords(
-                                      employeeId: idController.text.trim());
-                                }
-                              },
-                              child: const Text(
-                                'View',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
+                              ],
+                            ),
+                            const SizedBox(height: 10.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    style: const TextStyle(fontSize: 20.0),
+                                    decoration: const InputDecoration(
+                                      label: Text('*ID number or Name'),
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 12.0),
+                                    ),
+                                    controller: idController,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15.0),
+                            Container(
+                              color: Colors.green[300],
+                              width: double.infinity,
+                              height: 50.0,
+                              child: TextButton(
+                                onPressed: () {
+                                  if (idController.text.isEmpty) {
+                                    // get records all
+                                    instance.getRecords(
+                                      employeeId: 'all',
+                                    );
+                                  } else {
+                                    // get records with id or name
+                                    instance.getRecords(
+                                      employeeId: idController.text.trim(),
+                                    );
+                                  }
+                                },
+                                child: const Text(
+                                  'View',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                if (instance.historyList.isNotEmpty) ...[
-                  DataTable(
-                    showCheckboxColumn: false,
-                    dataRowColor:
-                        MaterialStateProperty.resolveWith(getDataRowColor),
-                    columns: const <DataColumn>[
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'ID No.',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'NAME',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'DATE',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'TIME',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ],
-                    rows: <DataRow>[
-                      for (int i = 0; i < instance.historyList.length; i++) ...[
-                        DataRow(
-                          onSelectChanged: (value) {},
-                          cells: <DataCell>[
-                            DataCell(Text(instance.historyList[i].employeeId)),
-                            DataCell(Text(instance.historyList[i].name)),
-                            DataCell(Text(DateFormat.yMMMEd()
-                                .format(instance.historyList[i].date))),
-                            DataCell(
-                                LogsWidget(logs: instance.historyList[i].logs)),
                           ],
                         ),
-                      ],
-                    ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 25.0),
-                  if (instance.historyList.length < instance.rowCount) ...[
-                    SizedBox(
-                      height: 50.0,
-                      width: 200.0,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.green[300],
+                  if (instance.historyList.isNotEmpty) ...[
+                    DataTable(
+                      showCheckboxColumn: false,
+                      dataRowColor:
+                          MaterialStateProperty.resolveWith(getDataRowColor),
+                      columns: const <DataColumn>[
+                        DataColumn(
+                          label: Expanded(
+                            child: Text(
+                              'ID No.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
-                        onPressed: () {
-                          if (instance.historyList.length < instance.rowCount) {
+                        DataColumn(
+                          label: Expanded(
+                            child: Text(
+                              'NAME',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Expanded(
+                            child: Text(
+                              'DATE',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Expanded(
+                            child: Text(
+                              'TIME',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ],
+                      rows: <DataRow>[
+                        for (int i = 0;
+                            i < instance.historyList.length;
+                            i++) ...[
+                          DataRow(
+                            onSelectChanged: (value) {},
+                            cells: <DataCell>[
+                              DataCell(
+                                  Text(instance.historyList[i].employeeId)),
+                              DataCell(Text(instance.historyList[i].name)),
+                              DataCell(Text(DateFormat.yMMMEd()
+                                  .format(instance.historyList[i].date))),
+                              DataCell(LogsWidget(
+                                  logs: instance.historyList[i].logs)),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 25.0),
+                    if (instance.historyList.length < instance.rowCount) ...[
+                      SizedBox(
+                        height: 50.0,
+                        width: 200.0,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.green[300],
+                          ),
+                          onPressed: () async {
+                            // if (instance.historyList.length <
+                            //     instance.rowCount) {
+                            //   instance.loadMoreRecords(
+                            //     employeeId: idController.text.trim(),
+                            //     dateFrom: instance.historyList.last.date,
+                            //     dateTo: toController.text,
+                            //   );
+                            // }
+                            debugPrint(json
+                                .encode(instance.historyList.last.toJson()));
                             instance.loadMoreRecords(
-                              employeeId: idController.text.trim(),
-                              dateFrom: instance.historyList.last.date,
-                              dateTo: toController.text,
+                              employeeId: 'all',
+                              dateFrom: instance.selectedFrom,
+                              dateTo: instance.historyList.last.date,
                             );
-                          }
-                        },
-                        child: const Text(
-                          'Load more..',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600,
+                          },
+                          child: const Text(
+                            'Load more..',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 15.0),
+                      const SizedBox(height: 15.0),
+                    ],
+                    Text(
+                        'Showing ${instance.historyList.length} out of ${instance.rowCount} entries.'),
+                    const SizedBox(height: 50.0),
                   ],
-                  Text(
-                      'Showing ${instance.historyList.length} out of ${instance.rowCount} entries.'),
-                  const SizedBox(height: 50.0),
                 ],
-              ],
+              ),
             ),
           ),
         ),
