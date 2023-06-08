@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -44,8 +42,7 @@ class _HomeViewState extends State<HomeView> {
               mode: CupertinoDatePickerMode.date,
               initialDateTime: instance.selectedFrom,
               onDateTimeChanged: (DateTime newDateTime) {
-                instance.selectedFrom =
-                    newDateTime.copyWith(hour: 0, minute: 0, second: 0);
+                instance.selectedFrom = newDateTime;
               },
               use24hFormat: false,
               minuteInterval: 1,
@@ -88,8 +85,7 @@ class _HomeViewState extends State<HomeView> {
               mode: CupertinoDatePickerMode.date,
               initialDateTime: instance.selectedTo,
               onDateTimeChanged: (DateTime newDateTime) {
-                instance.selectedTo =
-                    newDateTime.copyWith(hour: 23, minute: 59, second: 59);
+                instance.selectedTo = newDateTime;
               },
               use24hFormat: false,
               minuteInterval: 1,
@@ -125,7 +121,7 @@ class _HomeViewState extends State<HomeView> {
       MaterialState.selected
     };
     if (states.any(interactiveStates.contains)) {
-      return Colors.green[300];
+      return Colors.grey[300];
     }
     return null;
   }
@@ -260,6 +256,17 @@ class _HomeViewState extends State<HomeView> {
                                           12.0, 12.0, 12.0, 12.0),
                                     ),
                                     controller: idController,
+                                    onSubmitted: (data) {
+                                      if (idController.text.isEmpty) {
+                                        // get records all
+                                        instance.getRecordsAll();
+                                      } else {
+                                        // get records with id or name
+                                        instance.getRecords(
+                                          employeeId: idController.text.trim(),
+                                        );
+                                      }
+                                    },
                                   ),
                                 ),
                               ],
@@ -273,9 +280,7 @@ class _HomeViewState extends State<HomeView> {
                                 onPressed: () {
                                   if (idController.text.isEmpty) {
                                     // get records all
-                                    instance.getRecords(
-                                      employeeId: 'all',
-                                    );
+                                    instance.getRecordsAll();
                                   } else {
                                     // get records with id or name
                                     instance.getRecords(
@@ -342,12 +347,14 @@ class _HomeViewState extends State<HomeView> {
                             i < instance.historyList.length;
                             i++) ...[
                           DataRow(
-                            onSelectChanged: (value) {},
+                            // onSelectChanged: (value) {},
+                            selected: i % 2 == 0 ? true : false,
                             cells: <DataCell>[
+                              DataCell(SelectableText(
+                                  instance.historyList[i].employeeId)),
                               DataCell(
-                                  Text(instance.historyList[i].employeeId)),
-                              DataCell(Text(instance.historyList[i].name)),
-                              DataCell(Text(DateFormat.yMMMEd()
+                                  SelectableText(instance.historyList[i].name)),
+                              DataCell(SelectableText(DateFormat.yMMMEd()
                                   .format(instance.historyList[i].date))),
                               DataCell(LogsWidget(
                                   logs: instance.historyList[i].logs)),
@@ -365,22 +372,24 @@ class _HomeViewState extends State<HomeView> {
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.green[300],
                           ),
-                          onPressed: () async {
-                            // if (instance.historyList.length <
-                            //     instance.rowCount) {
-                            //   instance.loadMoreRecords(
-                            //     employeeId: idController.text.trim(),
-                            //     dateFrom: instance.historyList.last.date,
-                            //     dateTo: toController.text,
-                            //   );
-                            // }
-                            debugPrint(json
-                                .encode(instance.historyList.last.toJson()));
-                            instance.loadMoreRecords(
-                              employeeId: 'all',
-                              dateFrom: instance.selectedFrom,
-                              dateTo: instance.historyList.last.date,
-                            );
+                          onPressed: () {
+                            if (instance.historyList.length <
+                                instance.rowCount) {
+                              if (idController.text.isEmpty) {
+                                instance.loadMoreAll(
+                                  id: instance.getLowestId(
+                                      instance.historyList.last.logs),
+                                  dateFrom: instance.selectedFrom,
+                                  dateTo: instance.historyList.last.date,
+                                );
+                              } else {
+                                instance.loadMore(
+                                  employeeId: idController.text.trim(),
+                                  dateFrom: instance.selectedFrom,
+                                  dateTo: instance.historyList.last.date,
+                                );
+                              }
+                            }
                           },
                           child: const Text(
                             'Load more..',
@@ -395,8 +404,21 @@ class _HomeViewState extends State<HomeView> {
                       const SizedBox(height: 15.0),
                     ],
                     Text(
-                        'Showing ${instance.historyList.length} out of ${instance.rowCount} entries.'),
+                      'Showing ${instance.historyList.length} out of ${instance.rowCount} results.',
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
                     const SizedBox(height: 50.0),
+                  ] else if (instance.historyList.isEmpty &&
+                      idController.text.isNotEmpty) ...[
+                    const SizedBox(height: 25.0),
+                    const Text(
+                      'No data found.',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
                   ],
                 ],
               ),

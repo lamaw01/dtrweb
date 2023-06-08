@@ -10,18 +10,20 @@ $input = json_decode($inputJSON, TRUE);
 $result_array = array();
 
 // if not put id die
-if($_SERVER['REQUEST_METHOD']){
+if($_SERVER['REQUEST_METHOD'] && array_key_exists('id', $input)){
+    $id = $input['id'];
     $date_from = $input['date_from'];
     $date_to = $input['date_to'];
 
     $sql_get_history_all = "SELECT tbl_logs.employee_id, tbl_employee.name, 
     DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp FROM tbl_logs 
     LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
-    WHERE tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee.name IS NOT NULL
+    WHERE tbl_logs.id < :id AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee.name IS NOT NULL
     GROUP BY tbl_logs.employee_id, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id DESC LIMIT 30;";
 
     try {
         $get_history_all= $conn->prepare($sql_get_history_all);
+        $get_history_all->bindParam(':id', $id, PDO::PARAM_STR);
         $get_history_all->bindParam(':date_from', $date_from, PDO::PARAM_STR);
         $get_history_all->bindParam(':date_to', $date_to, PDO::PARAM_STR);
         $get_history_all->execute();

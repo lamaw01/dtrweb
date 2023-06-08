@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../model/user_model.dart';
+import '../services/http_service.dart';
 
 class LogsWidget extends StatefulWidget {
   const LogsWidget({super.key, required this.logs});
@@ -24,31 +25,50 @@ class _LogsWidgetState extends State<LogsWidget> {
       mainAxisSize: MainAxisSize.min,
       children: [
         for (int j = 0; j < widget.logs.length; j++) ...[
-          InkWell(
-            onTap: () async {
-              if (widget.logs[j].isSelfie == '1') {
-                await launchUrl(Uri.parse(
-                    'http://uc-1.dnsalias.net:55083/dtrwebapi/show_image.php?id=${widget.logs[j].id}'));
-              }
-            },
-            child: Column(
+          if (widget.logs[j].isSelfie == '1') ...[
+            InkWell(
+              hoverColor: Colors.transparent,
+              onTap: () {
+                launchUrl(
+                  Uri.parse(
+                      '${HttpService.serverUrl}/show_image.php?id=${widget.logs[j].id}'),
+                );
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.logs[j].logType,
+                    style: textStyleImage,
+                  ),
+                  const SizedBox(height: 5.0),
+                  Text(
+                    DateFormat('hh:mm:ss aa').format(
+                      widget.logs[j].timeStamp,
+                    ),
+                    style: textStyleImage,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 30.0),
+          ] else ...[
+            Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   widget.logs[j].logType,
-                  style: widget.logs[j].isSelfie == '1' ? textStyleImage : null,
                 ),
                 const SizedBox(height: 5.0),
                 Text(
                   DateFormat('hh:mm:ss aa').format(
                     widget.logs[j].timeStamp,
                   ),
-                  style: widget.logs[j].isSelfie == '1' ? textStyleImage : null,
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 30.0),
+            const SizedBox(width: 30.0),
+          ],
         ],
       ],
     );
