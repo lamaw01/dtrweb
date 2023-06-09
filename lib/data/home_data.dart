@@ -1,3 +1,4 @@
+import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
@@ -13,6 +14,45 @@ class HomeData with ChangeNotifier {
   var _rowCount = 0;
   int get rowCount => _rowCount;
   final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+
+  void exportExcel() {
+    var excel = Excel.createExcel();
+    Sheet sheetObject = excel['Sheet1'];
+    var cellStyle = CellStyle(
+      backgroundColorHex: '#dddddd',
+      fontFamily: getFontFamily(FontFamily.Arial),
+      horizontalAlign: HorizontalAlign.Center,
+    );
+
+    var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
+    column1
+      ..value = 'Employee ID'
+      ..cellStyle = cellStyle;
+
+    var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
+    column2
+      ..value = 'Name'
+      ..cellStyle = cellStyle;
+
+    var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
+    column3
+      ..value = 'Date Time'
+      ..cellStyle = cellStyle;
+
+    for (int i = 0; i < _historyList.length; i++) {
+      for (int j = 0; j < _historyList[i].logs.length; j++) {
+        // kRow++;
+        List<String> dataList = [
+          historyList[i].employeeId,
+          _historyList[i].name,
+          dateFormat.format(_historyList[i].logs[j].timeStamp)
+        ];
+        sheetObject.appendRow(dataList);
+      }
+    }
+    excel.save(
+        fileName: 'DTR ${DateFormat().add_yMMMMd().format(selectedTo)}.xlsx');
+  }
 
   int getLowestId(List<Log> logs) {
     var listOfId = <int>[];

@@ -301,6 +301,37 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
                 if (instance.historyList.isNotEmpty) ...[
+                  const SizedBox(height: 10.0),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.orange[300],
+                    ),
+                    width: 150.0,
+                    height: 30.0,
+                    child: TextButton(
+                      onPressed: () {
+                        instance.exportExcel();
+                      },
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.download,
+                            color: Colors.white,
+                          ),
+                          Text(
+                            'Export excel',
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              decoration: TextDecoration.underline,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   DataTable(
                     showCheckboxColumn: false,
                     dataRowColor:
