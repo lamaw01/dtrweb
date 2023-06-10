@@ -15,7 +15,19 @@ class HomeData with ChangeNotifier {
   int get rowCount => _rowCount;
   final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
 
-  void exportExcel() {
+  void exportExcel({String? employeeId}) async {
+    var historyListExcel = <HistoryModel>[];
+    if (employeeId == null) {
+      var result = await getRecordsAll(limitRow: _rowCount);
+      historyListExcel.addAll(result);
+    } else {
+      var result = await getRecords(
+        employeeId: employeeId,
+        limitRow: _rowCount,
+      );
+      historyListExcel.addAll(result);
+    }
+
     var excel = Excel.createExcel();
     Sheet sheetObject = excel['Sheet1'];
     var cellStyle = CellStyle(
@@ -36,16 +48,21 @@ class HomeData with ChangeNotifier {
 
     var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
     column3
+      ..value = 'Log'
+      ..cellStyle = cellStyle;
+
+    var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
+    column4
       ..value = 'Date Time'
       ..cellStyle = cellStyle;
 
-    for (int i = 0; i < _historyList.length; i++) {
-      for (int j = 0; j < _historyList[i].logs.length; j++) {
-        // kRow++;
+    for (int i = 0; i < historyListExcel.length; i++) {
+      for (int j = 0; j < historyListExcel[i].logs.length; j++) {
         List<String> dataList = [
-          historyList[i].employeeId,
-          _historyList[i].name,
-          dateFormat.format(_historyList[i].logs[j].timeStamp)
+          historyListExcel[i].employeeId,
+          historyListExcel[i].name,
+          historyListExcel[i].logs[j].logType,
+          dateFormat.format(historyListExcel[i].logs[j].timeStamp)
         ];
         sheetObject.appendRow(dataList);
       }
@@ -63,19 +80,24 @@ class HomeData with ChangeNotifier {
     return listOfId.reduce(min);
   }
 
-  Future<void> getRecords({
+  void addHistoryList(List<HistoryModel> data) {
+    _historyList = data;
+  }
+
+  Future<List<HistoryModel>> getRecords({
     required String employeeId,
+    required int limitRow,
   }) async {
     var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
     var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
+    var result = <HistoryModel>[];
     try {
-      final result = await HttpService.getRecords(
+      result = await HttpService.getRecords(
         employeeId: employeeId,
         dateFrom: dateFormat.format(newselectedFrom),
         dateTo: dateFormat.format(newselectedTo),
+        limitRow: limitRow,
       );
-
-      _historyList = result;
     } catch (e) {
       debugPrint('$e');
     } finally {
@@ -86,6 +108,7 @@ class HomeData with ChangeNotifier {
       );
       notifyListeners();
     }
+    return result;
   }
 
   Future<void> loadMore({
@@ -110,16 +133,16 @@ class HomeData with ChangeNotifier {
     }
   }
 
-  Future<void> getRecordsAll() async {
+  Future<List<HistoryModel>> getRecordsAll({required int limitRow}) async {
     var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
     var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
+    var result = <HistoryModel>[];
     try {
-      final result = await HttpService.getRecordsAll(
+      result = await HttpService.getRecordsAll(
         dateFrom: dateFormat.format(newselectedFrom),
         dateTo: dateFormat.format(newselectedTo),
+        limitRow: limitRow,
       );
-
-      _historyList = result;
     } catch (e) {
       debugPrint('$e');
     } finally {
@@ -129,6 +152,7 @@ class HomeData with ChangeNotifier {
       );
       notifyListeners();
     }
+    return result;
   }
 
   Future<void> loadMoreAll({

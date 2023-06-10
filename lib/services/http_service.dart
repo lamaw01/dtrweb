@@ -11,6 +11,7 @@ class HttpService {
     required String employeeId,
     required String dateFrom,
     required String dateTo,
+    required int limitRow,
   }) async {
     var response = await http
         .post(
@@ -24,6 +25,7 @@ class HttpService {
               'employee_id': employeeId,
               'date_from': dateFrom,
               'date_to': dateTo,
+              'limit_row': limitRow
             },
           ),
         )
@@ -85,6 +87,7 @@ class HttpService {
   static Future<List<HistoryModel>> getRecordsAll({
     required String dateFrom,
     required String dateTo,
+    required int limitRow,
   }) async {
     var response = await http
         .post(
@@ -97,6 +100,7 @@ class HttpService {
             <String, dynamic>{
               'date_from': dateFrom,
               'date_to': dateTo,
+              'limit_row': limitRow
             },
           ),
         )

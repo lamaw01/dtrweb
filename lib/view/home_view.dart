@@ -24,6 +24,8 @@ class _HomeViewState extends State<HomeView> {
   @override
   void dispose() {
     idController.dispose();
+    fromController.dispose();
+    toController.dispose();
     super.dispose();
   }
 
@@ -242,7 +244,7 @@ class _HomeViewState extends State<HomeView> {
                                 child: TextField(
                                   style: const TextStyle(fontSize: 20.0),
                                   decoration: const InputDecoration(
-                                    label: Text('*ID number or Name'),
+                                    label: Text('ID number or Name'),
                                     border: OutlineInputBorder(
                                       borderSide: BorderSide(
                                         color: Colors.grey,
@@ -253,15 +255,19 @@ class _HomeViewState extends State<HomeView> {
                                         12.0, 12.0, 12.0, 12.0),
                                   ),
                                   controller: idController,
-                                  onSubmitted: (data) {
+                                  onSubmitted: (data) async {
                                     if (idController.text.isEmpty) {
                                       // get records all
-                                      instance.getRecordsAll();
+                                      var result = await instance.getRecordsAll(
+                                        limitRow: 30,
+                                      );
+                                      instance.addHistoryList(result);
                                     } else {
                                       // get records with id or name
-                                      instance.getRecords(
-                                        employeeId: idController.text.trim(),
-                                      );
+                                      var result = await instance.getRecords(
+                                          employeeId: idController.text.trim(),
+                                          limitRow: 30);
+                                      instance.addHistoryList(result);
                                     }
                                   },
                                 ),
@@ -274,15 +280,19 @@ class _HomeViewState extends State<HomeView> {
                             width: double.infinity,
                             height: 50.0,
                             child: TextButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 if (idController.text.isEmpty) {
                                   // get records all
-                                  instance.getRecordsAll();
+                                  var result = await instance.getRecordsAll(
+                                    limitRow: 30,
+                                  );
+                                  instance.addHistoryList(result);
                                 } else {
                                   // get records with id or name
-                                  instance.getRecords(
-                                    employeeId: idController.text.trim(),
-                                  );
+                                  var result = await instance.getRecords(
+                                      employeeId: idController.text.trim(),
+                                      limitRow: 30);
+                                  instance.addHistoryList(result);
                                 }
                               },
                               child: const Text(
@@ -311,7 +321,13 @@ class _HomeViewState extends State<HomeView> {
                     height: 30.0,
                     child: TextButton(
                       onPressed: () {
-                        instance.exportExcel();
+                        if (idController.text.isEmpty) {
+                          instance.exportExcel();
+                        } else {
+                          instance.exportExcel(
+                            employeeId: idController.text.trim(),
+                          );
+                        }
                       },
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
