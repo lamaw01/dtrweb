@@ -29,14 +29,14 @@ if($_SERVER['REQUEST_METHOD'] && array_key_exists('id', $input)){
         $get_history_all->execute();
         $result_get_history_all = $get_history_all->fetchAll(PDO::FETCH_ASSOC);
         foreach ($result_get_history_all as $result) {
+            $id = $result['employee_id'];
             $time_head = $result['time_stamp'];
             $time_tail = $result['time_stamp'];
-            $employee_id = $result['employee_id'];
             // get logs
-            $get_logs_within= $conn->prepare("SELECT time_stamp, log_type, id, is_selfie FROM tbl_logs
-            WHERE employee_id = :employee_id
-            AND time_stamp BETWEEN '$time_head 00:00:00' AND '$time_tail 23:59:59' LIMIT 6;");
-            $get_logs_within->bindParam(':employee_id', $employee_id, PDO::PARAM_STR);
+            $get_logs_within= $conn->prepare("SELECT case is_selfie when '0' then time_stamp when '1' then selfie_timestamp end time_stamp,
+            log_type, id, is_selfie FROM tbl_logs
+            WHERE employee_id = :id AND time_stamp BETWEEN '$time_head 00:00:00' AND '$time_tail 23:59:59' LIMIT 6;");
+            $get_logs_within->bindParam(':id', $id, PDO::PARAM_STR);
             $get_logs_within->execute();
             $result_get_logs_within = $get_logs_within->fetchAll(PDO::FETCH_ASSOC);
             $my_array = array('employee_id'=>$result['employee_id'],'name'=>$result['name'],'date'=>$result['time_stamp'],'logs'=>$result_get_logs_within);
