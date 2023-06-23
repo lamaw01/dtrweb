@@ -36,7 +36,7 @@ class _HomeViewState extends State<HomeView> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Pick Date'),
+          title: const Text('Pick Date from'),
           content: SizedBox(
             height: 200.0,
             width: 300.0,
@@ -79,7 +79,7 @@ class _HomeViewState extends State<HomeView> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Pick Date'),
+          title: const Text('Pick Date to'),
           content: SizedBox(
             height: 200.0,
             width: 300.0,
@@ -151,6 +151,19 @@ class _HomeViewState extends State<HomeView> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                ValueListenableBuilder<bool>(
+                  valueListenable: instance.isLogging,
+                  builder: (context, value, child) {
+                    if (value) {
+                      return LinearProgressIndicator(
+                        backgroundColor: Colors.grey,
+                        color: Colors.orange[300],
+                        minHeight: 10,
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                ),
                 const SizedBox(height: 10.0),
                 SizedBox(
                   height: 250.0,
@@ -244,7 +257,7 @@ class _HomeViewState extends State<HomeView> {
                                 child: TextField(
                                   style: const TextStyle(fontSize: 20.0),
                                   decoration: const InputDecoration(
-                                    label: Text('ID number or Name'),
+                                    label: Text('ID no. or Name'),
                                     border: OutlineInputBorder(
                                       borderSide: BorderSide(
                                         color: Colors.grey,
@@ -256,19 +269,18 @@ class _HomeViewState extends State<HomeView> {
                                   ),
                                   controller: idController,
                                   onSubmitted: (data) async {
+                                    instance.changeLoadingState(true);
+                                    await Future.delayed(
+                                        const Duration(seconds: 1));
                                     if (idController.text.isEmpty) {
                                       // get records all
-                                      var result = await instance.getRecordsAll(
-                                        limitRow: 30,
-                                      );
-                                      instance.addHistoryList(result);
+                                      await instance.getRecordsAll();
                                     } else {
                                       // get records with id or name
-                                      var result = await instance.getRecords(
-                                          employeeId: idController.text.trim(),
-                                          limitRow: 30);
-                                      instance.addHistoryList(result);
+                                      await instance.getRecords(
+                                          employeeId: idController.text.trim());
                                     }
+                                    instance.changeLoadingState(false);
                                   },
                                 ),
                               ),
@@ -281,19 +293,18 @@ class _HomeViewState extends State<HomeView> {
                             height: 50.0,
                             child: TextButton(
                               onPressed: () async {
+                                instance.changeLoadingState(true);
+                                await Future.delayed(
+                                    const Duration(seconds: 1));
                                 if (idController.text.isEmpty) {
                                   // get records all
-                                  var result = await instance.getRecordsAll(
-                                    limitRow: 30,
-                                  );
-                                  instance.addHistoryList(result);
+                                  await instance.getRecordsAll();
                                 } else {
                                   // get records with id or name
-                                  var result = await instance.getRecords(
-                                      employeeId: idController.text.trim(),
-                                      limitRow: 30);
-                                  instance.addHistoryList(result);
+                                  await instance.getRecords(
+                                      employeeId: idController.text.trim());
                                 }
+                                instance.changeLoadingState(false);
                               },
                               child: const Text(
                                 'View',
@@ -387,26 +398,24 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ],
                     rows: <DataRow>[
-                      for (int i = 0; i < instance.historyList.length; i++) ...[
+                      for (int i = 0; i < instance.uiList.length; i++) ...[
                         DataRow(
                           // onSelectChanged: (value) {},
                           selected: i % 2 == 0 ? true : false,
                           cells: <DataCell>[
-                            DataCell(SelectableText(
-                                instance.historyList[i].employeeId)),
                             DataCell(
-                                SelectableText(instance.historyList[i].name)),
+                                SelectableText(instance.uiList[i].employeeId)),
+                            DataCell(SelectableText(instance.uiList[i].name)),
                             DataCell(SelectableText(DateFormat.yMMMEd()
-                                .format(instance.historyList[i].date))),
-                            DataCell(
-                                LogsWidget(logs: instance.historyList[i].logs)),
+                                .format(instance.uiList[i].date))),
+                            DataCell(LogsWidget(logs: instance.uiList[i].logs)),
                           ],
                         ),
                       ],
                     ],
                   ),
                   const SizedBox(height: 25.0),
-                  if (instance.historyList.length < instance.rowCount) ...[
+                  if (instance.uiList.length < instance.historyList.length) ...[
                     SizedBox(
                       height: 50.0,
                       width: 200.0,
@@ -415,21 +424,9 @@ class _HomeViewState extends State<HomeView> {
                           backgroundColor: Colors.green[300],
                         ),
                         onPressed: () {
-                          if (instance.historyList.length < instance.rowCount) {
-                            if (idController.text.isEmpty) {
-                              instance.loadMoreAll(
-                                id: instance.getLowestId(
-                                    instance.historyList.last.logs),
-                                dateFrom: instance.selectedFrom,
-                                dateTo: instance.historyList.last.date,
-                              );
-                            } else {
-                              instance.loadMore(
-                                employeeId: idController.text.trim(),
-                                dateFrom: instance.selectedFrom,
-                                dateTo: instance.historyList.last.date,
-                              );
-                            }
+                          if (instance.uiList.length <
+                              instance.historyList.length) {
+                            instance.loadMore();
                           }
                         },
                         child: const Text(
@@ -445,14 +442,13 @@ class _HomeViewState extends State<HomeView> {
                     const SizedBox(height: 15.0),
                   ],
                   Text(
-                    'Showing ${instance.historyList.length} out of ${instance.rowCount} results.',
+                    'Showing ${instance.uiList.length} out of ${instance.historyList.length} results.',
                     style: const TextStyle(
                       fontSize: 16.0,
                     ),
                   ),
                   const SizedBox(height: 50.0),
-                ] else if (instance.historyList.isEmpty &&
-                    idController.text.isNotEmpty) ...[
+                ] else if (instance.historyList.isEmpty) ...[
                   const SizedBox(height: 25.0),
                   const Text(
                     'No data found.',

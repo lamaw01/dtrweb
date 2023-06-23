@@ -1,7 +1,6 @@
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:math';
 
 import '../model/user_model.dart';
 import '../services/http_service.dart';
@@ -9,25 +8,23 @@ import '../services/http_service.dart';
 class HomeData with ChangeNotifier {
   var _historyList = <HistoryModel>[];
   List<HistoryModel> get historyList => _historyList;
+
+  var _uiList = <HistoryModel>[];
+  List<HistoryModel> get uiList => _uiList;
+
   DateTime selectedFrom = DateTime.now();
   DateTime selectedTo = DateTime.now();
-  var _rowCount = 0;
-  int get rowCount => _rowCount;
+
+  final _isLogging = ValueNotifier(false);
+  ValueNotifier<bool> get isLogging => _isLogging;
+
   final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
 
-  void exportExcel({String? employeeId}) async {
-    var historyListExcel = <HistoryModel>[];
-    if (employeeId == null) {
-      var result = await getRecordsAll(limitRow: _rowCount);
-      historyListExcel.addAll(result);
-    } else {
-      var result = await getRecords(
-        employeeId: employeeId,
-        limitRow: _rowCount,
-      );
-      historyListExcel.addAll(result);
-    }
+  void changeLoadingState(bool state) {
+    _isLogging.value = state;
+  }
 
+  void exportExcel({String? employeeId}) async {
     var excel = Excel.createExcel();
     Sheet sheetObject = excel['Sheet1'];
     var cellStyle = CellStyle(
@@ -56,13 +53,13 @@ class HomeData with ChangeNotifier {
       ..value = 'Date Time'
       ..cellStyle = cellStyle;
 
-    for (int i = 0; i < historyListExcel.length; i++) {
-      for (int j = 0; j < historyListExcel[i].logs.length; j++) {
+    for (int i = 0; i < _historyList.length; i++) {
+      for (int j = 0; j < _historyList[i].logs.length; j++) {
         List<String> dataList = [
-          historyListExcel[i].employeeId,
-          historyListExcel[i].name,
-          historyListExcel[i].logs[j].logType,
-          dateFormat.format(historyListExcel[i].logs[j].timeStamp)
+          _historyList[i].employeeId,
+          _historyList[i].name,
+          _historyList[i].logs[j].logType,
+          dateFormat.format(_historyList[i].logs[j].timeStamp)
         ];
         sheetObject.appendRow(dataList);
       }
@@ -71,105 +68,59 @@ class HomeData with ChangeNotifier {
         fileName: 'DTR ${DateFormat().add_yMMMMd().format(selectedTo)}.xlsx');
   }
 
-  int getLowestId(List<Log> logs) {
-    var listOfId = <int>[];
-    for (var log in logs) {
-      listOfId.add(log.id);
-    }
-    debugPrint(listOfId.reduce(min).toString());
-    return listOfId.reduce(min);
-  }
-
-  void addHistoryList(List<HistoryModel> data) {
+  // get initial data for history and put 30 it ui
+  void setData(List<HistoryModel> data) {
     _historyList = data;
+    if (_historyList.length > 30) {
+      _uiList = _historyList.getRange(0, 30).toList();
+    } else {
+      _uiList = _historyList;
+    }
+    notifyListeners();
   }
 
-  Future<List<HistoryModel>> getRecords({
-    required String employeeId,
-    required int limitRow,
-  }) async {
+  void loadMore() {
+    if (_historyList.length - _uiList.length < 30) {
+      _uiList.addAll(
+          _historyList.getRange(_uiList.length, _historyList.length).toList());
+    } else {
+      _uiList.addAll(
+          _historyList.getRange(_uiList.length, _uiList.length + 30).toList());
+    }
+    notifyListeners();
+    debugPrint(_historyList
+        .getRange(_uiList.length, _historyList.length)
+        .length
+        .toString());
+  }
+
+  Future<void> getRecords({required String employeeId}) async {
     var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
     var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
-    var result = <HistoryModel>[];
     try {
-      result = await HttpService.getRecords(
-        employeeId: employeeId,
-        dateFrom: dateFormat.format(newselectedFrom),
-        dateTo: dateFormat.format(newselectedTo),
-        limitRow: limitRow,
-      );
-    } catch (e) {
-      debugPrint('$e');
-    } finally {
-      _rowCount = await HttpService.getRecordsCount(
+      var result = await HttpService.getRecords(
         employeeId: employeeId,
         dateFrom: dateFormat.format(newselectedFrom),
         dateTo: dateFormat.format(newselectedTo),
       );
-      notifyListeners();
-    }
-    return result;
-  }
-
-  Future<void> loadMore({
-    required String employeeId,
-    required DateTime dateFrom,
-    required DateTime dateTo,
-  }) async {
-    var newselectedFrom = dateFrom.copyWith(hour: 0, minute: 0, second: 0);
-    var newselectedTo = dateTo
-        .copyWith(hour: 23, minute: 59, second: 59)
-        .subtract(const Duration(days: 1));
-    try {
-      final result = await HttpService.loadMore(
-        employeeId: employeeId,
-        dateFrom: dateFormat.format(newselectedFrom),
-        dateTo: dateFormat.format(newselectedTo),
-      );
-      _historyList.addAll(result);
-      notifyListeners();
+      setData(result);
     } catch (e) {
       debugPrint('$e');
     }
   }
 
-  Future<List<HistoryModel>> getRecordsAll({required int limitRow}) async {
+  Future<void> getRecordsAll() async {
     var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
     var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
-    var result = <HistoryModel>[];
-    try {
-      result = await HttpService.getRecordsAll(
-        dateFrom: dateFormat.format(newselectedFrom),
-        dateTo: dateFormat.format(newselectedTo),
-        limitRow: limitRow,
-      );
-    } catch (e) {
-      debugPrint('$e');
-    } finally {
-      _rowCount = await HttpService.getRecordsCountAll(
-        dateFrom: dateFormat.format(newselectedFrom),
-        dateTo: dateFormat.format(newselectedTo),
-      );
-      notifyListeners();
-    }
-    return result;
-  }
 
-  Future<void> loadMoreAll({
-    required int id,
-    required DateTime dateFrom,
-    required DateTime dateTo,
-  }) async {
-    var newselectedFrom = dateFrom.copyWith(hour: 0, minute: 0, second: 0);
-    var newselectedTo = dateTo.copyWith(hour: 23, minute: 59, second: 59);
     try {
-      final result = await HttpService.loadMoreAll(
-        id: id.toString(),
+      debugPrint(newselectedFrom.toString());
+      debugPrint(newselectedTo.toString());
+      var result = await HttpService.getRecordsAll(
         dateFrom: dateFormat.format(newselectedFrom),
         dateTo: dateFormat.format(newselectedTo),
       );
-      _historyList.addAll(result);
-      notifyListeners();
+      setData(result);
     } catch (e) {
       debugPrint('$e');
     }

@@ -14,21 +14,19 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
     $employee_id = $input['employee_id'];
     $date_from = $input['date_from'];
     $date_to = $input['date_to'];
-    $limit_row = $input['limit_row'];
 
     $concat_employee_id = "%$employee_id%";
 
-    $sql_get_history = "SELECT tbl_logs.employee_id, tbl_employee.name, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
+    $sql_get_history = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.name, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
     FROM tbl_logs LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     WHERE (tbl_logs.employee_id LIKE :employee_id OR tbl_employee.name LIKE :employee_id) 
-    AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id DESC LIMIT :limit_row;";
+    AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     try {
         $get_history= $conn->prepare($sql_get_history);
         $get_history->bindParam(':employee_id', $concat_employee_id, PDO::PARAM_STR);
         $get_history->bindParam(':date_from', $date_from, PDO::PARAM_STR);
         $get_history->bindParam(':date_to', $date_to, PDO::PARAM_STR);
-        $get_history->bindParam(':limit_row', $limit_row, PDO::PARAM_INT);
         $get_history->execute();
         $result_get_history = $get_history->fetchAll(PDO::FETCH_ASSOC);
         foreach ($result_get_history as $result) {

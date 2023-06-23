@@ -41,6 +41,7 @@ dependencies:
   url_launcher: ^6.1.11
   url_strategy: ^0.2.0
   excel: ^2.1.0
+  flutter_spinkit: ^5.2.0
 
 dev_dependencies:
   flutter_test:
