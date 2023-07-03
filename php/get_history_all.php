@@ -21,6 +21,9 @@ if($_SERVER['REQUEST_METHOD']){
     GROUP BY tbl_logs.employee_id, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     try {
+        $set=$conn->prepare("SET SQL_MODE=''");
+        $set->execute();
+
         $get_history_all= $conn->prepare($sql_get_history_all);
         $get_history_all->bindParam(':date_from', $date_from, PDO::PARAM_STR);
         $get_history_all->bindParam(':date_to', $date_to, PDO::PARAM_STR);

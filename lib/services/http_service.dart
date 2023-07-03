@@ -5,8 +5,7 @@ import 'dart:convert';
 import '../model/user_model.dart';
 
 class HttpService {
-  static const String serverUrl =
-      'http://uc-1.dnsalias.net:55083/dtr_history_api';
+  static const String serverUrl = 'http://103.62.153.74:53000/dtr_history_api';
 
   static Future<List<HistoryModel>> getRecords({
     required String employeeId,

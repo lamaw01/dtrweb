@@ -23,6 +23,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
     AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     try {
+        $set=$conn->prepare("SET SQL_MODE=''");
+        $set->execute();
+        
         $get_history= $conn->prepare($sql_get_history);
         $get_history->bindParam(':employee_id', $concat_employee_id, PDO::PARAM_STR);
         $get_history->bindParam(':date_from', $date_from, PDO::PARAM_STR);

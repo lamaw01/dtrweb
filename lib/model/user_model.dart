@@ -42,7 +42,7 @@ class HistoryModel {
 class Log {
   DateTime timeStamp;
   String logType;
-  int id;
+  String id;
   String isSelfie;
 
   Log({
@@ -55,8 +55,8 @@ class Log {
   factory Log.fromJson(Map<String, dynamic> json) => Log(
         timeStamp: DateTime.parse(json["time_stamp"]),
         logType: json["log_type"],
-        id: int.parse(json["id"]),
-        isSelfie: json["is_selfie"],
+        id: json["id"].toString(),
+        isSelfie: json["is_selfie"].toString(),
       );
 
   Map<String, dynamic> toJson() => {
