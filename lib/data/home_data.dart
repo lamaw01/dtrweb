@@ -24,7 +24,7 @@ class HomeData with ChangeNotifier {
     _isLogging.value = state;
   }
 
-  void exportExcel({String? employeeId}) async {
+  void exportExcel() async {
     var excel = Excel.createExcel();
     Sheet sheetObject = excel['Sheet1'];
     var cellStyle = CellStyle(
@@ -35,37 +35,173 @@ class HomeData with ChangeNotifier {
 
     var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
     column1
-      ..value = 'Employee ID'
+      ..value = ''
       ..cellStyle = cellStyle;
 
     var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
     column2
-      ..value = 'Name'
+      ..value = 'Emp ID'
       ..cellStyle = cellStyle;
 
     var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
     column3
-      ..value = 'Log'
+      ..value = 'Name'
       ..cellStyle = cellStyle;
 
     var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
     column4
-      ..value = 'Date Time'
+      ..value = 'Date In'
       ..cellStyle = cellStyle;
 
+    var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
+    column5
+      ..value = 'Date Out'
+      ..cellStyle = cellStyle;
+
+    var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
+    column6
+      ..value = 'Time Logs'
+      ..cellStyle = cellStyle;
+
+    var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
+    column7
+      ..value = 'Duration(Hours)'
+      ..cellStyle = cellStyle;
+
+    var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
+    column8
+      ..value = 'Undertime'
+      ..cellStyle = cellStyle;
+
+    var column9 = sheetObject.cell(CellIndex.indexByString('I1'));
+    column9
+      ..value = 'Tardy'
+      ..cellStyle = cellStyle;
+
+    var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
+    column10
+      ..value = 'Overtime'
+      ..cellStyle = cellStyle;
+
+    sheetObject.setColWidth(5, 100);
+
+    _historyList.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
+
+    var rowCountUser = 0;
+    final dateFormatExcel = DateFormat('hh:mm:ss aa');
+    final dateFormatInOut = DateFormat('yyyy-MM-dd');
+
     for (int i = 0; i < _historyList.length; i++) {
-      for (int j = 0; j < _historyList[i].logs.length; j++) {
-        List<String> dataList = [
-          _historyList[i].employeeId,
-          _historyList[i].name,
-          _historyList[i].logs[j].logType,
-          dateFormat.format(_historyList[i].logs[j].timeStamp)
-        ];
-        sheetObject.appendRow(dataList);
+      rowCountUser = rowCountUser + 1;
+      var dateOut = '';
+      var duration = 0;
+      if (i > 0) {
+        if (_historyList[i].name != _historyList[i - 1].name) {
+          rowCountUser = 1;
+          List<dynamic> emptyRow = [
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+          ];
+          sheetObject.appendRow(emptyRow);
+        }
       }
+
+      if (_historyList[i].logs.last.logType == 'IN') {
+        // if last log is in, then date out is tommorrow
+        if (i < _historyList.length - 1 &&
+            _historyList[i].name == _historyList[i + 1].name) {
+          dateOut = dateFormatInOut.format(_historyList[i + 1].date);
+          late DateTime dateLogIn;
+          late DateTime dateLogOut;
+          for (var log in _historyList[i].logs) {
+            if (log.logType == 'IN') {
+              dateLogIn = log.timeStamp;
+              break;
+            }
+          }
+          for (var log in _historyList[i + 1].logs) {
+            if (log.logType == 'OUT') {
+              dateLogOut = log.timeStamp;
+              break;
+            }
+          }
+          duration = dateLogOut.difference(dateLogIn).inHours;
+          debugPrint('$dateLogIn - $dateLogOut - $duration');
+        }
+      }
+      // if last log is in and last user log, empty date out
+      else if (_historyList[i].logs.last.logType == 'IN' &&
+          _historyList[i].name != _historyList[i + 1].name) {
+        dateOut = '';
+      }
+      // if date is out, then date in and out same
+      else {
+        dateOut = dateFormatInOut.format(_historyList[i].date);
+        late DateTime dateLogIn;
+        late DateTime dateLogOut;
+        for (var log in _historyList[i].logs) {
+          if (log.logType == 'IN') {
+            dateLogIn = log.timeStamp;
+            break;
+          }
+        }
+        for (var log in _historyList[i].logs.reversed) {
+          if (log.logType == 'OUT') {
+            dateLogOut = log.timeStamp;
+            break;
+          }
+        }
+        duration = dateLogOut.difference(dateLogIn).inHours;
+        debugPrint('$dateLogIn - $dateLogOut - $duration');
+      }
+
+      var logsString = '';
+      for (var log in _historyList[i].logs) {
+        logsString =
+            '$logsString - ${log.logType} ${dateFormatExcel.format(log.timeStamp)}';
+      }
+
+      List<dynamic> dataList = [
+        rowCountUser,
+        _historyList[i].employeeId,
+        _historyList[i].name,
+        dateFormatInOut.format(_historyList[i].date),
+        dateOut,
+        logsString.substring(2),
+        duration,
+      ];
+      sheetObject.appendRow(dataList);
     }
+
     excel.save(
         fileName: 'DTR ${DateFormat().add_yMMMMd().format(selectedTo)}.xlsx');
+  }
+
+  int calcDurationInOutSameDay(List<Log> logs) {
+    late DateTime dateLogIn;
+    late DateTime dateLogOut;
+    for (var log in logs) {
+      if (log.logType == 'IN') {
+        dateLogIn = log.timeStamp;
+        break;
+      }
+    }
+    for (var log in logs.reversed) {
+      if (log.logType == 'OUT') {
+        dateLogOut = log.timeStamp;
+        break;
+      }
+    }
+    final duration = dateLogOut.difference(dateLogIn).inHours;
+    debugPrint('$dateLogIn - $dateLogOut - $duration');
+    return duration;
   }
 
   // get initial data for history and put 30 it ui

@@ -335,9 +335,7 @@ class _HomeViewState extends State<HomeView> {
                         if (idController.text.isEmpty) {
                           instance.exportExcel();
                         } else {
-                          instance.exportExcel(
-                            employeeId: idController.text.trim(),
-                          );
+                          instance.exportExcel();
                         }
                       },
                       child: const Row(
