@@ -115,51 +115,27 @@ class HomeData with ChangeNotifier {
 
       if (_historyList[i].logs.last.logType == 'IN') {
         // if last log is in, then date out is tommorrow
+        debugPrint('$i ${_historyList.length - 1}');
         if (i < _historyList.length - 1 &&
             _historyList[i].name == _historyList[i + 1].name) {
           dateOut = dateFormatInOut.format(_historyList[i + 1].date);
-          late DateTime dateLogIn;
-          late DateTime dateLogOut;
-          for (var log in _historyList[i].logs) {
-            if (log.logType == 'IN') {
-              dateLogIn = log.timeStamp;
-              break;
-            }
-          }
-          for (var log in _historyList[i + 1].logs) {
-            if (log.logType == 'OUT') {
-              dateLogOut = log.timeStamp;
-              break;
-            }
-          }
-          duration = dateLogOut.difference(dateLogIn).inHours;
-          debugPrint('$dateLogIn - $dateLogOut - $duration');
+          debugPrint(_historyList[i].name);
+          duration = calcDurationInOutOtherDay(
+              _historyList[i].logs, _historyList[i + 1].logs);
         }
       }
       // if last log is in and last user log, empty date out
       else if (_historyList[i].logs.last.logType == 'IN' &&
           _historyList[i].name != _historyList[i + 1].name) {
         dateOut = '';
+        debugPrint(_historyList[i].name);
+        duration = calcDurationInOutSameDay(_historyList[i].logs);
       }
       // if date is out, then date in and out same
       else {
         dateOut = dateFormatInOut.format(_historyList[i].date);
-        late DateTime dateLogIn;
-        late DateTime dateLogOut;
-        for (var log in _historyList[i].logs) {
-          if (log.logType == 'IN') {
-            dateLogIn = log.timeStamp;
-            break;
-          }
-        }
-        for (var log in _historyList[i].logs.reversed) {
-          if (log.logType == 'OUT') {
-            dateLogOut = log.timeStamp;
-            break;
-          }
-        }
-        duration = dateLogOut.difference(dateLogIn).inHours;
-        debugPrint('$dateLogIn - $dateLogOut - $duration');
+        debugPrint(_historyList[i].name);
+        duration = calcDurationInOutSameDay(_historyList[i].logs);
       }
 
       var logsString = '';
@@ -184,24 +160,54 @@ class HomeData with ChangeNotifier {
         fileName: 'DTR ${DateFormat().add_yMMMMd().format(selectedTo)}.xlsx');
   }
 
+  int calcDurationInOutOtherDay(List<Log> logs1, List<Log> logs2) {
+    debugPrint('logs1 ${logs1.length} logs1 ${logs2.length}');
+    var seconds = 0;
+    try {
+      if (logs1.last.logType == 'IN') {
+        seconds = seconds +
+            logs2.first.timeStamp.difference(logs1.last.timeStamp).inSeconds;
+        debugPrint(
+            'calcDurationInOutOtherDay if ${logs2.first.timeStamp.difference(logs1.last.timeStamp).inHours}');
+      }
+
+      for (int i = 0; i < logs1.length; i++) {
+        if (logs1[i].logType == 'IN' && logs1[i + 1].logType == 'OUT') {
+          seconds = seconds +
+              logs1[i + 1].timeStamp.difference(logs1[i].timeStamp).inSeconds;
+          debugPrint(
+              'calcDurationInOutOtherDay loop ${logs1[i + 1].timeStamp.difference(logs1[i].timeStamp).inHours}');
+        }
+      }
+    } catch (e) {
+      debugPrint('calcDurationInOutOtherDay $e');
+    }
+
+    debugPrint('seconds $seconds');
+    var hours = Duration(seconds: seconds).inHours;
+    debugPrint('hours $hours');
+    return hours;
+  }
+
   int calcDurationInOutSameDay(List<Log> logs) {
-    late DateTime dateLogIn;
-    late DateTime dateLogOut;
-    for (var log in logs) {
-      if (log.logType == 'IN') {
-        dateLogIn = log.timeStamp;
-        break;
+    var seconds = 0;
+    try {
+      for (int i = 0; i < logs.length; i++) {
+        if (logs[i].logType == 'IN' && logs[i + 1].logType == 'OUT') {
+          seconds = seconds +
+              logs[i + 1].timeStamp.difference(logs[i].timeStamp).inSeconds;
+          debugPrint(
+              'calcDurationInOutSameDay ${logs[i + 1].timeStamp.difference(logs[i].timeStamp).inHours}');
+        }
       }
+    } catch (e) {
+      debugPrint('calcDurationInOutSameDay $e');
     }
-    for (var log in logs.reversed) {
-      if (log.logType == 'OUT') {
-        dateLogOut = log.timeStamp;
-        break;
-      }
-    }
-    final duration = dateLogOut.difference(dateLogIn).inHours;
-    debugPrint('$dateLogIn - $dateLogOut - $duration');
-    return duration;
+
+    debugPrint('seconds $seconds');
+    var hours = Duration(seconds: seconds).inHours;
+    debugPrint('hours $hours');
+    return hours;
   }
 
   // get initial data for history and put 30 it ui
