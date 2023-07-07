@@ -2,6 +2,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../model/department_model.dart';
 import '../model/user_model.dart';
 import '../services/http_service.dart';
 
@@ -12,14 +13,33 @@ class HomeData with ChangeNotifier {
   var _uiList = <HistoryModel>[];
   List<HistoryModel> get uiList => _uiList;
 
+  final _departmentList = <DepartmentModel>[];
+  List<DepartmentModel> get departmentList => _departmentList;
+
   DateTime selectedFrom = DateTime.now();
   DateTime selectedTo = DateTime.now();
 
   final _isLogging = ValueNotifier(false);
   ValueNotifier<bool> get isLogging => _isLogging;
 
+  final _is24HourFormat = ValueNotifier(false);
+  ValueNotifier<bool> get is24HourFormat => _is24HourFormat;
+
   final _dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
   final _dateFormatFileExcel = DateFormat().add_yMMMMd();
+
+  String dateFormat12or24(DateTime dateTime) {
+    if (_is24HourFormat.value) {
+      return DateFormat('HH:mm:ss').format(dateTime);
+    } else {
+      return DateFormat('hh:mm:ss aa').format(dateTime);
+    }
+  }
+
+  void changeTimeFormat(bool state) {
+    _is24HourFormat.value = state;
+    debugPrint(_is24HourFormat.value.toString());
+  }
 
   void changeLoadingState(bool state) {
     _isLogging.value = state;
@@ -46,65 +66,79 @@ class HomeData with ChangeNotifier {
 
     var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
     column3
-      ..value = 'Name'
+      ..value = 'First name'
       ..cellStyle = cellStyle;
 
     var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
     column4
-      ..value = 'Date In'
+      ..value = 'Middle initial'
       ..cellStyle = cellStyle;
 
     var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
     column5
-      ..value = 'Date Out'
+      ..value = 'Last name'
       ..cellStyle = cellStyle;
 
     var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
     column6
-      ..value = 'Time Logs'
+      ..value = 'Date In'
       ..cellStyle = cellStyle;
 
     var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
     column7
-      ..value = 'Duration(Hours)'
+      ..value = 'Date Out'
       ..cellStyle = cellStyle;
 
     var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
     column8
-      ..value = 'Undertime'
+      ..value = 'Time Logs'
       ..cellStyle = cellStyle;
 
     var column9 = sheetObject.cell(CellIndex.indexByString('I1'));
     column9
-      ..value = 'Tardy'
+      ..value = 'Duration(Hours)'
       ..cellStyle = cellStyle;
 
     var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
     column10
+      ..value = 'Undertime'
+      ..cellStyle = cellStyle;
+
+    var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
+    column11
+      ..value = 'Tardy'
+      ..cellStyle = cellStyle;
+
+    var column12 = sheetObject.cell(CellIndex.indexByString('L1'));
+    column12
       ..value = 'Overtime'
       ..cellStyle = cellStyle;
 
-    sheetObject.setColWidth(5, 100);
+    sheetObject.setColWidth(7, 100);
 
     // sort list alphabetically and by date, very important
     _historyList.sort((a, b) {
-      return ('${a.name.toLowerCase()} ${a.date.toString()}')
-          .compareTo(('${b.name.toLowerCase()} ${b.date.toString()}'));
+      return ('${a.firstName.toLowerCase()} ${a.middleName.toLowerCase()} ${a.lastName.toLowerCase()} ${a.date.toString()}')
+          .compareTo(
+              '${b.firstName.toLowerCase()} ${b.middleName.toLowerCase()} ${b.lastName.toLowerCase()} ${b.date.toString()}');
     });
 
     var rowCountUser = 0;
-    final dateFormatExcel = DateFormat('hh:mm:ss aa');
     final dateFormatInOut = DateFormat('yyyy-MM-dd');
 
     for (int i = 0; i < _historyList.length; i++) {
       rowCountUser = rowCountUser + 1;
       var dateOut = '';
       var duration = 0;
+
       if (i > 0) {
         //reset user logs count and add space
-        if (_historyList[i].name != _historyList[i - 1].name) {
+        if (nameIndex(i) != nameIndex(i - 1)) {
           rowCountUser = 1;
           List<dynamic> emptyRow = [
+            '',
+            '',
+            '',
             '',
             '',
             '',
@@ -120,8 +154,10 @@ class HomeData with ChangeNotifier {
       if (_historyList[i].logs.last.logType == 'IN') {
         // if last log is in, then date out is tommorrow
         if (i + 1 < _historyList.length) {
-          debugPrint(_historyList[i].name);
-          if (_historyList[i].name == _historyList[i + 1].name) {
+          debugPrint(nameIndex(i) +
+              historyList[i].middleName +
+              historyList[i].lastName);
+          if (nameIndex(i) == nameIndex(i + 1)) {
             dateOut = dateFormatInOut.format(_historyList[i + 1].date);
             duration = calcDurationInOutOtherDay(
                 _historyList[i].logs, _historyList[i + 1].logs);
@@ -130,27 +166,29 @@ class HomeData with ChangeNotifier {
         // if last log is in and last index, do in out same day, otherwise dont calc duration
         else {
           dateOut = dateFormatInOut.format(_historyList[i].date);
-          debugPrint(_historyList[i].name);
+          debugPrint(nameIndex(i));
           duration = calcDurationInOutSameDay(_historyList[i].logs);
         }
       }
       // if date is out, then date in and out same
       else {
         dateOut = dateFormatInOut.format(_historyList[i].date);
-        debugPrint(_historyList[i].name);
+        debugPrint(nameIndex(i));
         duration = calcDurationInOutSameDay(_historyList[i].logs);
       }
 
       var logsString = '';
       for (var log in _historyList[i].logs) {
         logsString =
-            '$logsString - ${log.logType} ${dateFormatExcel.format(log.timeStamp)}';
+            '$logsString - ${log.logType} ${dateFormat12or24(log.timeStamp)}';
       }
 
       List<dynamic> dataList = [
         rowCountUser,
         _historyList[i].employeeId,
-        _historyList[i].name,
+        _historyList[i].firstName,
+        _historyList[i].middleName,
+        _historyList[i].lastName,
         dateFormatInOut.format(_historyList[i].date),
         dateOut,
         logsString.substring(2),
@@ -162,6 +200,12 @@ class HomeData with ChangeNotifier {
     excel.save(
         fileName:
             'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
+  }
+
+  String nameIndex(int index) {
+    final name =
+        "${_historyList[index].firstName} ${historyList[index].middleName} ${_historyList[index].lastName}";
+    return name;
   }
 
   // calculate duration in hours if log out is other day
@@ -255,7 +299,10 @@ class HomeData with ChangeNotifier {
         .toString());
   }
 
-  Future<void> getRecords({required String employeeId}) async {
+  Future<void> getRecords({
+    required String employeeId,
+    required DepartmentModel department,
+  }) async {
     var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
     var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
     try {
@@ -263,6 +310,7 @@ class HomeData with ChangeNotifier {
         employeeId: employeeId,
         dateFrom: _dateFormat.format(newselectedFrom),
         dateTo: _dateFormat.format(newselectedTo),
+        department: department,
       );
       setData(result);
     } catch (e) {
@@ -270,7 +318,7 @@ class HomeData with ChangeNotifier {
     }
   }
 
-  Future<void> getRecordsAll() async {
+  Future<void> getRecordsAll({required DepartmentModel department}) async {
     var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
     var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
 
@@ -280,8 +328,19 @@ class HomeData with ChangeNotifier {
       var result = await HttpService.getRecordsAll(
         dateFrom: _dateFormat.format(newselectedFrom),
         dateTo: _dateFormat.format(newselectedTo),
+        department: department,
       );
       setData(result);
+    } catch (e) {
+      debugPrint('$e');
+    }
+  }
+
+  Future<void> getDepartment() async {
+    try {
+      final result = await HttpService.getDepartment();
+      _departmentList.addAll(result);
+      notifyListeners();
     } catch (e) {
       debugPrint('$e');
     }

@@ -12,27 +12,35 @@ String historyModelToJson(List<HistoryModel> data) =>
 
 class HistoryModel {
   String employeeId;
-  String name;
+  String firstName;
+  String lastName;
+  String middleName;
   DateTime date;
   List<Log> logs;
 
   HistoryModel({
     required this.employeeId,
-    required this.name,
+    required this.firstName,
+    required this.lastName,
+    required this.middleName,
     required this.date,
     required this.logs,
   });
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) => HistoryModel(
         employeeId: json["employee_id"],
-        name: json["name"],
+        firstName: json["first_name"],
+        lastName: json["last_name"],
+        middleName: json["middle_name"],
         date: DateTime.parse(json["date"]),
         logs: List<Log>.from(json["logs"].map((x) => Log.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
         "employee_id": employeeId,
-        "name": name,
+        "first_name": firstName,
+        "last_name": lastName,
+        "middle_name": middleName,
         "date":
             "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         "logs": List<dynamic>.from(logs.map((x) => x.toJson())),

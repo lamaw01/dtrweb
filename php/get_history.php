@@ -14,22 +14,37 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
     $employee_id = $input['employee_id'];
     $date_from = $input['date_from'];
     $date_to = $input['date_to'];
+    $department = $input['department'];
 
     $concat_employee_id = "%$employee_id%";
 
-    $sql_get_history = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.name, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
+    $sql_get_history = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
     FROM tbl_logs LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     WHERE (tbl_logs.employee_id LIKE :employee_id OR tbl_employee.name LIKE :employee_id) 
     AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
+
+    $sql_get_history_with_department = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
+    FROM tbl_logs LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
+    LEFT JOIN tbl_employee_department ON tbl_employee.employee_id = tbl_employee_department.employee_id 
+    WHERE (tbl_logs.employee_id LIKE :employee_id OR tbl_employee.name LIKE :employee_id) 
+    AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee_department.department_id = :department 
+    GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     try {
         $set=$conn->prepare("SET SQL_MODE=''");
         $set->execute();
         
-        $get_history= $conn->prepare($sql_get_history);
+        if($department != '000'){
+            $get_history=$conn->prepare($sql_get_history_with_department);
+        }else{
+            $get_history=$conn->prepare($sql_get_history);
+        }
         $get_history->bindParam(':employee_id', $concat_employee_id, PDO::PARAM_STR);
         $get_history->bindParam(':date_from', $date_from, PDO::PARAM_STR);
         $get_history->bindParam(':date_to', $date_to, PDO::PARAM_STR);
+        if($department != '000'){
+            $get_history->bindParam(':department', $department, PDO::PARAM_STR);
+        }
         $get_history->execute();
         $result_get_history = $get_history->fetchAll(PDO::FETCH_ASSOC);
         foreach ($result_get_history as $result) {
@@ -43,7 +58,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
             $get_logs_within->bindParam(':id', $id, PDO::PARAM_STR);
             $get_logs_within->execute();
             $result_get_logs_within = $get_logs_within->fetchAll(PDO::FETCH_ASSOC);
-            $my_array = array('employee_id'=>$result['employee_id'],'name'=>$result['name'],'date'=>$result['time_stamp'],'logs'=>$result_get_logs_within);
+            $my_array = array('employee_id'=>$result['employee_id'],'first_name'=>$result['first_name'],'last_name'=>$result['last_name'],'middle_name'=>$result['middle_name'],'date'=>$result['time_stamp'],'logs'=>$result_get_logs_within);
             array_push($result_array,$my_array);
         }
         echo json_encode($result_array);

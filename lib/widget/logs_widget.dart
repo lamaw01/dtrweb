@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../data/home_data.dart';
 import '../model/user_model.dart';
 import '../services/http_service.dart';
 
@@ -21,6 +22,7 @@ class _LogsWidgetState extends State<LogsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var instance = Provider.of<HomeData>(context, listen: false);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -43,9 +45,7 @@ class _LogsWidgetState extends State<LogsWidget> {
                   ),
                   const SizedBox(height: 5.0),
                   Text(
-                    DateFormat('hh:mm:ss aa').format(
-                      widget.logs[j].timeStamp,
-                    ),
+                    instance.dateFormat12or24(widget.logs[j].timeStamp),
                     style: textStyleImage,
                   ),
                 ],
@@ -61,9 +61,7 @@ class _LogsWidgetState extends State<LogsWidget> {
                 ),
                 const SizedBox(height: 5.0),
                 Text(
-                  DateFormat('hh:mm:ss aa').format(
-                    widget.logs[j].timeStamp,
-                  ),
+                  instance.dateFormat12or24(widget.logs[j].timeStamp),
                 ),
               ],
             ),

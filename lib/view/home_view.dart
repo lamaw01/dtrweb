@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../data/home_data.dart';
+import '../model/department_model.dart';
 import '../widget/logs_widget.dart';
 
 class HomeView extends StatefulWidget {
@@ -20,6 +21,18 @@ class _HomeViewState extends State<HomeView> {
   final toController =
       TextEditingController(text: DateFormat.yMEd().format(DateTime.now()));
   final scrollController = ScrollController();
+  var dropdownValue =
+      DepartmentModel(departmentId: '000', departmentName: 'All');
+
+  @override
+  void initState() {
+    super.initState();
+    var instance = Provider.of<HomeData>(context, listen: false);
+    instance.departmentList.add(dropdownValue);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await instance.getDepartment();
+    });
+  }
 
   @override
   void dispose() {
@@ -38,7 +51,7 @@ class _HomeViewState extends State<HomeView> {
         return AlertDialog(
           title: const Text('Pick Date from'),
           content: SizedBox(
-            height: 200.0,
+            height: 180.0,
             width: 300.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
@@ -81,7 +94,7 @@ class _HomeViewState extends State<HomeView> {
         return AlertDialog(
           title: const Text('Pick Date to'),
           content: SizedBox(
-            height: 200.0,
+            height: 180.0,
             width: 300.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
@@ -138,7 +151,7 @@ class _HomeViewState extends State<HomeView> {
         title: const Text(title),
       ),
       body: Scrollbar(
-        // thickness: 20,
+        // thickness: 18,
         thumbVisibility: true,
         trackVisibility: true,
         // interactive: true,
@@ -166,7 +179,7 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 const SizedBox(height: 10.0),
                 SizedBox(
-                  height: 250.0,
+                  height: 280.0,
                   width: 800.0,
                   child: Card(
                     child: Padding(
@@ -189,7 +202,7 @@ class _HomeViewState extends State<HomeView> {
                               SizedBox(
                                 width: 300.0,
                                 child: TextField(
-                                  style: const TextStyle(fontSize: 20.0),
+                                  style: const TextStyle(fontSize: 18.0),
                                   readOnly: true,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
@@ -198,6 +211,7 @@ class _HomeViewState extends State<HomeView> {
                                         width: 1.0,
                                       ),
                                     ),
+                                    isDense: true,
                                     contentPadding: EdgeInsets.fromLTRB(
                                         12.0, 12.0, 12.0, 12.0),
                                   ),
@@ -223,7 +237,7 @@ class _HomeViewState extends State<HomeView> {
                               SizedBox(
                                 width: 300.0,
                                 child: TextField(
-                                  style: const TextStyle(fontSize: 20.0),
+                                  style: const TextStyle(fontSize: 18.0),
                                   readOnly: true,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
@@ -232,6 +246,7 @@ class _HomeViewState extends State<HomeView> {
                                         width: 1.0,
                                       ),
                                     ),
+                                    isDense: true,
                                     contentPadding: EdgeInsets.fromLTRB(
                                         12.0, 12.0, 12.0, 12.0),
                                   ),
@@ -252,10 +267,60 @@ class _HomeViewState extends State<HomeView> {
                           const SizedBox(height: 10.0),
                           Row(
                             mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Department: ',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Container(
+                                height: 40.0,
+                                width: 640.0,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                    color: Colors.grey,
+                                    style: BorderStyle.solid,
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<DepartmentModel>(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0),
+                                    borderRadius: BorderRadius.circular(5),
+                                    value: dropdownValue,
+                                    onChanged: (DepartmentModel? value) async {
+                                      if (value != null) {
+                                        setState(() {
+                                          dropdownValue = value;
+                                        });
+                                      }
+                                    },
+                                    items: instance.departmentList
+                                        .map<DropdownMenuItem<DepartmentModel>>(
+                                            (DepartmentModel value) {
+                                      return DropdownMenuItem<DepartmentModel>(
+                                        value: value,
+                                        child: Text(value.departmentName),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10.0),
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
                             children: [
                               Expanded(
                                 child: TextField(
-                                  style: const TextStyle(fontSize: 20.0),
+                                  style: const TextStyle(fontSize: 18.0),
                                   decoration: const InputDecoration(
                                     label: Text('ID no. or Name'),
                                     border: OutlineInputBorder(
@@ -264,6 +329,7 @@ class _HomeViewState extends State<HomeView> {
                                         width: 1.0,
                                       ),
                                     ),
+                                    isDense: true,
                                     contentPadding: EdgeInsets.fromLTRB(
                                         12.0, 12.0, 12.0, 12.0),
                                   ),
@@ -274,11 +340,13 @@ class _HomeViewState extends State<HomeView> {
                                         const Duration(seconds: 1));
                                     if (idController.text.isEmpty) {
                                       // get records all
-                                      await instance.getRecordsAll();
+                                      await instance.getRecordsAll(
+                                          department: dropdownValue);
                                     } else {
                                       // get records with id or name
                                       await instance.getRecords(
-                                          employeeId: idController.text.trim());
+                                          employeeId: idController.text.trim(),
+                                          department: dropdownValue);
                                     }
                                     instance.changeLoadingState(false);
                                   },
@@ -286,7 +354,32 @@ class _HomeViewState extends State<HomeView> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 15.0),
+                          const SizedBox(height: 5.0),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                '24 Hour format: ',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              ValueListenableBuilder(
+                                valueListenable: instance.is24HourFormat,
+                                builder: (_, value, __) {
+                                  return Checkbox(
+                                    value: instance.is24HourFormat.value,
+                                    onChanged: (newCheckboxState) {
+                                      instance.is24HourFormat.value =
+                                          newCheckboxState!;
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10.0),
                           Container(
                             color: Colors.green[300],
                             width: double.infinity,
@@ -298,11 +391,13 @@ class _HomeViewState extends State<HomeView> {
                                     const Duration(seconds: 1));
                                 if (idController.text.isEmpty) {
                                   // get records all
-                                  await instance.getRecordsAll();
+                                  await instance.getRecordsAll(
+                                      department: dropdownValue);
                                 } else {
                                   // get records with id or name
                                   await instance.getRecords(
-                                      employeeId: idController.text.trim());
+                                      employeeId: idController.text.trim(),
+                                      department: dropdownValue);
                                 }
                                 instance.changeLoadingState(false);
                               },
@@ -373,7 +468,23 @@ class _HomeViewState extends State<HomeView> {
                       DataColumn(
                         label: Expanded(
                           child: Text(
-                            'NAME',
+                            'First name',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'Middle initial',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'Last name',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -403,7 +514,12 @@ class _HomeViewState extends State<HomeView> {
                           cells: <DataCell>[
                             DataCell(
                                 SelectableText(instance.uiList[i].employeeId)),
-                            DataCell(SelectableText(instance.uiList[i].name)),
+                            DataCell(
+                                SelectableText(instance.uiList[i].firstName)),
+                            DataCell(
+                                SelectableText(instance.uiList[i].middleName)),
+                            DataCell(
+                                SelectableText(instance.uiList[i].lastName)),
                             DataCell(SelectableText(DateFormat.yMMMEd()
                                 .format(instance.uiList[i].date))),
                             DataCell(LogsWidget(logs: instance.uiList[i].logs)),
@@ -416,7 +532,7 @@ class _HomeViewState extends State<HomeView> {
                   if (instance.uiList.length < instance.historyList.length) ...[
                     SizedBox(
                       height: 50.0,
-                      width: 200.0,
+                      width: 180.0,
                       child: TextButton(
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.green[300],
