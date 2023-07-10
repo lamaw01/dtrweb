@@ -46,160 +46,181 @@ class HomeData with ChangeNotifier {
   }
 
   void exportExcel() async {
-    var excel = Excel.createExcel();
-    Sheet sheetObject = excel['Sheet1'];
-    var cellStyle = CellStyle(
-      backgroundColorHex: '#dddddd',
-      fontFamily: getFontFamily(FontFamily.Arial),
-      horizontalAlign: HorizontalAlign.Center,
-    );
+    try {
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Sheet1'];
+      var cellStyle = CellStyle(
+        backgroundColorHex: '#dddddd',
+        fontFamily: getFontFamily(FontFamily.Arial),
+        horizontalAlign: HorizontalAlign.Center,
+      );
 
-    var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
-    column1
-      ..value = ''
-      ..cellStyle = cellStyle;
+      var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
+      column1
+        ..value = ''
+        ..cellStyle = cellStyle;
 
-    var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
-    column2
-      ..value = 'Emp ID'
-      ..cellStyle = cellStyle;
+      var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
+      column2
+        ..value = 'Emp ID'
+        ..cellStyle = cellStyle;
 
-    var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
-    column3
-      ..value = 'First name'
-      ..cellStyle = cellStyle;
+      var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
+      column3
+        ..value = 'First name'
+        ..cellStyle = cellStyle;
 
-    var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
-    column4
-      ..value = 'Middle initial'
-      ..cellStyle = cellStyle;
+      var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
+      column4
+        ..value = 'Middle initial'
+        ..cellStyle = cellStyle;
 
-    var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
-    column5
-      ..value = 'Last name'
-      ..cellStyle = cellStyle;
+      var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
+      column5
+        ..value = 'Last name'
+        ..cellStyle = cellStyle;
 
-    var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
-    column6
-      ..value = 'Date In'
-      ..cellStyle = cellStyle;
+      var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
+      column6
+        ..value = 'Date In'
+        ..cellStyle = cellStyle;
 
-    var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
-    column7
-      ..value = 'Date Out'
-      ..cellStyle = cellStyle;
+      var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
+      column7
+        ..value = 'Date Out'
+        ..cellStyle = cellStyle;
 
-    var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
-    column8
-      ..value = 'Time Logs'
-      ..cellStyle = cellStyle;
+      var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
+      column8
+        ..value = 'Time Logs'
+        ..cellStyle = cellStyle;
 
-    var column9 = sheetObject.cell(CellIndex.indexByString('I1'));
-    column9
-      ..value = 'Duration(Hours)'
-      ..cellStyle = cellStyle;
+      var column9 = sheetObject.cell(CellIndex.indexByString('I1'));
+      column9
+        ..value = 'Duration(Hours)'
+        ..cellStyle = cellStyle;
 
-    var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
-    column10
-      ..value = 'Undertime'
-      ..cellStyle = cellStyle;
+      var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
+      column10
+        ..value = 'Undertime'
+        ..cellStyle = cellStyle;
 
-    var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
-    column11
-      ..value = 'Tardy'
-      ..cellStyle = cellStyle;
+      var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
+      column11
+        ..value = 'Tardy'
+        ..cellStyle = cellStyle;
 
-    var column12 = sheetObject.cell(CellIndex.indexByString('L1'));
-    column12
-      ..value = 'Overtime'
-      ..cellStyle = cellStyle;
+      var column12 = sheetObject.cell(CellIndex.indexByString('L1'));
+      column12
+        ..value = 'Overtime'
+        ..cellStyle = cellStyle;
 
-    sheetObject.setColWidth(7, 100);
+      sheetObject.setColWidth(7, 100);
 
-    // sort list alphabetically and by date, very important
-    _historyList.sort((a, b) {
-      return ('${a.firstName.toLowerCase()} ${a.middleName.toLowerCase()} ${a.lastName.toLowerCase()} ${a.date.toString()}')
-          .compareTo(
-              '${b.firstName.toLowerCase()} ${b.middleName.toLowerCase()} ${b.lastName.toLowerCase()} ${b.date.toString()}');
-    });
+      // sort list alphabetically and by date, very important
+      _historyList.sort((a, b) {
+        return ('${a.firstName.toLowerCase()} ${a.middleName.toLowerCase()} ${a.lastName.toLowerCase()} ${a.date.toString()}')
+            .compareTo(
+                '${b.firstName.toLowerCase()} ${b.middleName.toLowerCase()} ${b.lastName.toLowerCase()} ${b.date.toString()}');
+      });
 
-    var rowCountUser = 0;
-    final dateFormatInOut = DateFormat('yyyy-MM-dd');
+      var rowCountUser = 0;
+      final dateFormatInOut = DateFormat('yyyy-MM-dd');
 
-    for (int i = 0; i < _historyList.length; i++) {
-      rowCountUser = rowCountUser + 1;
-      var dateOut = '';
-      var duration = 0;
+      for (int i = 0; i < _historyList.length; i++) {
+        rowCountUser = rowCountUser + 1;
+        var dateOut = '';
+        var duration = 0;
+        var logsString = '';
 
-      if (i > 0) {
-        //reset user logs count and add space
-        if (nameIndex(i) != nameIndex(i - 1)) {
-          rowCountUser = 1;
-          List<dynamic> emptyRow = [
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-          ];
-          sheetObject.appendRow(emptyRow);
-        }
-      }
-
-      if (_historyList[i].logs.last.logType == 'IN') {
-        // if last log is in, then date out is tommorrow
-        if (i + 1 < _historyList.length) {
-          debugPrint(nameIndex(i) +
-              historyList[i].middleName +
-              historyList[i].lastName);
-          if (nameIndex(i) == nameIndex(i + 1)) {
-            dateOut = dateFormatInOut.format(_historyList[i + 1].date);
-            duration = calcDurationInOutOtherDay(
-                _historyList[i].logs, _historyList[i + 1].logs);
+        if (i > 0) {
+          //reset user logs count and add space
+          if (nameIndex(i) != nameIndex(i - 1)) {
+            rowCountUser = 1;
+            List<dynamic> emptyRow = [
+              '',
+              '',
+              '',
+              '',
+              '',
+              '',
+              '',
+              '',
+              '',
+              '',
+            ];
+            sheetObject.appendRow(emptyRow);
           }
         }
-        // if last log is in and last index, do in out same day, otherwise dont calc duration
+
+        // if logs is only 1 and is out remove
+        if (_historyList[i].logs.length == 1 &&
+            _historyList[i].logs.first.logType == 'OUT') {
+          _historyList.removeAt(i);
+        }
+
+        // arrange logs into 1 string
+        for (var log in _historyList[i].logs) {
+          logsString =
+              '$logsString - ${log.logType} ${dateFormat12or24(log.timeStamp)}';
+        }
+
+        if (_historyList[i].logs.last.logType == 'IN') {
+          // if last log is in, then date out is tommorrow
+          if (i + 1 < _historyList.length) {
+            debugPrint(nameIndex(i));
+            if (nameIndex(i) == nameIndex(i + 1)) {
+              dateOut = dateFormatInOut.format(_historyList[i + 1].date);
+              duration = calcDurationInOutOtherDay(
+                  _historyList[i].logs, _historyList[i + 1].logs);
+              // move first log other day to yesterday if out
+              debugPrint(_historyList[i + 1].logs.first.timeStamp.toString());
+              logsString =
+                  '$logsString - ${_historyList[i + 1].logs[0].logType} ${dateFormat12or24(_historyList[i + 1].logs[0].timeStamp)}';
+              // if next log is out and is solo, remove
+              if (_historyList[i + 1].logs.length > 1) {
+                _historyList[i + 1].logs.removeAt(0);
+              }
+            } else {
+              if (_historyList[i + 1].logs.first.logType == 'OUT') {
+                historyList[i + 1].logs.removeAt(0);
+              }
+            }
+          }
+          // if last log is in and last index, do in out same day, otherwise dont calc duration
+          else {
+            dateOut = dateFormatInOut.format(_historyList[i].date);
+            debugPrint(nameIndex(i));
+            duration = calcDurationInOutSameDay(_historyList[i].logs);
+          }
+        }
+        // if date is out, then date in and out same
         else {
           dateOut = dateFormatInOut.format(_historyList[i].date);
           debugPrint(nameIndex(i));
           duration = calcDurationInOutSameDay(_historyList[i].logs);
         }
-      }
-      // if date is out, then date in and out same
-      else {
-        dateOut = dateFormatInOut.format(_historyList[i].date);
-        debugPrint(nameIndex(i));
-        duration = calcDurationInOutSameDay(_historyList[i].logs);
+
+        List<dynamic> dataList = [
+          rowCountUser,
+          _historyList[i].employeeId,
+          _historyList[i].firstName,
+          _historyList[i].middleName,
+          _historyList[i].lastName,
+          dateFormatInOut.format(_historyList[i].date),
+          dateOut,
+          logsString.substring(2),
+          duration,
+        ];
+        sheetObject.appendRow(dataList);
       }
 
-      var logsString = '';
-      for (var log in _historyList[i].logs) {
-        logsString =
-            '$logsString - ${log.logType} ${dateFormat12or24(log.timeStamp)}';
-      }
-
-      List<dynamic> dataList = [
-        rowCountUser,
-        _historyList[i].employeeId,
-        _historyList[i].firstName,
-        _historyList[i].middleName,
-        _historyList[i].lastName,
-        dateFormatInOut.format(_historyList[i].date),
-        dateOut,
-        logsString.substring(2),
-        duration,
-      ];
-      sheetObject.appendRow(dataList);
+      excel.save(
+          fileName:
+              'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
+    } catch (e) {
+      debugPrint(e.toString());
     }
-
-    excel.save(
-        fileName:
-            'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
   }
 
   String nameIndex(int index) {
