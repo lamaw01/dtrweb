@@ -67,61 +67,56 @@ class HomeData with ChangeNotifier {
 
       var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
       column3
-        ..value = 'First name'
+        ..value = 'Name'
         ..cellStyle = cellStyle;
 
       var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
       column4
-        ..value = 'Middle initial'
+        ..value = 'Date In'
         ..cellStyle = cellStyle;
 
       var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
       column5
-        ..value = 'Last name'
+        ..value = 'Time In'
         ..cellStyle = cellStyle;
 
       var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
       column6
-        ..value = 'Date In'
+        ..value = 'Date Out'
         ..cellStyle = cellStyle;
 
       var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
       column7
-        ..value = 'Date Out'
+        ..value = 'Time Out'
         ..cellStyle = cellStyle;
 
       var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
       column8
-        ..value = 'Time Logs'
+        ..value = 'Duration(Hours)'
         ..cellStyle = cellStyle;
 
       var column9 = sheetObject.cell(CellIndex.indexByString('I1'));
       column9
-        ..value = 'Duration(Hours)'
+        ..value = 'Undertime'
         ..cellStyle = cellStyle;
 
       var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
       column10
-        ..value = 'Undertime'
+        ..value = 'Tardy'
         ..cellStyle = cellStyle;
 
       var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
       column11
-        ..value = 'Tardy'
-        ..cellStyle = cellStyle;
-
-      var column12 = sheetObject.cell(CellIndex.indexByString('L1'));
-      column12
         ..value = 'Overtime'
         ..cellStyle = cellStyle;
 
-      sheetObject.setColWidth(7, 100);
+      sheetObject.setColWidth(2, 25);
 
       // sort list alphabetically and by date, very important
       _historyList.sort((a, b) {
-        return ('${a.firstName.toLowerCase()} ${a.middleName.toLowerCase()} ${a.lastName.toLowerCase()} ${a.date.toString()}')
+        return ('${a.lastName.toLowerCase()} ${a.firstName.toLowerCase()} ${a.middleName.toLowerCase()}  ${a.date.toString()}')
             .compareTo(
-                '${b.firstName.toLowerCase()} ${b.middleName.toLowerCase()} ${b.lastName.toLowerCase()} ${b.date.toString()}');
+                '${b.lastName.toLowerCase()} ${b.firstName.toLowerCase()} ${b.middleName.toLowerCase()}  ${b.date.toString()}');
       });
 
       var rowCountUser = 0;
@@ -131,7 +126,7 @@ class HomeData with ChangeNotifier {
         rowCountUser = rowCountUser + 1;
         var dateOut = '';
         var duration = 0;
-        var logsString = '';
+        var timeLogs = <Log>[];
 
         if (i > 0) {
           //reset user logs count and add space
@@ -159,11 +154,7 @@ class HomeData with ChangeNotifier {
           _historyList.removeAt(i);
         }
 
-        // arrange logs into 1 string
-        for (var log in _historyList[i].logs) {
-          logsString =
-              '$logsString - ${log.logType} ${dateFormat12or24(log.timeStamp)}';
-        }
+        timeLogs.add(_historyList[i].logs.first);
 
         if (_historyList[i].logs.last.logType == 'IN') {
           // if last log is in, then date out is tommorrow
@@ -175,8 +166,7 @@ class HomeData with ChangeNotifier {
                   _historyList[i].logs, _historyList[i + 1].logs);
               // move first log other day to yesterday if out
               debugPrint(_historyList[i + 1].logs.first.timeStamp.toString());
-              logsString =
-                  '$logsString - ${_historyList[i + 1].logs[0].logType} ${dateFormat12or24(_historyList[i + 1].logs[0].timeStamp)}';
+              timeLogs.add(_historyList[i + 1].logs[0]);
               // if next log is out and is solo, remove
               if (_historyList[i + 1].logs.length > 1) {
                 _historyList[i + 1].logs.removeAt(0);
@@ -192,6 +182,7 @@ class HomeData with ChangeNotifier {
             dateOut = dateFormatInOut.format(_historyList[i].date);
             debugPrint(nameIndex(i));
             duration = calcDurationInOutSameDay(_historyList[i].logs);
+            timeLogs.add(_historyList[i].logs.last);
           }
         }
         // if date is out, then date in and out same
@@ -199,17 +190,21 @@ class HomeData with ChangeNotifier {
           dateOut = dateFormatInOut.format(_historyList[i].date);
           debugPrint(nameIndex(i));
           duration = calcDurationInOutSameDay(_historyList[i].logs);
+          timeLogs.add(_historyList[i].logs.last);
         }
+
+        var timeIn = dateFormat12or24(timeLogs.first.timeStamp);
+        var timeOut = dateFormat12or24(timeLogs.last.timeStamp);
+        if (timeLogs.length == 1) timeOut = '';
 
         List<dynamic> dataList = [
           rowCountUser,
           _historyList[i].employeeId,
-          _historyList[i].firstName,
-          _historyList[i].middleName,
-          _historyList[i].lastName,
+          '${_historyList[i].lastName} ${_historyList[i].firstName}, ${_historyList[i].middleName}',
           dateFormatInOut.format(_historyList[i].date),
+          timeIn,
           dateOut,
-          logsString.substring(2),
+          timeOut,
           duration,
         ];
         sheetObject.appendRow(dataList);
