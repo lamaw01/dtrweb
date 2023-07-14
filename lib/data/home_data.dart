@@ -74,22 +74,22 @@ class HomeData with ChangeNotifier {
 
       var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
       column4
-        ..value = 'In'
+        ..value = 'Date in'
         ..cellStyle = cellStyle;
 
       var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
       column5
-        ..value = 'Out'
+        ..value = 'Time in'
         ..cellStyle = cellStyle;
 
       var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
       column6
-        ..value = 'In'
+        ..value = 'Date out'
         ..cellStyle = cellStyle;
 
       var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
       column7
-        ..value = 'Out'
+        ..value = 'Time out'
         ..cellStyle = cellStyle;
 
       var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
@@ -114,8 +114,12 @@ class HomeData with ChangeNotifier {
 
       sheetObject.setColWidth(2, 25);
 
+      // assign values
+      var historyListExcel = <HistoryModel>[];
+      historyListExcel.addAll(_historyList);
+
       // sort list alphabetically and by date, very important
-      _historyList.sort((a, b) {
+      historyListExcel.sort((a, b) {
         return ('${a.lastName.toLowerCase()} ${a.firstName.toLowerCase()} ${a.middleName.toLowerCase()}  ${a.date.toString()}')
             .compareTo(
                 '${b.lastName.toLowerCase()} ${b.firstName.toLowerCase()} ${b.middleName.toLowerCase()}  ${b.date.toString()}');
@@ -124,26 +128,28 @@ class HomeData with ChangeNotifier {
       var rowCountUser = 0;
       final dateFormatInOut = DateFormat('yyyy-MM-dd');
 
-      for (int i = 0; i < _historyList.length; i++) {
+      for (int i = 0; i < historyListExcel.length; i++) {
         rowCountUser = rowCountUser + 1;
         var dateOut = '';
         var duration = 0;
         var timeLogs = <Log>[];
 
-        if (_historyList[i].logs.length == 1 &&
-            _historyList[i].logs.first.logType == 'OUT' &&
-            _historyList[i - 1].logs.last.logType == 'IN') {
-          _historyList.removeAt(i);
-          log('${_historyList[i].employeeId} ${_historyList[i].logs.first.logType}');
+        if (historyListExcel[i].logs.length == 1 &&
+            historyListExcel[i].logs.first.logType == 'OUT' &&
+            historyListExcel[i - 1].logs.last.logType == 'IN') {
+          historyListExcel.removeAt(i);
+          log('${historyListExcel[i].employeeId} ${historyListExcel[i].logs.first.logType}');
         }
 
-        timeLogs.add(_historyList[i].logs.first);
+        timeLogs.add(historyListExcel[i].logs.first);
 
         // debugPrint(nameIndex(i));
         if (i > 0) {
           //reset user logs count and add space
-          if (nameIndex(i - 1) != nameIndex(i)) {
-            debugPrint(nameIndex(i - 1) + nameIndex(i));
+          if (nameIndex(historyListExcel[i - 1]) !=
+              nameIndex(historyListExcel[i])) {
+            debugPrint(nameIndex(historyListExcel[i - 1]) +
+                nameIndex(historyListExcel[i]));
             // debugPrint(i.toString());
             List<dynamic> emptyRow = [
               '',
@@ -160,45 +166,46 @@ class HomeData with ChangeNotifier {
           }
         }
 
-        if (_historyList[i].logs.last.logType == 'IN') {
+        if (historyListExcel[i].logs.last.logType == 'IN') {
           // if last log is in, then date out is tommorrow
-          if (i + 1 < _historyList.length) {
+          if (i + 1 < historyListExcel.length) {
             // debugPrint(nameIndex(i));
-            if (nameIndex(i) == nameIndex(i + 1)) {
-              dateOut = dateFormatInOut.format(_historyList[i + 1].date);
+            if (nameIndex(historyListExcel[i]) ==
+                nameIndex(historyListExcel[i + 1])) {
+              dateOut = dateFormatInOut.format(historyListExcel[i + 1].date);
               duration = calcDurationInOutOtherDay(
-                  _historyList[i].logs, _historyList[i + 1].logs);
+                  historyListExcel[i].logs, historyListExcel[i + 1].logs);
               // move first log other day to yesterday if out
-              // debugPrint(_historyList[i + 1].logs.first.timeStamp.toString());
+              // debugPrint(historyListExcel[i + 1].logs.first.timeStamp.toString());
 
-              timeLogs.add(_historyList[i + 1].logs[0]);
+              timeLogs.add(historyListExcel[i + 1].logs[0]);
 
               // if next log is out and is solo, remove
-              if (_historyList[i + 1].logs.length > 1) {
-                _historyList[i + 1].logs.removeAt(0);
+              if (historyListExcel[i + 1].logs.length > 1) {
+                historyListExcel[i + 1].logs.removeAt(0);
               }
             } else {
-              if (_historyList[i + 1].logs.first.logType == 'OUT') {
-                historyList[i + 1].logs.removeAt(0);
+              if (historyListExcel[i + 1].logs.first.logType == 'OUT') {
+                historyListExcel[i + 1].logs.removeAt(0);
               }
             }
           }
           // if last log is in and last index, do in out same day, otherwise dont calc duration
           else {
-            if (_historyList[i].logs.length > 1) {
-              dateOut = dateFormatInOut.format(_historyList[i].date);
+            if (historyListExcel[i].logs.length > 1) {
+              dateOut = dateFormatInOut.format(historyListExcel[i].date);
               // debugPrint(nameIndex(i));
-              duration = calcDurationInOutSameDay(_historyList[i].logs);
-              timeLogs.add(_historyList[i].logs.last);
+              duration = calcDurationInOutSameDay(historyListExcel[i].logs);
+              timeLogs.add(historyListExcel[i].logs.last);
             }
           }
         }
         // if date is out, then date in and out same
         else {
-          dateOut = dateFormatInOut.format(_historyList[i].date);
+          dateOut = dateFormatInOut.format(historyListExcel[i].date);
           // debugPrint(nameIndex(i));
-          duration = calcDurationInOutSameDay(_historyList[i].logs);
-          timeLogs.add(_historyList[i].logs.last);
+          duration = calcDurationInOutSameDay(historyListExcel[i].logs);
+          timeLogs.add(historyListExcel[i].logs.last);
         }
 
         var timeIn = dateFormat12or24(timeLogs.first.timeStamp);
@@ -207,9 +214,9 @@ class HomeData with ChangeNotifier {
 
         List<dynamic> dataList = [
           rowCountUser,
-          _historyList[i].employeeId,
-          nameIndex(i),
-          dateFormatInOut.format(_historyList[i].date),
+          historyListExcel[i].employeeId,
+          nameIndex(historyListExcel[i]),
+          dateFormatInOut.format(historyListExcel[i].date),
           timeIn,
           dateOut,
           timeOut,
@@ -226,9 +233,8 @@ class HomeData with ChangeNotifier {
     }
   }
 
-  String nameIndex(int index) {
-    final name =
-        "${_historyList[index].lastName}, ${historyList[index].firstName} ${_historyList[index].middleName}";
+  String nameIndex(HistoryModel model) {
+    final name = "${model.lastName}, ${model.firstName} ${model.middleName}";
     return name;
   }
 

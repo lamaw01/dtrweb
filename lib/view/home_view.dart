@@ -427,11 +427,7 @@ class _HomeViewState extends State<HomeView> {
                     height: 30.0,
                     child: TextButton(
                       onPressed: () {
-                        if (idController.text.isEmpty) {
-                          instance.exportExcel();
-                        } else {
-                          instance.exportExcel();
-                        }
+                        instance.exportExcel();
                       },
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
