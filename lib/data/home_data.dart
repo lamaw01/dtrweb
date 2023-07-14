@@ -74,22 +74,22 @@ class HomeData with ChangeNotifier {
 
       var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
       column4
-        ..value = 'Date In'
+        ..value = 'In'
         ..cellStyle = cellStyle;
 
       var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
       column5
-        ..value = 'Time In'
+        ..value = 'Out'
         ..cellStyle = cellStyle;
 
       var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
       column6
-        ..value = 'Date Out'
+        ..value = 'In'
         ..cellStyle = cellStyle;
 
       var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
       column7
-        ..value = 'Time Out'
+        ..value = 'Out'
         ..cellStyle = cellStyle;
 
       var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
@@ -208,7 +208,7 @@ class HomeData with ChangeNotifier {
         List<dynamic> dataList = [
           rowCountUser,
           _historyList[i].employeeId,
-          '${_historyList[i].lastName} ${_historyList[i].firstName}, ${_historyList[i].middleName}',
+          nameIndex(i),
           dateFormatInOut.format(_historyList[i].date),
           timeIn,
           dateOut,
@@ -228,7 +228,7 @@ class HomeData with ChangeNotifier {
 
   String nameIndex(int index) {
     final name =
-        "${_historyList[index].lastName} ${historyList[index].firstName} ${_historyList[index].middleName}";
+        "${_historyList[index].lastName}, ${historyList[index].firstName} ${_historyList[index].middleName}";
     return name;
   }
 
@@ -268,6 +268,8 @@ class HomeData with ChangeNotifier {
     } catch (e) {
       debugPrint('other error $e');
     }
+    // add 6 minutes late allowance
+    seconds = seconds + 360;
     // debugPrint('seconds $seconds');
     var hours = Duration(seconds: seconds).inHours;
     // debugPrint('hours $hours');
@@ -291,6 +293,8 @@ class HomeData with ChangeNotifier {
     } catch (e) {
       debugPrint('same day error $e');
     }
+    // add 6 minutes late allowance
+    seconds = seconds + 360;
     // debugPrint('seconds $seconds');
     var hours = Duration(seconds: seconds).inHours;
     // debugPrint('hours $hours');

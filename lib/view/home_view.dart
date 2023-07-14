@@ -468,23 +468,7 @@ class _HomeViewState extends State<HomeView> {
                       DataColumn(
                         label: Expanded(
                           child: Text(
-                            'First name',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'Middle initial',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'Last name',
+                            'Name',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -514,12 +498,8 @@ class _HomeViewState extends State<HomeView> {
                           cells: <DataCell>[
                             DataCell(
                                 SelectableText(instance.uiList[i].employeeId)),
-                            DataCell(
-                                SelectableText(instance.uiList[i].firstName)),
-                            DataCell(
-                                SelectableText(instance.uiList[i].middleName)),
-                            DataCell(
-                                SelectableText(instance.uiList[i].lastName)),
+                            DataCell(SelectableText(
+                                '${instance.uiList[i].lastName}, ${instance.uiList[i].firstName} ${instance.uiList[i].middleName}')),
                             DataCell(SelectableText(DateFormat.yMMMEd()
                                 .format(instance.uiList[i].date))),
                             DataCell(LogsWidget(logs: instance.uiList[i].logs)),
