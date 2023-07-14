@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -128,13 +130,22 @@ class HomeData with ChangeNotifier {
         var duration = 0;
         var timeLogs = <Log>[];
 
+        if (_historyList[i].logs.length == 1 &&
+            _historyList[i].logs.first.logType == 'OUT' &&
+            _historyList[i - 1].logs.last.logType == 'IN') {
+          _historyList.removeAt(i);
+          log('${_historyList[i].employeeId} ${_historyList[i].logs.first.logType}');
+        }
+
+        timeLogs.add(_historyList[i].logs.first);
+
+        // debugPrint(nameIndex(i));
         if (i > 0) {
           //reset user logs count and add space
-          if (nameIndex(i) != nameIndex(i - 1)) {
-            rowCountUser = 1;
+          if (nameIndex(i - 1) != nameIndex(i)) {
+            debugPrint(nameIndex(i - 1) + nameIndex(i));
+            // debugPrint(i.toString());
             List<dynamic> emptyRow = [
-              '',
-              '',
               '',
               '',
               '',
@@ -145,28 +156,23 @@ class HomeData with ChangeNotifier {
               '',
             ];
             sheetObject.appendRow(emptyRow);
+            rowCountUser = 1;
           }
         }
-
-        // if logs is only 1 and is out remove
-        if (_historyList[i].logs.length == 1 &&
-            _historyList[i].logs.first.logType == 'OUT') {
-          _historyList.removeAt(i);
-        }
-
-        timeLogs.add(_historyList[i].logs.first);
 
         if (_historyList[i].logs.last.logType == 'IN') {
           // if last log is in, then date out is tommorrow
           if (i + 1 < _historyList.length) {
-            debugPrint(nameIndex(i));
+            // debugPrint(nameIndex(i));
             if (nameIndex(i) == nameIndex(i + 1)) {
               dateOut = dateFormatInOut.format(_historyList[i + 1].date);
               duration = calcDurationInOutOtherDay(
                   _historyList[i].logs, _historyList[i + 1].logs);
               // move first log other day to yesterday if out
-              debugPrint(_historyList[i + 1].logs.first.timeStamp.toString());
+              // debugPrint(_historyList[i + 1].logs.first.timeStamp.toString());
+
               timeLogs.add(_historyList[i + 1].logs[0]);
+
               // if next log is out and is solo, remove
               if (_historyList[i + 1].logs.length > 1) {
                 _historyList[i + 1].logs.removeAt(0);
@@ -179,16 +185,18 @@ class HomeData with ChangeNotifier {
           }
           // if last log is in and last index, do in out same day, otherwise dont calc duration
           else {
-            dateOut = dateFormatInOut.format(_historyList[i].date);
-            debugPrint(nameIndex(i));
-            duration = calcDurationInOutSameDay(_historyList[i].logs);
-            timeLogs.add(_historyList[i].logs.last);
+            if (_historyList[i].logs.length > 1) {
+              dateOut = dateFormatInOut.format(_historyList[i].date);
+              // debugPrint(nameIndex(i));
+              duration = calcDurationInOutSameDay(_historyList[i].logs);
+              timeLogs.add(_historyList[i].logs.last);
+            }
           }
         }
         // if date is out, then date in and out same
         else {
           dateOut = dateFormatInOut.format(_historyList[i].date);
-          debugPrint(nameIndex(i));
+          // debugPrint(nameIndex(i));
           duration = calcDurationInOutSameDay(_historyList[i].logs);
           timeLogs.add(_historyList[i].logs.last);
         }
@@ -220,13 +228,13 @@ class HomeData with ChangeNotifier {
 
   String nameIndex(int index) {
     final name =
-        "${_historyList[index].firstName} ${historyList[index].middleName} ${_historyList[index].lastName}";
+        "${_historyList[index].lastName} ${historyList[index].firstName} ${_historyList[index].middleName}";
     return name;
   }
 
   // calculate duration in hours if log out is other day
   int calcDurationInOutOtherDay(List<Log> logs1, List<Log> logs2) {
-    debugPrint('logs1 ${logs1.length} logs1 ${logs2.length}');
+    // debugPrint('logs1 ${logs1.length} logs1 ${logs2.length}');
     var seconds = 0;
     try {
       if (logs1.last.logType == 'IN') {
@@ -235,16 +243,16 @@ class HomeData with ChangeNotifier {
             if (logs2[j].logType == 'OUT') {
               seconds = seconds +
                   logs2[j].timeStamp.difference(logs1.last.timeStamp).inSeconds;
-              debugPrint(
-                  'other day 1st ${logs2[j].timeStamp.difference(logs1.last.timeStamp).inSeconds}');
+              // debugPrint(
+              //     'other day 1st ${logs2[j].timeStamp.difference(logs1.last.timeStamp).inSeconds}');
               break;
             }
           }
         } else {
           seconds = seconds +
               logs2.first.timeStamp.difference(logs1.last.timeStamp).inSeconds;
-          debugPrint(
-              'other day 2nd ${logs2.first.timeStamp.difference(logs1.last.timeStamp).inHours}');
+          // debugPrint(
+          //     'other day 2nd ${logs2.first.timeStamp.difference(logs1.last.timeStamp).inHours}');
         }
       }
       for (int i = 0; i < logs1.length; i++) {
@@ -252,17 +260,17 @@ class HomeData with ChangeNotifier {
           if (logs1[i].logType == 'IN' && logs1[i + 1].logType == 'OUT') {
             seconds = seconds +
                 logs1[i + 1].timeStamp.difference(logs1[i].timeStamp).inSeconds;
-            debugPrint(
-                'other day loop ${logs1[i + 1].timeStamp.difference(logs1[i].timeStamp).inHours}');
+            // debugPrint(
+            //     'other day loop ${logs1[i + 1].timeStamp.difference(logs1[i].timeStamp).inHours}');
           }
         }
       }
     } catch (e) {
       debugPrint('other error $e');
     }
-    debugPrint('seconds $seconds');
+    // debugPrint('seconds $seconds');
     var hours = Duration(seconds: seconds).inHours;
-    debugPrint('hours $hours');
+    // debugPrint('hours $hours');
     return hours;
   }
 
@@ -275,17 +283,17 @@ class HomeData with ChangeNotifier {
           if (logs[i].logType == 'IN' && logs[i + 1].logType == 'OUT') {
             seconds = seconds +
                 logs[i + 1].timeStamp.difference(logs[i].timeStamp).inSeconds;
-            debugPrint(
-                'same day ${logs[i + 1].timeStamp.difference(logs[i].timeStamp).inHours}');
+            // debugPrint(
+            //     'same day ${logs[i + 1].timeStamp.difference(logs[i].timeStamp).inHours}');
           }
         }
       }
     } catch (e) {
       debugPrint('same day error $e');
     }
-    debugPrint('seconds $seconds');
+    // debugPrint('seconds $seconds');
     var hours = Duration(seconds: seconds).inHours;
-    debugPrint('hours $hours');
+    // debugPrint('hours $hours');
     return hours;
   }
 
