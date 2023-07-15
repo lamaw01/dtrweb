@@ -45,7 +45,7 @@ class _LogsWidgetState extends State<LogsWidget> {
                   ),
                   const SizedBox(height: 5.0),
                   Text(
-                    instance.dateFormat12or24(widget.logs[j].timeStamp),
+                    instance.dateFormat12or24Web(widget.logs[j].timeStamp),
                     style: textStyleImage,
                   ),
                 ],
@@ -61,7 +61,7 @@ class _LogsWidgetState extends State<LogsWidget> {
                 ),
                 const SizedBox(height: 5.0),
                 Text(
-                  instance.dateFormat12or24(widget.logs[j].timeStamp),
+                  instance.dateFormat12or24Web(widget.logs[j].timeStamp),
                 ),
               ],
             ),
