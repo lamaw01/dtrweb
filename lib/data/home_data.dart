@@ -150,9 +150,6 @@ class HomeData with ChangeNotifier {
           //reset user logs count and add space
           if (nameIndex(historyListExcel[i - 1]) !=
               nameIndex(historyListExcel[i])) {
-            debugPrint(nameIndex(historyListExcel[i - 1]) +
-                nameIndex(historyListExcel[i]));
-            // debugPrint(i.toString());
             List<dynamic> emptyRow = [
               '',
               '',
@@ -175,11 +172,11 @@ class HomeData with ChangeNotifier {
                 nameIndex(historyListExcel[i + 1])) {
               // dateOut = dateFormatInOut.format(historyListExcel[i + 1].date);
               duration = calcDurationInOutOtherDay(
-                  historyListExcel[i].logs, historyListExcel[i + 1].logs);
+                logs1: historyListExcel[i].logs,
+                logs2: historyListExcel[i + 1].logs,
+              );
               // move first log other day to yesterday if out
-
               timeLogs.add(historyListExcel[i + 1].logs[0]);
-
               // if next log is out and is solo, remove
               if (historyListExcel[i + 1].logs.length > 1) {
                 historyListExcel[i + 1].logs.removeAt(0);
@@ -196,7 +193,8 @@ class HomeData with ChangeNotifier {
           else {
             if (historyListExcel[i].logs.length > 1) {
               // dateOut = dateFormatInOut.format(historyListExcel[i].date);
-              duration = calcDurationInOutSameDay(historyListExcel[i].logs);
+              duration =
+                  calcDurationInOutSameDay(logs: historyListExcel[i].logs);
               // timeLogs.add(historyListExcel[i].logs.last);
               timeLogs.addAll(
                   historyListExcel[i].logs.skip(timeLogs.length == 2 ? 2 : 1));
@@ -206,7 +204,7 @@ class HomeData with ChangeNotifier {
         // if date is out, then date in and out same
         else {
           // dateOut = dateFormatInOut.format(historyListExcel[i].date);
-          duration = calcDurationInOutSameDay(historyListExcel[i].logs);
+          duration = calcDurationInOutSameDay(logs: historyListExcel[i].logs);
           // timeLogs.add(historyListExcel[i].logs.last);
           timeLogs.addAll(
               historyListExcel[i].logs.skip(timeLogs.length == 2 ? 2 : 1));
@@ -258,7 +256,10 @@ class HomeData with ChangeNotifier {
   }
 
   // calculate duration in hours if log out is other day
-  int calcDurationInOutOtherDay(List<Log> logs1, List<Log> logs2) {
+  int calcDurationInOutOtherDay({
+    required List<Log> logs1,
+    required List<Log> logs2,
+  }) {
     // debugPrint('logs1 ${logs1.length} logs1 ${logs2.length}');
     var seconds = 0;
     try {
@@ -302,7 +303,7 @@ class HomeData with ChangeNotifier {
   }
 
   // calculate duration in hours if in and out same day
-  int calcDurationInOutSameDay(List<Log> logs) {
+  int calcDurationInOutSameDay({required List<Log> logs}) {
     var seconds = 0;
     try {
       for (int i = 0; i < logs.length; i++) {
@@ -310,8 +311,6 @@ class HomeData with ChangeNotifier {
           if (logs[i].logType == 'IN' && logs[i + 1].logType == 'OUT') {
             seconds = seconds +
                 logs[i + 1].timeStamp.difference(logs[i].timeStamp).inSeconds;
-            // debugPrint(
-            //     'same day ${logs[i + 1].timeStamp.difference(logs[i].timeStamp).inHours}');
           }
         }
       }
