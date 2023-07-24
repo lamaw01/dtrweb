@@ -134,18 +134,24 @@ class HomeData with ChangeNotifier {
       var rowCountUser = 0;
       // final dateFormatInOut = DateFormat('yyyy-MM-dd');
 
+      //remove solo out and move to yesterday
+      for (int k = 0; k < historyListExcel.length; k++) {
+        if (k > 0) {
+          if (historyListExcel[k].logs.length == 1 &&
+              historyListExcel[k].logs.first.logType == 'OUT' &&
+              historyListExcel[k - 1].logs.last.logType == 'IN') {
+            historyListExcel[k - 1].logs.add(historyListExcel[k].logs.first);
+            historyListExcel.removeAt(k);
+          }
+        }
+      }
+
       for (int i = 0; i < historyListExcel.length; i++) {
         rowCountUser = rowCountUser + 1;
         // var dateOut = '';
         ind = i;
         var duration = 0;
         var timeLogs = <Log>[];
-
-        if (historyListExcel[i].logs.length == 1 &&
-            historyListExcel[i].logs.first.logType == 'OUT' &&
-            historyListExcel[i - 1].logs.last.logType == 'IN') {
-          historyListExcel.removeAt(i);
-        }
 
         timeLogs.add(historyListExcel[i].logs.first);
 
@@ -184,35 +190,32 @@ class HomeData with ChangeNotifier {
               if (historyListExcel[i + 1].logs.length > 1) {
                 historyListExcel[i + 1].logs.removeAt(0);
               }
-            }
-            //remove first log of n+1 index if out, because already move to i
-            else {
+            } else {
+              //remove first log of n+1 index if out, because already move to i
               if (historyListExcel[i + 1].logs.length > 1) {
                 if (historyListExcel[i + 1].logs[0].logType == 'OUT') {
                   historyListExcel[i + 1].logs.removeAt(0);
                 }
               }
+              duration =
+                  calcDurationInOutSameDay(logs: historyListExcel[i].logs);
+              timeLogs.addAll(historyListExcel[i].logs.skip(timeLogs.length));
             }
-          }
-          // if last log is in and last index, do in out same day, otherwise dont calc duration
-          else {
+          } else {
+            // if last log is in and last index, do in out same day, otherwise dont calc duration
             if (historyListExcel[i].logs.length > 1) {
               // dateOut = dateFormatInOut.format(historyListExcel[i].date);
               duration =
                   calcDurationInOutSameDay(logs: historyListExcel[i].logs);
-              // timeLogs.add(historyListExcel[i].logs.last);
-              timeLogs.addAll(
-                  historyListExcel[i].logs.skip(timeLogs.length == 2 ? 2 : 1));
+              timeLogs.addAll(historyListExcel[i].logs.skip(timeLogs.length));
             }
           }
-        }
-        // if date is out, then date in and out same
-        else {
+        } else {
+          // if date is out, then date in and out same
           // dateOut = dateFormatInOut.format(historyListExcel[i].date);
           duration = calcDurationInOutSameDay(logs: historyListExcel[i].logs);
           // timeLogs.add(historyListExcel[i].logs.last);
-          timeLogs.addAll(
-              historyListExcel[i].logs.skip(timeLogs.length == 2 ? 2 : 1));
+          timeLogs.addAll(historyListExcel[i].logs.skip(timeLogs.length));
         }
 
         var timeIn1 = '';
@@ -251,9 +254,8 @@ class HomeData with ChangeNotifier {
           fileName:
               'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
     } catch (e) {
-      debugPrint(e.toString() +
-          historyList[ind].date.toString() +
-          historyList[ind].firstName);
+      debugPrint(
+          '$e ${historyList[ind].date} ${historyList[ind].firstName} $ind');
     }
   }
 
@@ -301,6 +303,7 @@ class HomeData with ChangeNotifier {
     } catch (e) {
       debugPrint('other error $e');
     }
+    debugPrint('calcDurationInOutOtherDay');
     // add 6 minutes late allowance
     seconds = seconds + 360;
     // debugPrint('seconds $seconds');
@@ -324,6 +327,7 @@ class HomeData with ChangeNotifier {
     } catch (e) {
       debugPrint('same day error $e');
     }
+    debugPrint('calcDurationInOutSameDay');
     // add 6 minutes late allowance
     seconds = seconds + 360;
     // debugPrint('seconds $seconds');

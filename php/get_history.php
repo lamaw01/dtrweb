@@ -20,14 +20,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
 
     $sql_get_history = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
     FROM tbl_logs LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
-    WHERE (tbl_logs.employee_id LIKE :employee_id OR tbl_employee.name LIKE :employee_id) 
-    AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
+    WHERE (tbl_logs.employee_id LIKE :employee_id OR tbl_employee.first_name LIKE :employee_id OR tbl_employee.last_name LIKE :employee_id) 
+    AND tbl_employee.last_name IS NOT NULL AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     $sql_get_history_with_department = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
     FROM tbl_logs LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     LEFT JOIN tbl_employee_department ON tbl_employee.employee_id = tbl_employee_department.employee_id 
-    WHERE (tbl_logs.employee_id LIKE :employee_id OR tbl_employee.name LIKE :employee_id) 
-    AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee_department.department_id = :department 
+    WHERE (tbl_logs.employee_id LIKE :employee_id OR tbl_employee.first_name LIKE :employee_id OR tbl_employee.last_name LIKE :employee_id) 
+    AND tbl_employee.last_name IS NOT NULL AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee_department.department_id = :department 
     GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     try {

@@ -18,14 +18,14 @@ if($_SERVER['REQUEST_METHOD']){
     $sql_get_history_all = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name,
     DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp FROM tbl_logs 
     LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
-    WHERE tbl_logs.time_stamp BETWEEN :date_from AND :date_to
+    WHERE tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee.last_name IS NOT NULL
     GROUP BY tbl_logs.employee_id, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
-    $sql_get_history_all_with_department = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name,
+    $sql_get_history_all_with_department = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, 
     DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp FROM tbl_logs 
     LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     LEFT JOIN tbl_employee_department ON tbl_employee.employee_id = tbl_employee_department.employee_id 
-    WHERE tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee_department.department_id = :department
+    WHERE tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee_department.department_id = :department AND tbl_employee.last_name IS NOT NULL
     GROUP BY tbl_logs.employee_id, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     try {

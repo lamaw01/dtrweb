@@ -69,7 +69,7 @@ class HttpService {
         'Content-Type': 'application/json; charset=UTF-8',
       },
     ).timeout(const Duration(seconds: 10));
-    debugPrint('getDepartment ${response.body}');
+    // debugPrint('getDepartment ${response.body}');
     return departmentModelFromJson(response.body);
   }
 }
