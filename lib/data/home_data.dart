@@ -53,6 +53,8 @@ class HomeData with ChangeNotifier {
     _isLogging.value = state;
   }
 
+  var ind = 0;
+
   void exportExcel() async {
     try {
       var excel = Excel.createExcel();
@@ -135,6 +137,7 @@ class HomeData with ChangeNotifier {
       for (int i = 0; i < historyListExcel.length; i++) {
         rowCountUser = rowCountUser + 1;
         // var dateOut = '';
+        ind = i;
         var duration = 0;
         var timeLogs = <Log>[];
 
@@ -184,8 +187,10 @@ class HomeData with ChangeNotifier {
             }
             //remove first log of n+1 index if out, because already move to i
             else {
-              if (historyListExcel[i + 1].logs.first.logType == 'OUT') {
-                historyListExcel[i + 1].logs.removeAt(0);
+              if (historyListExcel[i + 1].logs.length > 1) {
+                if (historyListExcel[i + 1].logs[0].logType == 'OUT') {
+                  historyListExcel[i + 1].logs.removeAt(0);
+                }
               }
             }
           }
@@ -246,7 +251,9 @@ class HomeData with ChangeNotifier {
           fileName:
               'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint(e.toString() +
+          historyList[ind].date.toString() +
+          historyList[ind].firstName);
     }
   }
 
