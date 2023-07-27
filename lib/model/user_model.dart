@@ -17,6 +17,11 @@ class HistoryModel {
   String middleName;
   DateTime date;
   List<Log> logs;
+  String schedCode;
+  String schedIn;
+  String breakStart;
+  String breakEnd;
+  String schedOut;
 
   HistoryModel({
     required this.employeeId,
@@ -25,6 +30,11 @@ class HistoryModel {
     required this.middleName,
     required this.date,
     required this.logs,
+    required this.schedCode,
+    required this.schedIn,
+    required this.breakStart,
+    required this.breakEnd,
+    required this.schedOut,
   });
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) => HistoryModel(
@@ -34,6 +44,11 @@ class HistoryModel {
         middleName: json["middle_name"],
         date: DateTime.parse(json["date"]),
         logs: List<Log>.from(json["logs"].map((x) => Log.fromJson(x))),
+        schedCode: json["sched_code"].toString(),
+        schedIn: json["sched_in"].toString(),
+        breakStart: json["break_start"].toString(),
+        breakEnd: json["break_end"].toString(),
+        schedOut: json["sched_out"].toString(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -44,6 +59,11 @@ class HistoryModel {
         "date":
             "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         "logs": List<dynamic>.from(logs.map((x) => x.toJson())),
+        "sched_code": schedCode,
+        "sched_in": schedIn,
+        "break_start": breakStart,
+        "break_end": breakEnd,
+        "sched_out": schedOut,
       };
 }
 
@@ -62,7 +82,7 @@ class Log {
 
   factory Log.fromJson(Map<String, dynamic> json) => Log(
         timeStamp: DateTime.parse(json["time_stamp"]),
-        logType: json["log_type"],
+        logType: json["log_type"].toString(),
         id: json["id"].toString(),
         isSelfie: json["is_selfie"].toString(),
       );

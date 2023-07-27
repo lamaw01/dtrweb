@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -132,28 +134,65 @@ class HomeData with ChangeNotifier {
       });
 
       var rowCountUser = 0;
-      // final dateFormatInOut = DateFormat('yyyy-MM-dd');
 
-      //remove solo out and move to yesterday
-      for (int k = 0; k < historyListExcel.length; k++) {
-        if (k > 0) {
-          if (historyListExcel[k].logs.length == 1 &&
-              historyListExcel[k].logs.first.logType == 'OUT' &&
-              historyListExcel[k - 1].logs.last.logType == 'IN') {
-            historyListExcel[k - 1].logs.add(historyListExcel[k].logs.first);
+      try {
+        for (int k = 0; k < historyListExcel.length; k++) {
+          if (k == 0 &&
+              historyListExcel[k].logs.length == 1 &&
+              historyListExcel[k].logs.first.logType == 'OUT') {
             historyListExcel.removeAt(k);
+          } else if (k > 0) {
+            //remove solo out and move to yesterday
+            if (historyListExcel[k].logs.length == 1 &&
+                historyListExcel[k].logs.first.logType == 'OUT' &&
+                historyListExcel[k - 1].logs.last.logType == 'IN') {
+              if (nameIndex(historyListExcel[k]) ==
+                  nameIndex(historyListExcel[k - 1])) {
+                historyListExcel[k - 1]
+                    .logs
+                    .add(historyListExcel[k].logs.first);
+              }
+
+              if (k - 1 == 0) {
+                historyListExcel[k - 1].logs.removeAt(0);
+              }
+              historyListExcel.removeAt(k);
+              log('remove solo 1');
+            }
+          } else if (nameIndex(historyListExcel[k]) !=
+              nameIndex(historyListExcel[k + 1])) {
+            log('remove solo 2');
+            historyListExcel.removeAt(k);
+          } else if (k > 0 && k < 3) {
+            log('remove solo 3');
+            if (nameIndex(historyListExcel[k]) !=
+                    nameIndex(historyListExcel[k - 1]) &&
+                nameIndex(historyListExcel[k]) !=
+                    nameIndex(historyListExcel[k + 1])) {
+              historyListExcel.removeAt(k);
+            }
           }
         }
+      } catch (e) {
+        debugPrint('$e remove solo out and move to yesterday');
       }
 
       for (int i = 0; i < historyListExcel.length; i++) {
+        try {
+          //remove first out if logs more than 2
+          if (historyListExcel[i].logs.first.logType == 'OUT' &&
+              historyListExcel[i].logs.length > 2 &&
+              rowCountUser == 1) {
+            historyListExcel[i].logs.removeAt(0);
+          }
+        } catch (e) {
+          debugPrint('$e remove first out if logs more than 2');
+        }
+
         rowCountUser = rowCountUser + 1;
-        // var dateOut = '';
-        ind = i;
+
         var duration = 0;
         var timeLogs = <Log>[];
-
-        timeLogs.add(historyListExcel[i].logs.first);
 
         if (i > 0) {
           //reset user logs count and add space
@@ -174,66 +213,107 @@ class HomeData with ChangeNotifier {
           }
         }
 
-        if (historyListExcel[i].logs.last.logType == 'IN') {
+        try {
           // if last log is in, then date out is tommorrow
-          if (i + 1 < historyListExcel.length) {
-            if (nameIndex(historyListExcel[i]) ==
-                nameIndex(historyListExcel[i + 1])) {
-              // dateOut = dateFormatInOut.format(historyListExcel[i + 1].date);
-              duration = calcDurationInOutOtherDay(
-                logs1: historyListExcel[i].logs,
-                logs2: historyListExcel[i + 1].logs,
-              );
-              // move first log other day to yesterday if out
-              timeLogs.add(historyListExcel[i + 1].logs[0]);
-              // if next log is out and is solo, remove
-              if (historyListExcel[i + 1].logs.length > 1) {
-                historyListExcel[i + 1].logs.removeAt(0);
-              }
-            } else {
-              //remove first log of n+1 index if out, because already move to i
-              if (historyListExcel[i + 1].logs.length > 1) {
-                if (historyListExcel[i + 1].logs[0].logType == 'OUT') {
+          if (historyListExcel[i].logs.last.logType == 'IN') {
+            if (i + 1 < historyListExcel.length) {
+              if (nameIndex(historyListExcel[i]) ==
+                  nameIndex(historyListExcel[i + 1])) {
+                log('dire 0');
+                duration = calcDurationInOutOtherDay(
+                  logs1: historyListExcel[i].logs,
+                  logs2: historyListExcel[i + 1].logs,
+                  sIn: historyListExcel[i].schedIn,
+                  bEnd: historyListExcel[i].breakEnd,
+                  name: historyListExcel[i].firstName,
+                );
+                timeLogs.add(historyListExcel[i].logs.last);
+                // move first log other day to yesterday if out
+                timeLogs.add(historyListExcel[i + 1].logs[0]);
+                // if next log is out and is solo, remove
+                if (historyListExcel[i + 1].logs.length > 1) {
                   historyListExcel[i + 1].logs.removeAt(0);
                 }
+              } else {
+                //remove first log of n+1 index if out, because already move to i
+                if (historyListExcel[i + 1].logs.length > 1) {
+                  if (historyListExcel[i + 1].logs[0].logType == 'OUT') {
+                    historyListExcel[i + 1].logs.removeAt(0);
+                  }
+                }
+                log('dire 1');
+                duration = calcDurationInOutSameDay(
+                  logs: historyListExcel[i].logs,
+                  sIn: historyListExcel[i].schedIn,
+                  bEnd: historyListExcel[i].breakEnd,
+                  name: historyListExcel[i].firstName,
+                );
+                // timeLogs.add(historyListExcel[i].logs.last);
+                // if (historyListExcel[i].logs.length > 1) {
+                //   timeLogs.addAll(historyListExcel[i].logs);
+                // }
+                timeLogs.addAll(historyListExcel[i].logs);
               }
-              duration =
-                  calcDurationInOutSameDay(logs: historyListExcel[i].logs);
-              timeLogs.addAll(historyListExcel[i].logs.skip(timeLogs.length));
+            } else {
+              log('dire 2');
+              // if last log is in and last index, do in out same day, otherwise dont calc duration
+              if (historyListExcel[i].logs.length > 1) {
+                duration = calcDurationInOutSameDay(
+                  logs: historyListExcel[i].logs,
+                  sIn: historyListExcel[i].schedIn,
+                  bEnd: historyListExcel[i].breakEnd,
+                  name: historyListExcel[i].firstName,
+                );
+              }
+              timeLogs.addAll(historyListExcel[i].logs);
             }
           } else {
-            // if last log is in and last index, do in out same day, otherwise dont calc duration
             if (historyListExcel[i].logs.length > 1) {
-              // dateOut = dateFormatInOut.format(historyListExcel[i].date);
-              duration =
-                  calcDurationInOutSameDay(logs: historyListExcel[i].logs);
-              timeLogs.addAll(historyListExcel[i].logs.skip(timeLogs.length));
+              log('dire 3');
+              // if date is out, then date in and out same
+              duration = calcDurationInOutSameDay(
+                logs: historyListExcel[i].logs,
+                sIn: historyListExcel[i].schedIn,
+                bEnd: historyListExcel[i].breakEnd,
+                name: historyListExcel[i].firstName,
+              );
             }
+            timeLogs.addAll(historyListExcel[i].logs);
           }
-        } else {
-          // if date is out, then date in and out same
-          // dateOut = dateFormatInOut.format(historyListExcel[i].date);
-          duration = calcDurationInOutSameDay(logs: historyListExcel[i].logs);
-          // timeLogs.add(historyListExcel[i].logs.last);
-          timeLogs.addAll(historyListExcel[i].logs.skip(timeLogs.length));
+        } catch (e) {
+          debugPrint('$e if in');
         }
 
         var timeIn1 = '';
         var timeOut1 = '';
         var timeIn2 = '';
         var timeOut2 = '';
-        timeIn1 = dateFormat12or24Excel(timeLogs[0].timeStamp);
 
-        if (timeLogs.length >= 2) {
-          timeOut1 = dateFormat12or24Excel(timeLogs[1].timeStamp);
+        try {
+          if (timeLogs.length > 1 &&
+              (timeLogs[0].logType == 'OUT' && timeLogs[1].logType == 'IN')) {
+            var tempList = <Log>[];
+            tempList.add(timeLogs[1]);
+            tempList.add(timeLogs[0]);
+            timeLogs[0] = tempList[0];
+            timeLogs[1] = tempList[1];
+          }
+
+          timeIn1 = dateFormat12or24Excel(timeLogs[0].timeStamp);
+
+          if (timeLogs.length >= 2) {
+            timeOut1 = dateFormat12or24Excel(timeLogs[1].timeStamp);
+          }
+          if (timeLogs.length >= 3) {
+            timeIn2 = dateFormat12or24Excel(timeLogs[2].timeStamp);
+          }
+          if (timeLogs.length >= 4) {
+            timeOut2 = dateFormat12or24Excel(timeLogs[3].timeStamp);
+          }
+          if (timeLogs.length == 1) timeOut1 = '';
+        } catch (e) {
+          debugPrint('$e time slot');
         }
-        if (timeLogs.length >= 3) {
-          timeIn2 = dateFormat12or24Excel(timeLogs[2].timeStamp);
-        }
-        if (timeLogs.length >= 4) {
-          timeOut2 = dateFormat12or24Excel(timeLogs[3].timeStamp);
-        }
-        if (timeLogs.length == 1) timeOut1 = '';
 
         List<dynamic> dataList = [
           rowCountUser,
@@ -268,35 +348,47 @@ class HomeData with ChangeNotifier {
   int calcDurationInOutOtherDay({
     required List<Log> logs1,
     required List<Log> logs2,
+    required String sIn,
+    required String bEnd,
+    required String name,
   }) {
-    // debugPrint('logs1 ${logs1.length} logs1 ${logs2.length}');
     var seconds = 0;
+    var logs = <Log>[];
+
     try {
       if (logs1.last.logType == 'IN') {
+        logs.add(logs1.last);
         if (logs2.first.logType == 'IN') {
           for (int j = 0; j < logs2.length; j++) {
             if (logs2[j].logType == 'OUT') {
-              seconds = seconds +
-                  logs2[j].timeStamp.difference(logs1.last.timeStamp).inSeconds;
-              // debugPrint(
-              //     'other day 1st ${logs2[j].timeStamp.difference(logs1.last.timeStamp).inSeconds}');
+              logs.add(logs2[j]);
+              // seconds = seconds +
+              //     logs2[j].timeStamp.difference(logs1.last.timeStamp).inSeconds;
               break;
             }
           }
         } else {
-          seconds = seconds +
-              logs2.first.timeStamp.difference(logs1.last.timeStamp).inSeconds;
-          // debugPrint(
-          //     'other day 2nd ${logs2.first.timeStamp.difference(logs1.last.timeStamp).inHours}');
+          // seconds = seconds +
+          //     logs2.first.timeStamp.difference(logs1.last.timeStamp).inSeconds;
+          logs.add(logs2.first);
         }
       }
-      for (int i = 0; i < logs1.length; i++) {
-        if (i + 1 < logs1.length) {
-          if (logs1[i].logType == 'IN' && logs1[i + 1].logType == 'OUT') {
+      // for (int i = 0; i < logs1.length; i++) {
+      //   if (i + 1 < logs1.length) {
+      //     if (logs1[i].logType == 'IN' && logs1[i + 1].logType == 'OUT') {
+      //       seconds = seconds +
+      //           logs1[i + 1].timeStamp.difference(logs1[i].timeStamp).inSeconds;
+      //     }
+      //   }
+      // }
+
+      // var latePenalty = calcLate(logs: logs, sIn: sIn, bEnd: bEnd, name: name);
+
+      for (int i = 0; i < logs.length; i++) {
+        if (i + 1 < logs.length) {
+          if (logs[i].logType == 'IN' && logs[i + 1].logType == 'OUT') {
             seconds = seconds +
-                logs1[i + 1].timeStamp.difference(logs1[i].timeStamp).inSeconds;
-            // debugPrint(
-            //     'other day loop ${logs1[i + 1].timeStamp.difference(logs1[i].timeStamp).inHours}');
+                logs[i + 1].timeStamp.difference(logs[i].timeStamp).inSeconds;
           }
         }
       }
@@ -306,15 +398,22 @@ class HomeData with ChangeNotifier {
     debugPrint('calcDurationInOutOtherDay');
     // add 6 minutes late allowance
     seconds = seconds + 360;
-    // debugPrint('seconds $seconds');
+    // seconds = seconds - latePenalty;
     var hours = Duration(seconds: seconds).inHours;
-    // debugPrint('hours $hours');
     return hours;
   }
 
   // calculate duration in hours if in and out same day
-  int calcDurationInOutSameDay({required List<Log> logs}) {
+  int calcDurationInOutSameDay({
+    required List<Log> logs,
+    required String sIn,
+    required String bEnd,
+    required String name,
+  }) {
     var seconds = 0;
+    // var latePenalty =
+    //     calcLate(logs: logs, sIn: sIn, bEnd: bEnd, name: name);
+
     try {
       for (int i = 0; i < logs.length; i++) {
         if (i + 1 < logs.length) {
@@ -330,10 +429,110 @@ class HomeData with ChangeNotifier {
     debugPrint('calcDurationInOutSameDay');
     // add 6 minutes late allowance
     seconds = seconds + 360;
-    // debugPrint('seconds $seconds');
+    // seconds = seconds - latePenalty;
     var hours = Duration(seconds: seconds).inHours;
-    // debugPrint('hours $hours');
     return hours;
+  }
+
+  // int calcLateInOutOtherDay({
+  //   required List<Log> logs1,
+  //   required List<Log> logs2,
+  //   required String sIn,
+  //   required String bEnd,
+  //   required String name,
+  // }) {
+  //   // var schedIn = '';
+  //   // var breakIn = '';
+  //   var latePenalty = 0;
+  //   try {
+  //     // if (logs.length >= 2) {
+  //     //   if (logs[0].logType == 'IN' && logs[1].logType == 'OUT') {
+  //     //     log('${_dateFormat.format(logs[0].timeStamp)} $schedIn');
+  //     //     schedIn = '${logs[0].timeStamp.toString().substring(0, 10)} $sIn';
+
+  //     //     var inDifference = logs[0]
+  //     //         .timeStamp
+  //     //         .difference(_dateFormat.parse(schedIn))
+  //     //         .inSeconds;
+  //     //     var differenceSec = Duration(seconds: inDifference).inSeconds;
+
+  //     //     if (inDifference > 0) {
+  //     //       latePenalty = latePenalty + inDifference;
+  //     //     }
+  //     //     log('$name $differenceSec in');
+  //     //   }
+  //     //   if (logs.length >= 4) {
+  //     //     if (logs[2].logType == 'IN' && logs[3].logType == 'OUT') {
+  //     //       log('${_dateFormat.format(logs[2].timeStamp)} $breakIn');
+  //     //       breakIn = '${logs[2].timeStamp.toString().substring(0, 10)} $bEnd';
+
+  //     //       var inDifference = logs[2]
+  //     //           .timeStamp
+  //     //           .difference(_dateFormat.parse(breakIn))
+  //     //           .inSeconds;
+  //     //       var differenceSec = Duration(seconds: inDifference).inSeconds;
+
+  //     //       if (inDifference > 0) {
+  //     //         latePenalty = latePenalty + inDifference;
+  //     //       }
+  //     //       log('$name $differenceSec break');
+  //     //     }
+  //     //   }
+  //     // }
+  //   } catch (e) {
+  //     debugPrint('$e calcLate');
+  //   }
+  //   return latePenalty;
+  // }
+
+  int calcLate({
+    required List<Log> logs,
+    required String sIn,
+    required String bEnd,
+    required String name,
+  }) {
+    var schedIn = '';
+    var breakIn = '';
+    var latePenalty = 0;
+    try {
+      if (logs.length >= 2) {
+        if (logs[0].logType == 'IN' && logs[1].logType == 'OUT') {
+          log('${_dateFormat.format(logs[0].timeStamp)} $schedIn');
+          schedIn = '${logs[0].timeStamp.toString().substring(0, 10)} $sIn';
+
+          var inDifference = logs[0]
+              .timeStamp
+              .difference(_dateFormat.parse(schedIn))
+              .inSeconds;
+          var differenceSec = Duration(seconds: inDifference).inSeconds;
+
+          if (inDifference > 0) {
+            latePenalty = latePenalty + inDifference;
+          }
+          log('$name $differenceSec in');
+        }
+        if (logs.length >= 4) {
+          if (logs[2].logType == 'IN' && logs[3].logType == 'OUT') {
+            log('${_dateFormat.format(logs[2].timeStamp)} $breakIn');
+            breakIn = '${logs[2].timeStamp.toString().substring(0, 10)} $bEnd';
+
+            var inDifference = logs[2]
+                .timeStamp
+                .difference(_dateFormat.parse(breakIn))
+                .inSeconds;
+            var differenceSec = Duration(seconds: inDifference).inSeconds;
+
+            if (inDifference > 0) {
+              latePenalty = latePenalty + inDifference;
+            }
+            log('$name $differenceSec break');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('$e calcLate');
+    }
+    return latePenalty;
   }
 
   // get initial data for history and put 30 it ui
