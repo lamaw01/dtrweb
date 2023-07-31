@@ -17,7 +17,7 @@ class HistoryModel {
   String middleName;
   DateTime date;
   List<Log> logs;
-  String schedCode;
+  String schedId;
   String schedIn;
   String breakStart;
   String breakEnd;
@@ -30,7 +30,7 @@ class HistoryModel {
     required this.middleName,
     required this.date,
     required this.logs,
-    required this.schedCode,
+    required this.schedId,
     required this.schedIn,
     required this.breakStart,
     required this.breakEnd,
@@ -44,7 +44,7 @@ class HistoryModel {
         middleName: json["middle_name"],
         date: DateTime.parse(json["date"]),
         logs: List<Log>.from(json["logs"].map((x) => Log.fromJson(x))),
-        schedCode: json["sched_code"].toString(),
+        schedId: json["sched_id"].toString(),
         schedIn: json["sched_in"].toString(),
         breakStart: json["break_start"].toString(),
         breakEnd: json["break_end"].toString(),
@@ -59,7 +59,7 @@ class HistoryModel {
         "date":
             "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         "logs": List<dynamic>.from(logs.map((x) => x.toJson())),
-        "sched_code": schedCode,
+        "sched_id": schedId,
         "sched_in": schedIn,
         "break_start": breakStart,
         "break_end": breakEnd,

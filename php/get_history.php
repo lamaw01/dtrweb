@@ -19,17 +19,17 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
     $concat_employee_id = "%$employee_id%";
 
     $sql_get_history = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, 
-    tbl_employee.sched_code, tbl_schedule.sched_in, tbl_schedule.break_start, tbl_schedule.break_end, tbl_schedule.sched_out, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
+    tbl_employee.sched_id, tbl_schedule.sched_in, tbl_schedule.break_start, tbl_schedule.break_end, tbl_schedule.sched_out, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
     FROM tbl_logs LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
-    LEFT JOIN tbl_schedule ON tbl_employee.sched_code = tbl_schedule.sched_code 
+    LEFT JOIN tbl_schedule ON tbl_employee.sched_id = tbl_schedule.sched_id 
     WHERE (tbl_logs.employee_id LIKE :employee_id OR tbl_employee.first_name LIKE :employee_id OR tbl_employee.last_name LIKE :employee_id) 
     AND tbl_employee.last_name IS NOT NULL AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     $sql_get_history_with_department = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, 
-    tbl_employee.sched_code, tbl_schedule.sched_in, tbl_schedule.break_start, tbl_schedule.break_end, tbl_schedule.sched_out, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
+    tbl_employee.sched_id, tbl_schedule.sched_in, tbl_schedule.break_start, tbl_schedule.break_end, tbl_schedule.sched_out, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp 
     FROM tbl_logs LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     LEFT JOIN tbl_employee_department ON tbl_employee.employee_id = tbl_employee_department.employee_id 
-    LEFT JOIN tbl_schedule ON tbl_employee.sched_code = tbl_schedule.sched_code 
+    LEFT JOIN tbl_schedule ON tbl_employee.sched_id = tbl_schedule.sched_id 
     WHERE (tbl_logs.employee_id LIKE :employee_id OR tbl_employee.first_name LIKE :employee_id OR tbl_employee.last_name LIKE :employee_id) 
     AND tbl_employee.last_name IS NOT NULL AND tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee_department.department_id = :department 
     GROUP BY DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
@@ -62,7 +62,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
             $get_logs_within->bindParam(':id', $id, PDO::PARAM_STR);
             $get_logs_within->execute();
             $result_get_logs_within = $get_logs_within->fetchAll(PDO::FETCH_ASSOC);
-            $my_array = array('employee_id'=>$result['employee_id'],'first_name'=>$result['first_name'],'last_name'=>$result['last_name'],'middle_name'=>$result['middle_name'],'date'=>$result['time_stamp'],'logs'=>$result_get_logs_within,'sched_code'=>$result['sched_code'],'sched_in'=>$result['sched_in'],'break_start'=>$result['break_start'],'break_end'=>$result['break_end'],'sched_out'=>$result['sched_out']);
+            $my_array = array('employee_id'=>$result['employee_id'],'first_name'=>$result['first_name'],'last_name'=>$result['last_name'],'middle_name'=>$result['middle_name'],'date'=>$result['time_stamp'],'logs'=>$result_get_logs_within,'sched_id'=>$result['sched_id'],'sched_in'=>$result['sched_in'],'break_start'=>$result['break_start'],'break_end'=>$result['break_end'],'sched_out'=>$result['sched_out']);
             array_push($result_array,$my_array);
         }
         echo json_encode($result_array);
