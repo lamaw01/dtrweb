@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../model/department_model.dart';
+import '../model/late_model.dart';
 import '../model/user_model.dart';
 import '../services/http_service.dart';
 
@@ -107,18 +108,28 @@ class HomeData with ChangeNotifier {
         ..value = 'Duration(Hours)'
         ..cellStyle = cellStyle;
 
-      var column9 = sheetObject.cell(CellIndex.indexByString('I1'));
-      column9
+      var column10 = sheetObject.cell(CellIndex.indexByString('I1'));
+      column10
+        ..value = 'Late In(Minutes)'
+        ..cellStyle = cellStyle;
+
+      var column11 = sheetObject.cell(CellIndex.indexByString('J1'));
+      column11
+        ..value = 'Late Break(Minutes)'
+        ..cellStyle = cellStyle;
+
+      var column12 = sheetObject.cell(CellIndex.indexByString('K1'));
+      column12
         ..value = 'Undertime'
         ..cellStyle = cellStyle;
 
-      var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
-      column10
+      var column13 = sheetObject.cell(CellIndex.indexByString('L1'));
+      column13
         ..value = 'Tardy'
         ..cellStyle = cellStyle;
 
-      var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
-      column11
+      var column14 = sheetObject.cell(CellIndex.indexByString('M1'));
+      column14
         ..value = 'Overtime'
         ..cellStyle = cellStyle;
 
@@ -152,25 +163,30 @@ class HomeData with ChangeNotifier {
                     .logs
                     .add(historyListExcel[k].logs.first);
               }
-
               if (k - 1 == 0) {
                 historyListExcel[k - 1].logs.removeAt(0);
+                log('remove solo 0');
               }
               historyListExcel.removeAt(k);
               log('remove solo 1');
             }
-          } else if (nameIndex(historyListExcel[k]) !=
-              nameIndex(historyListExcel[k + 1])) {
-            log('remove solo 2');
-            historyListExcel.removeAt(k);
           } else if (k > 0 && k < 3) {
-            log('remove solo 3');
             if (nameIndex(historyListExcel[k]) !=
                     nameIndex(historyListExcel[k - 1]) &&
                 nameIndex(historyListExcel[k]) !=
                     nameIndex(historyListExcel[k + 1])) {
+              log('remove solo 2');
               historyListExcel.removeAt(k);
             }
+          }
+
+          if (k + 1 < historyListExcel.length &&
+              nameIndex(historyListExcel[k]) ==
+                  nameIndex(historyListExcel[k + 1]) &&
+              historyListExcel[k].logs.first.logType == 'OUT' &&
+              historyListExcel[k].logs.length == 1) {
+            log('remove solo 3');
+            historyListExcel.removeAt(k);
           }
         }
       } catch (e) {
@@ -191,7 +207,7 @@ class HomeData with ChangeNotifier {
 
         rowCountUser = rowCountUser + 1;
 
-        var duration = 0;
+        late LateModel duration;
         var timeLogs = <Log>[];
 
         if (i > 0) {
@@ -213,9 +229,9 @@ class HomeData with ChangeNotifier {
           }
         }
 
-        try {
-          // if last log is in, then date out is tommorrow
-          if (historyListExcel[i].logs.last.logType == 'IN') {
+        // if last log is in, then date out is tommorrow
+        if (historyListExcel[i].logs.last.logType == 'IN') {
+          try {
             if (i + 1 < historyListExcel.length) {
               if (nameIndex(historyListExcel[i]) ==
                   nameIndex(historyListExcel[i + 1])) {
@@ -231,13 +247,15 @@ class HomeData with ChangeNotifier {
                 // move first log other day to yesterday if out
                 timeLogs.add(historyListExcel[i + 1].logs[0]);
                 // if next log is out and is solo, remove
-                if (historyListExcel[i + 1].logs.length > 1) {
+                if (historyListExcel[i + 1].logs.isNotEmpty) {
                   historyListExcel[i + 1].logs.removeAt(0);
                 }
               } else {
                 //remove first log of n+1 index if out, because already move to i
-                if (historyListExcel[i + 1].logs.length > 1) {
-                  if (historyListExcel[i + 1].logs[0].logType == 'OUT') {
+                if (historyListExcel[i + 1].logs.isNotEmpty) {
+                  if (historyListExcel[i + 1].logs[0].logType == 'OUT' &&
+                      nameIndex(historyListExcel[i]) ==
+                          nameIndex(historyListExcel[i + 1])) {
                     historyListExcel[i + 1].logs.removeAt(0);
                   }
                 }
@@ -249,26 +267,29 @@ class HomeData with ChangeNotifier {
                   name: historyListExcel[i].firstName,
                 );
                 // timeLogs.add(historyListExcel[i].logs.last);
-                // if (historyListExcel[i].logs.length > 1) {
-                //   timeLogs.addAll(historyListExcel[i].logs);
-                // }
-                timeLogs.addAll(historyListExcel[i].logs);
+                if (historyListExcel[i].logs.isNotEmpty) {
+                  timeLogs.addAll(historyListExcel[i].logs);
+                }
               }
             } else {
               log('dire 2');
               // if last log is in and last index, do in out same day, otherwise dont calc duration
-              if (historyListExcel[i].logs.length > 1) {
+              if (historyListExcel[i].logs.isNotEmpty) {
                 duration = calcDurationInOutSameDay(
                   logs: historyListExcel[i].logs,
                   sIn: historyListExcel[i].schedIn,
                   bEnd: historyListExcel[i].breakEnd,
                   name: historyListExcel[i].firstName,
                 );
+                timeLogs.addAll(historyListExcel[i].logs);
               }
-              timeLogs.addAll(historyListExcel[i].logs);
             }
-          } else {
-            if (historyListExcel[i].logs.length > 1) {
+          } catch (e) {
+            debugPrint('$e if in');
+          }
+        } else {
+          try {
+            if (historyListExcel[i].logs.isNotEmpty) {
               log('dire 3');
               // if date is out, then date in and out same
               duration = calcDurationInOutSameDay(
@@ -277,11 +298,11 @@ class HomeData with ChangeNotifier {
                 bEnd: historyListExcel[i].breakEnd,
                 name: historyListExcel[i].firstName,
               );
+              timeLogs.addAll(historyListExcel[i].logs);
             }
-            timeLogs.addAll(historyListExcel[i].logs);
+          } catch (e) {
+            debugPrint('$e else out');
           }
-        } catch (e) {
-          debugPrint('$e if in');
         }
 
         var timeIn1 = '';
@@ -323,7 +344,9 @@ class HomeData with ChangeNotifier {
           timeOut1,
           timeIn2,
           timeOut2,
-          duration,
+          duration.hour,
+          duration.lateIn,
+          duration.lateBreak,
         ];
         sheetObject.appendRow(dataList);
       }
@@ -345,7 +368,7 @@ class HomeData with ChangeNotifier {
   }
 
   // calculate duration in hours if log out is other day
-  int calcDurationInOutOtherDay({
+  LateModel calcDurationInOutOtherDay({
     required List<Log> logs1,
     required List<Log> logs2,
     required String sIn,
@@ -362,27 +385,13 @@ class HomeData with ChangeNotifier {
           for (int j = 0; j < logs2.length; j++) {
             if (logs2[j].logType == 'OUT') {
               logs.add(logs2[j]);
-              // seconds = seconds +
-              //     logs2[j].timeStamp.difference(logs1.last.timeStamp).inSeconds;
               break;
             }
           }
         } else {
-          // seconds = seconds +
-          //     logs2.first.timeStamp.difference(logs1.last.timeStamp).inSeconds;
           logs.add(logs2.first);
         }
       }
-      // for (int i = 0; i < logs1.length; i++) {
-      //   if (i + 1 < logs1.length) {
-      //     if (logs1[i].logType == 'IN' && logs1[i + 1].logType == 'OUT') {
-      //       seconds = seconds +
-      //           logs1[i + 1].timeStamp.difference(logs1[i].timeStamp).inSeconds;
-      //     }
-      //   }
-      // }
-
-      // var latePenalty = calcLate(logs: logs, sIn: sIn, bEnd: bEnd, name: name);
 
       for (int i = 0; i < logs.length; i++) {
         if (i + 1 < logs.length) {
@@ -395,24 +404,32 @@ class HomeData with ChangeNotifier {
     } catch (e) {
       debugPrint('other error $e');
     }
-    debugPrint('calcDurationInOutOtherDay');
-    // add 6 minutes late allowance
+    var latePenalty = calcLate(
+      logs: logs,
+      sIn: sIn,
+      bEnd: bEnd,
+      name: name,
+    );
+    // debugPrint('calcDurationInOutOtherDay');
     seconds = seconds + 360;
-    // seconds = seconds - latePenalty;
     var hours = Duration(seconds: seconds).inHours;
-    return hours;
+    var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
+    var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
+    return LateModel(
+      hour: hours,
+      lateIn: lateIn,
+      lateBreak: lateBreak,
+    );
   }
 
   // calculate duration in hours if in and out same day
-  int calcDurationInOutSameDay({
+  LateModel calcDurationInOutSameDay({
     required List<Log> logs,
     required String sIn,
     required String bEnd,
     required String name,
   }) {
     var seconds = 0;
-    // var latePenalty =
-    //     calcLate(logs: logs, sIn: sIn, bEnd: bEnd, name: name);
 
     try {
       for (int i = 0; i < logs.length; i++) {
@@ -426,66 +443,25 @@ class HomeData with ChangeNotifier {
     } catch (e) {
       debugPrint('same day error $e');
     }
-    debugPrint('calcDurationInOutSameDay');
-    // add 6 minutes late allowance
+    var latePenalty = calcLate(
+      logs: logs,
+      sIn: sIn,
+      bEnd: bEnd,
+      name: name,
+    );
+    // debugPrint('calcDurationInOutSameDay');
     seconds = seconds + 360;
-    // seconds = seconds - latePenalty;
     var hours = Duration(seconds: seconds).inHours;
-    return hours;
+    var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
+    var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
+    return LateModel(
+      hour: hours,
+      lateIn: lateIn,
+      lateBreak: lateBreak,
+    );
   }
 
-  // int calcLateInOutOtherDay({
-  //   required List<Log> logs1,
-  //   required List<Log> logs2,
-  //   required String sIn,
-  //   required String bEnd,
-  //   required String name,
-  // }) {
-  //   // var schedIn = '';
-  //   // var breakIn = '';
-  //   var latePenalty = 0;
-  //   try {
-  //     // if (logs.length >= 2) {
-  //     //   if (logs[0].logType == 'IN' && logs[1].logType == 'OUT') {
-  //     //     log('${_dateFormat.format(logs[0].timeStamp)} $schedIn');
-  //     //     schedIn = '${logs[0].timeStamp.toString().substring(0, 10)} $sIn';
-
-  //     //     var inDifference = logs[0]
-  //     //         .timeStamp
-  //     //         .difference(_dateFormat.parse(schedIn))
-  //     //         .inSeconds;
-  //     //     var differenceSec = Duration(seconds: inDifference).inSeconds;
-
-  //     //     if (inDifference > 0) {
-  //     //       latePenalty = latePenalty + inDifference;
-  //     //     }
-  //     //     log('$name $differenceSec in');
-  //     //   }
-  //     //   if (logs.length >= 4) {
-  //     //     if (logs[2].logType == 'IN' && logs[3].logType == 'OUT') {
-  //     //       log('${_dateFormat.format(logs[2].timeStamp)} $breakIn');
-  //     //       breakIn = '${logs[2].timeStamp.toString().substring(0, 10)} $bEnd';
-
-  //     //       var inDifference = logs[2]
-  //     //           .timeStamp
-  //     //           .difference(_dateFormat.parse(breakIn))
-  //     //           .inSeconds;
-  //     //       var differenceSec = Duration(seconds: inDifference).inSeconds;
-
-  //     //       if (inDifference > 0) {
-  //     //         latePenalty = latePenalty + inDifference;
-  //     //       }
-  //     //       log('$name $differenceSec break');
-  //     //     }
-  //     //   }
-  //     // }
-  //   } catch (e) {
-  //     debugPrint('$e calcLate');
-  //   }
-  //   return latePenalty;
-  // }
-
-  int calcLate({
+  LateMinutesModel calcLate({
     required List<Log> logs,
     required String sIn,
     required String bEnd,
@@ -493,7 +469,8 @@ class HomeData with ChangeNotifier {
   }) {
     var schedIn = '';
     var breakIn = '';
-    var latePenalty = 0;
+    var latePenaltyIn = 0;
+    var latePenaltyBreak = 0;
     try {
       if (logs.length >= 2) {
         if (logs[0].logType == 'IN' && logs[1].logType == 'OUT') {
@@ -502,14 +479,17 @@ class HomeData with ChangeNotifier {
 
           var inDifference = logs[0]
               .timeStamp
-              .difference(_dateFormat.parse(schedIn))
+              .difference(
+                  _dateFormat.parse(schedIn).add(const Duration(seconds: 360)))
               .inSeconds;
           var differenceSec = Duration(seconds: inDifference).inSeconds;
 
+          // late
           if (inDifference > 0) {
-            latePenalty = latePenalty + inDifference;
+            latePenaltyIn = latePenaltyIn + inDifference;
           }
-          log('$name $differenceSec in');
+          var lateIn = Duration(seconds: latePenaltyIn).inMinutes;
+          log('lateIn $name $differenceSec seconds $lateIn minutes');
         }
         if (logs.length >= 4) {
           if (logs[2].logType == 'IN' && logs[3].logType == 'OUT') {
@@ -518,21 +498,28 @@ class HomeData with ChangeNotifier {
 
             var inDifference = logs[2]
                 .timeStamp
-                .difference(_dateFormat.parse(breakIn))
+                .difference(_dateFormat
+                    .parse(breakIn)
+                    .add(const Duration(seconds: 360)))
                 .inSeconds;
             var differenceSec = Duration(seconds: inDifference).inSeconds;
 
+            // late
             if (inDifference > 0) {
-              latePenalty = latePenalty + inDifference;
+              latePenaltyBreak = latePenaltyBreak + inDifference;
             }
-            log('$name $differenceSec break');
+            var lateBreak = Duration(seconds: latePenaltyBreak).inMinutes;
+            log('lateBreak $name $differenceSec seconds $lateBreak minutes');
           }
         }
       }
     } catch (e) {
       debugPrint('$e calcLate');
     }
-    return latePenalty;
+    return LateMinutesModel(
+      lateInMinutes: latePenaltyIn,
+      lateBreakMinutes: latePenaltyBreak,
+    );
   }
 
   // get initial data for history and put 30 it ui
