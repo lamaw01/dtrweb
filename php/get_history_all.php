@@ -13,23 +13,25 @@ $input = json_decode($inputJSON, TRUE);
 $result_array = array();
 
 // if not put id die
-if($_SERVER['REQUEST_METHOD']){
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
     $date_from = $input['date_from'];
     $date_to = $input['date_to'];
     $department = $input['department'];
 
     $sql_get_history_all = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name,
-    tbl_employee.sched_id, tbl_schedule.sched_in, tbl_schedule.break_start, tbl_schedule.break_end, tbl_schedule.sched_out, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp FROM tbl_logs 
+    tbl_employee.week_sched_id, tbl_week_schedule.monday, tbl_week_schedule.tuesday, tbl_week_schedule.wednesday, tbl_week_schedule.thursday, tbl_week_schedule.friday, tbl_week_schedule.saturday, tbl_week_schedule.sunday,
+    DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp FROM tbl_logs 
     LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
-    LEFT JOIN tbl_schedule ON tbl_employee.sched_id = tbl_schedule.sched_id 
+    LEFT JOIN tbl_week_schedule ON tbl_employee.week_sched_id = tbl_week_schedule.week_sched_id 
     WHERE tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee.last_name IS NOT NULL
     GROUP BY tbl_logs.employee_id, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     $sql_get_history_all_with_department = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, 
-    tbl_employee.sched_id, tbl_schedule.sched_in, tbl_schedule.break_start, tbl_schedule.break_end, tbl_schedule.sched_out, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp FROM tbl_logs 
+    tbl_employee.week_sched_id, tbl_week_schedule.monday, tbl_week_schedule.tuesday, tbl_week_schedule.wednesday, tbl_week_schedule.thursday, tbl_week_schedule.friday, tbl_week_schedule.saturday, tbl_week_schedule.sunday,
+    DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp FROM tbl_logs 
     LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     LEFT JOIN tbl_employee_department ON tbl_employee.employee_id = tbl_employee_department.employee_id 
-    LEFT JOIN tbl_schedule ON tbl_employee.sched_id = tbl_schedule.sched_id 
+    LEFT JOIN tbl_week_schedule ON tbl_employee.week_sched_id = tbl_week_schedule.week_sched_id 
     WHERE tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee_department.department_id = :department AND tbl_employee.last_name IS NOT NULL
     GROUP BY tbl_logs.employee_id, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
@@ -60,7 +62,7 @@ if($_SERVER['REQUEST_METHOD']){
             $get_logs_within->bindParam(':id', $id, PDO::PARAM_STR);
             $get_logs_within->execute();
             $result_get_logs_within = $get_logs_within->fetchAll(PDO::FETCH_ASSOC);
-            $my_array = array('employee_id'=>$result['employee_id'],'first_name'=>$result['first_name'],'last_name'=>$result['last_name'],'middle_name'=>$result['middle_name'],'date'=>$result['time_stamp'],'logs'=>$result_get_logs_within,'sched_id'=>$result['sched_id'],'sched_in'=>$result['sched_in'],'break_start'=>$result['break_start'],'break_end'=>$result['break_end'],'sched_out'=>$result['sched_out']);
+            $my_array = array('employee_id'=>$result['employee_id'],'first_name'=>$result['first_name'],'last_name'=>$result['last_name'],'middle_name'=>$result['middle_name'],'date'=>$result['time_stamp'],'logs'=>$result_get_logs_within,'week_sched_id'=>$result['week_sched_id'],'monday'=>$result['monday'],'tuesday'=>$result['tuesday'],'wednesday'=>$result['wednesday'],'thursday'=>$result['thursday'],'friday'=>$result['friday'],'saturday'=>$result['saturday'],'sunday'=>$result['sunday']);
             array_push($result_array,$my_array);
         }
         echo json_encode($result_array);

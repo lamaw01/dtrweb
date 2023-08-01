@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../model/department_model.dart';
 import '../model/late_model.dart';
+import '../model/schedule_model.dart';
 import '../model/user_model.dart';
 import '../services/http_service.dart';
 
@@ -18,6 +19,9 @@ class HomeData with ChangeNotifier {
 
   final _departmentList = <DepartmentModel>[];
   List<DepartmentModel> get departmentList => _departmentList;
+
+  final _scheduleList = <ScheduleModel>[];
+  List<ScheduleModel> get scheduleList => _scheduleList;
 
   DateTime selectedFrom = DateTime.now();
   DateTime selectedTo = DateTime.now();
@@ -228,6 +232,14 @@ class HomeData with ChangeNotifier {
             rowCountUser = 1;
           }
         }
+        var dayOfWeek = DateFormat('EEEE').format(DateTime.now()).toLowerCase();
+        var todaySched = scheduleList.singleWhere(
+          (element) =>
+              element.schedId ==
+              selectDay(day: dayOfWeek, model: historyListExcel[i]),
+        );
+        var sIn = todaySched.schedIn;
+        var bEnd = todaySched.schedOut;
 
         // if last log is in, then date out is tommorrow
         if (historyListExcel[i].logs.last.logType == 'IN') {
@@ -236,11 +248,12 @@ class HomeData with ChangeNotifier {
               if (nameIndex(historyListExcel[i]) ==
                   nameIndex(historyListExcel[i + 1])) {
                 log('dire 0');
+
                 duration = calcDurationInOutOtherDay(
                   logs1: historyListExcel[i].logs,
                   logs2: historyListExcel[i + 1].logs,
-                  sIn: historyListExcel[i].schedIn,
-                  bEnd: historyListExcel[i].breakEnd,
+                  sIn: sIn,
+                  bEnd: bEnd,
                   name: historyListExcel[i].firstName,
                 );
                 timeLogs.add(historyListExcel[i].logs.last);
@@ -262,8 +275,8 @@ class HomeData with ChangeNotifier {
                 log('dire 1');
                 duration = calcDurationInOutSameDay(
                   logs: historyListExcel[i].logs,
-                  sIn: historyListExcel[i].schedIn,
-                  bEnd: historyListExcel[i].breakEnd,
+                  sIn: sIn,
+                  bEnd: bEnd,
                   name: historyListExcel[i].firstName,
                 );
                 // timeLogs.add(historyListExcel[i].logs.last);
@@ -277,8 +290,8 @@ class HomeData with ChangeNotifier {
               if (historyListExcel[i].logs.isNotEmpty) {
                 duration = calcDurationInOutSameDay(
                   logs: historyListExcel[i].logs,
-                  sIn: historyListExcel[i].schedIn,
-                  bEnd: historyListExcel[i].breakEnd,
+                  sIn: sIn,
+                  bEnd: bEnd,
                   name: historyListExcel[i].firstName,
                 );
                 timeLogs.addAll(historyListExcel[i].logs);
@@ -294,8 +307,8 @@ class HomeData with ChangeNotifier {
               // if date is out, then date in and out same
               duration = calcDurationInOutSameDay(
                 logs: historyListExcel[i].logs,
-                sIn: historyListExcel[i].schedIn,
-                bEnd: historyListExcel[i].breakEnd,
+                sIn: sIn,
+                bEnd: bEnd,
                 name: historyListExcel[i].firstName,
               );
               timeLogs.addAll(historyListExcel[i].logs);
@@ -359,6 +372,25 @@ class HomeData with ChangeNotifier {
     } catch (e) {
       debugPrint(
           '$e ${historyList[ind].date} ${historyList[ind].firstName} $ind');
+    }
+  }
+
+  String selectDay({required String day, required HistoryModel model}) {
+    switch (day) {
+      case 'monday':
+        return model.monday;
+      case 'tuesday':
+        return model.tuesday;
+      case 'wednesday':
+        return model.wednesday;
+      case 'thursday':
+        return model.thursday;
+      case 'friday':
+        return model.friday;
+      case 'saturday':
+        return model.saturday;
+      default:
+        return model.sunday;
     }
   }
 
@@ -589,6 +621,16 @@ class HomeData with ChangeNotifier {
     try {
       final result = await HttpService.getDepartment();
       _departmentList.addAll(result);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('$e');
+    }
+  }
+
+  Future<void> getSchedule() async {
+    try {
+      final result = await HttpService.geSchedule();
+      _scheduleList.addAll(result);
       notifyListeners();
     } catch (e) {
       debugPrint('$e');

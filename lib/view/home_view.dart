@@ -31,6 +31,7 @@ class _HomeViewState extends State<HomeView> {
     instance.departmentList.add(dropdownValue);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await instance.getDepartment();
+      await instance.getSchedule();
     });
   }
 

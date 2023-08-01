@@ -17,11 +17,14 @@ class HistoryModel {
   String middleName;
   DateTime date;
   List<Log> logs;
-  String schedId;
-  String schedIn;
-  String breakStart;
-  String breakEnd;
-  String schedOut;
+  String weekSchedId;
+  String monday;
+  String tuesday;
+  String wednesday;
+  String thursday;
+  String friday;
+  String saturday;
+  String sunday;
 
   HistoryModel({
     required this.employeeId,
@@ -30,11 +33,14 @@ class HistoryModel {
     required this.middleName,
     required this.date,
     required this.logs,
-    required this.schedId,
-    required this.schedIn,
-    required this.breakStart,
-    required this.breakEnd,
-    required this.schedOut,
+    required this.weekSchedId,
+    required this.monday,
+    required this.tuesday,
+    required this.wednesday,
+    required this.thursday,
+    required this.friday,
+    required this.saturday,
+    required this.sunday,
   });
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) => HistoryModel(
@@ -44,11 +50,14 @@ class HistoryModel {
         middleName: json["middle_name"],
         date: DateTime.parse(json["date"]),
         logs: List<Log>.from(json["logs"].map((x) => Log.fromJson(x))),
-        schedId: json["sched_id"].toString(),
-        schedIn: json["sched_in"].toString(),
-        breakStart: json["break_start"].toString(),
-        breakEnd: json["break_end"].toString(),
-        schedOut: json["sched_out"].toString(),
+        weekSchedId: json["week_sched_id"],
+        monday: json["monday"],
+        tuesday: json["tuesday"],
+        wednesday: json["wednesday"],
+        thursday: json["thursday"],
+        friday: json["friday"],
+        saturday: json["saturday"],
+        sunday: json["sunday"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -59,11 +68,14 @@ class HistoryModel {
         "date":
             "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         "logs": List<dynamic>.from(logs.map((x) => x.toJson())),
-        "sched_id": schedId,
-        "sched_in": schedIn,
-        "break_start": breakStart,
-        "break_end": breakEnd,
-        "sched_out": schedOut,
+        "week_sched_id": weekSchedId,
+        "monday": monday,
+        "tuesday": tuesday,
+        "wednesday": wednesday,
+        "thursday": thursday,
+        "friday": friday,
+        "saturday": saturday,
+        "sunday": sunday,
       };
 }
 

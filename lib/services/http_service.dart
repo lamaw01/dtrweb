@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../model/department_model.dart';
+import '../model/schedule_model.dart';
 import '../model/user_model.dart';
 
 class HttpService {
@@ -71,5 +72,17 @@ class HttpService {
     ).timeout(const Duration(seconds: 10));
     // debugPrint('getDepartment ${response.body}');
     return departmentModelFromJson(response.body);
+  }
+
+  static Future<List<ScheduleModel>> geSchedule() async {
+    var response = await http.get(
+      Uri.parse('$_serverUrl/get_schedule.php'),
+      headers: <String, String>{
+        'Accept': '*/*',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    ).timeout(const Duration(seconds: 10));
+    // debugPrint('geSchedule ${response.body}');
+    return scheduleModelFromJson(response.body);
   }
 }
