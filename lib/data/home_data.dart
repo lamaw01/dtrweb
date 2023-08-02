@@ -238,8 +238,6 @@ class HomeData with ChangeNotifier {
               element.schedId ==
               selectDay(day: dayOfWeek, model: historyListExcel[i]),
         );
-        var sIn = todaySched.schedIn;
-        var bEnd = todaySched.schedOut;
 
         // if last log is in, then date out is tommorrow
         if (historyListExcel[i].logs.last.logType == 'IN') {
@@ -252,9 +250,8 @@ class HomeData with ChangeNotifier {
                 duration = calcDurationInOutOtherDay(
                   logs1: historyListExcel[i].logs,
                   logs2: historyListExcel[i + 1].logs,
-                  sIn: sIn,
-                  bEnd: bEnd,
                   name: historyListExcel[i].firstName,
+                  sched: todaySched,
                 );
                 timeLogs.add(historyListExcel[i].logs.last);
                 // move first log other day to yesterday if out
@@ -275,9 +272,8 @@ class HomeData with ChangeNotifier {
                 log('dire 1');
                 duration = calcDurationInOutSameDay(
                   logs: historyListExcel[i].logs,
-                  sIn: sIn,
-                  bEnd: bEnd,
                   name: historyListExcel[i].firstName,
+                  sched: todaySched,
                 );
                 // timeLogs.add(historyListExcel[i].logs.last);
                 if (historyListExcel[i].logs.isNotEmpty) {
@@ -290,9 +286,8 @@ class HomeData with ChangeNotifier {
               if (historyListExcel[i].logs.isNotEmpty) {
                 duration = calcDurationInOutSameDay(
                   logs: historyListExcel[i].logs,
-                  sIn: sIn,
-                  bEnd: bEnd,
                   name: historyListExcel[i].firstName,
+                  sched: todaySched,
                 );
                 timeLogs.addAll(historyListExcel[i].logs);
               }
@@ -307,9 +302,8 @@ class HomeData with ChangeNotifier {
               // if date is out, then date in and out same
               duration = calcDurationInOutSameDay(
                 logs: historyListExcel[i].logs,
-                sIn: sIn,
-                bEnd: bEnd,
                 name: historyListExcel[i].firstName,
+                sched: todaySched,
               );
               timeLogs.addAll(historyListExcel[i].logs);
             }
@@ -403,9 +397,8 @@ class HomeData with ChangeNotifier {
   LateModel calcDurationInOutOtherDay({
     required List<Log> logs1,
     required List<Log> logs2,
-    required String sIn,
-    required String bEnd,
     required String name,
+    required ScheduleModel sched,
   }) {
     var seconds = 0;
     var logs = <Log>[];
@@ -438,9 +431,8 @@ class HomeData with ChangeNotifier {
     }
     var latePenalty = calcLate(
       logs: logs,
-      sIn: sIn,
-      bEnd: bEnd,
       name: name,
+      sched: sched,
     );
     // debugPrint('calcDurationInOutOtherDay');
     seconds = seconds + 360;
@@ -457,9 +449,8 @@ class HomeData with ChangeNotifier {
   // calculate duration in hours if in and out same day
   LateModel calcDurationInOutSameDay({
     required List<Log> logs,
-    required String sIn,
-    required String bEnd,
     required String name,
+    required ScheduleModel sched,
   }) {
     var seconds = 0;
 
@@ -477,9 +468,8 @@ class HomeData with ChangeNotifier {
     }
     var latePenalty = calcLate(
       logs: logs,
-      sIn: sIn,
-      bEnd: bEnd,
       name: name,
+      sched: sched,
     );
     // debugPrint('calcDurationInOutSameDay');
     seconds = seconds + 360;
@@ -493,55 +483,67 @@ class HomeData with ChangeNotifier {
     );
   }
 
+  String convertToHourMinutes(int totalSeconds) {
+    var minutes = (totalSeconds / 60) % 60;
+    var hours = totalSeconds / 3600;
+    return '$hours $minutes';
+  }
+
   LateMinutesModel calcLate({
     required List<Log> logs,
-    required String sIn,
-    required String bEnd,
     required String name,
+    required ScheduleModel sched,
   }) {
+    var sIn = sched.schedIn;
+    var bEnd = sched.breakEnd;
     var schedIn = '';
     var breakIn = '';
     var latePenaltyIn = 0;
     var latePenaltyBreak = 0;
     try {
-      if (logs.length >= 2) {
-        if (logs[0].logType == 'IN' && logs[1].logType == 'OUT') {
-          log('${_dateFormat.format(logs[0].timeStamp)} $schedIn');
-          schedIn = '${logs[0].timeStamp.toString().substring(0, 10)} $sIn';
+      log('lateIn $name schedType ${sched.schedType} schedIn ${sched.schedIn} breakEnd ${sched.breakEnd}');
+      if (sched.schedType.toLowerCase() != 'c') {
+        if (logs.length >= 2) {
+          if (logs[0].logType == 'IN' && logs[1].logType == 'OUT') {
+            log('${_dateFormat.format(logs[0].timeStamp)} $schedIn');
+            schedIn = '${logs[0].timeStamp.toString().substring(0, 10)} $sIn';
 
-          var inDifference = logs[0]
-              .timeStamp
-              .difference(
-                  _dateFormat.parse(schedIn).add(const Duration(seconds: 360)))
-              .inSeconds;
-          var differenceSec = Duration(seconds: inDifference).inSeconds;
-
-          // late
-          if (inDifference > 0) {
-            latePenaltyIn = latePenaltyIn + inDifference;
-          }
-          var lateIn = Duration(seconds: latePenaltyIn).inMinutes;
-          log('lateIn $name $differenceSec seconds $lateIn minutes');
-        }
-        if (logs.length >= 4) {
-          if (logs[2].logType == 'IN' && logs[3].logType == 'OUT') {
-            log('${_dateFormat.format(logs[2].timeStamp)} $breakIn');
-            breakIn = '${logs[2].timeStamp.toString().substring(0, 10)} $bEnd';
-
-            var inDifference = logs[2]
+            var inDifference = logs[0]
                 .timeStamp
                 .difference(_dateFormat
-                    .parse(breakIn)
+                    .parse(schedIn)
                     .add(const Duration(seconds: 360)))
                 .inSeconds;
             var differenceSec = Duration(seconds: inDifference).inSeconds;
 
             // late
             if (inDifference > 0) {
-              latePenaltyBreak = latePenaltyBreak + inDifference;
+              latePenaltyIn = latePenaltyIn + inDifference;
             }
-            var lateBreak = Duration(seconds: latePenaltyBreak).inMinutes;
-            log('lateBreak $name $differenceSec seconds $lateBreak minutes');
+            var lateIn = Duration(seconds: latePenaltyIn).inMinutes;
+            log('lateIn $name $differenceSec seconds $lateIn minutes');
+          }
+          if (logs.length >= 4 && sched.schedType.toLowerCase() == 'b') {
+            if (logs[2].logType == 'IN' && logs[3].logType == 'OUT') {
+              log('${_dateFormat.format(logs[2].timeStamp)} $breakIn');
+              breakIn =
+                  '${logs[2].timeStamp.toString().substring(0, 10)} $bEnd';
+
+              var inDifference = logs[2]
+                  .timeStamp
+                  .difference(_dateFormat
+                      .parse(breakIn)
+                      .add(const Duration(seconds: 360)))
+                  .inSeconds;
+              var differenceSec = Duration(seconds: inDifference).inSeconds;
+
+              // late
+              if (inDifference > 0) {
+                latePenaltyBreak = latePenaltyBreak + inDifference;
+              }
+              var lateBreak = Duration(seconds: latePenaltyBreak).inMinutes;
+              log('lateBreak $name $differenceSec seconds $lateBreak minutes');
+            }
           }
         }
       }
