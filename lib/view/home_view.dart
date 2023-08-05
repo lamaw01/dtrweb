@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../data/home_data.dart';
 import '../model/department_model.dart';
 import '../widget/logs_widget.dart';
+import 'excel_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -150,6 +151,46 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(title),
+        actions: [
+          InkWell(
+            onTap: () async {
+              instance.changeLoadingState(true);
+              await Future.delayed(const Duration(seconds: 1));
+              if (idController.text.isEmpty) {
+                // get records all
+                await instance.getRecordsAll(department: dropdownValue);
+              } else {
+                // get records with id or name
+                await instance.getRecords(
+                    employeeId: idController.text.trim(),
+                    department: dropdownValue);
+              }
+              instance.changeLoadingState(false);
+              instance.exportExcel(false);
+              if (mounted) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ExcelView(),
+                  ),
+                );
+              }
+            },
+            child: Ink(
+              padding: const EdgeInsets.all(5.0),
+              child: const Row(
+                children: [
+                  Text(
+                    'Excel Mode',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  Icon(Icons.arrow_forward),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       body: Scrollbar(
         // thickness: 18,
@@ -428,7 +469,14 @@ class _HomeViewState extends State<HomeView> {
                     height: 30.0,
                     child: TextButton(
                       onPressed: () {
-                        instance.exportExcel();
+                        bool result = instance.exportExcel(true);
+                        if (!result) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content:
+                                Text('Error exporting, try click view again'),
+                          ));
+                        }
                       },
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,

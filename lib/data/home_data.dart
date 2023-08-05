@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../model/department_model.dart';
+import '../model/excel_model.dart';
 import '../model/late_model.dart';
 import '../model/schedule_model.dart';
 import '../model/user_model.dart';
@@ -13,6 +14,9 @@ import '../services/http_service.dart';
 class HomeData with ChangeNotifier {
   var _historyList = <HistoryModel>[];
   List<HistoryModel> get historyList => _historyList;
+
+  var _excelList = <ExcelModel>[];
+  List<ExcelModel> get excelList => _excelList;
 
   var _uiList = <HistoryModel>[];
   List<HistoryModel> get uiList => _uiList;
@@ -60,9 +64,27 @@ class HomeData with ChangeNotifier {
     _isLogging.value = state;
   }
 
-  var ind = 0;
+  bool exportExcel(bool isExcel) {
+    bool success = true;
+    // assign values
+    var historyListExcel = <HistoryModel>[];
+    historyListExcel.addAll(_historyList);
 
-  void exportExcel() async {
+    final result = <ExcelModel>[
+      ExcelModel(
+        rowCount: 0,
+        employeeId: 'Emp ID',
+        name: 'Name',
+        timeIn1: 'In',
+        timeOut1: 'Out',
+        timeIn2: 'In',
+        timeOut2: 'Out',
+        duration: 0,
+        lateIn: 0,
+        lateBreak: 0,
+      )
+    ];
+
     try {
       var excel = Excel.createExcel();
       Sheet sheetObject = excel['Sheet1'];
@@ -137,10 +159,6 @@ class HomeData with ChangeNotifier {
         ..value = 'Overtime'
         ..cellStyle = cellStyle;
 
-      // assign values
-      var historyListExcel = <HistoryModel>[];
-      historyListExcel.addAll(_historyList);
-
       // sort list alphabetically and by date, very important
       historyListExcel.sort((a, b) {
         return ('${a.lastName.toLowerCase()} ${a.firstName.toLowerCase()} ${a.middleName.toLowerCase()}  ${a.date.toString()}')
@@ -200,10 +218,14 @@ class HomeData with ChangeNotifier {
       for (int i = 0; i < historyListExcel.length; i++) {
         try {
           //remove first out if logs more than 2
-          if (historyListExcel[i].logs.first.logType == 'OUT' &&
-              historyListExcel[i].logs.length > 2 &&
-              rowCountUser == 1) {
-            historyListExcel[i].logs.removeAt(0);
+          if (historyListExcel[i].logs.isNotEmpty) {
+            if (historyListExcel[i].logs.first.logType == 'OUT' &&
+                historyListExcel[i].logs.length > 2 &&
+                rowCountUser == 1) {
+              if (historyListExcel[i].logs.isNotEmpty) {
+                historyListExcel[i].logs.removeAt(0);
+              }
+            }
           }
         } catch (e) {
           debugPrint('$e remove first out if logs more than 2');
@@ -229,6 +251,18 @@ class HomeData with ChangeNotifier {
               '',
             ];
             sheetObject.appendRow(emptyRow);
+            result.add(ExcelModel(
+              rowCount: 0,
+              employeeId: '',
+              name: '',
+              timeIn1: '',
+              timeOut1: '',
+              timeIn2: '',
+              timeOut2: '',
+              duration: 0,
+              lateIn: 0,
+              lateBreak: 0,
+            ));
             rowCountUser = 1;
           }
         }
@@ -355,18 +389,35 @@ class HomeData with ChangeNotifier {
           duration.lateIn,
           duration.lateBreak,
         ];
+        result.add(ExcelModel(
+          rowCount: rowCountUser,
+          employeeId: historyListExcel[i].employeeId,
+          name: nameIndex(historyListExcel[i]),
+          timeIn1: timeIn1,
+          timeOut1: timeOut1,
+          timeIn2: timeIn2,
+          timeOut2: timeOut2,
+          duration: duration.hour,
+          lateIn: duration.lateIn,
+          lateBreak: duration.lateBreak,
+        ));
         sheetObject.appendRow(dataList);
       }
 
       sheetObject.setColWidth(2, 25);
 
-      excel.save(
-          fileName:
-              'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
+      if (isExcel) {
+        excel.save(
+            fileName:
+                'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
+      }
     } catch (e) {
-      debugPrint(
-          '$e ${historyList[ind].date} ${historyList[ind].firstName} $ind');
+      debugPrint('$e ');
+      success = false;
+    } finally {
+      _excelList = result;
     }
+    return success;
   }
 
   String selectDay({required String day, required HistoryModel model}) {
@@ -435,7 +486,7 @@ class HomeData with ChangeNotifier {
       sched: sched,
     );
     // debugPrint('calcDurationInOutOtherDay');
-    seconds = seconds + 360;
+    seconds = seconds + 300;
     var hours = Duration(seconds: seconds).inHours;
     var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
     var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
@@ -472,7 +523,7 @@ class HomeData with ChangeNotifier {
       sched: sched,
     );
     // debugPrint('calcDurationInOutSameDay');
-    seconds = seconds + 360;
+    seconds = seconds + 300;
     var hours = Duration(seconds: seconds).inHours;
     var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
     var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
@@ -481,12 +532,6 @@ class HomeData with ChangeNotifier {
       lateIn: lateIn,
       lateBreak: lateBreak,
     );
-  }
-
-  String convertToHourMinutes(int totalSeconds) {
-    var minutes = (totalSeconds / 60) % 60;
-    var hours = totalSeconds / 3600;
-    return '$hours $minutes';
   }
 
   LateMinutesModel calcLate({
@@ -512,13 +557,13 @@ class HomeData with ChangeNotifier {
                 .timeStamp
                 .difference(_dateFormat
                     .parse(schedIn)
-                    .add(const Duration(seconds: 360)))
+                    .add(const Duration(seconds: 300)))
                 .inSeconds;
             var differenceSec = Duration(seconds: inDifference).inSeconds;
 
             // late
             if (inDifference > 0) {
-              latePenaltyIn = latePenaltyIn + inDifference;
+              latePenaltyIn = latePenaltyIn + inDifference + 300;
             }
             var lateIn = Duration(seconds: latePenaltyIn).inMinutes;
             log('lateIn $name $differenceSec seconds $lateIn minutes');
@@ -533,13 +578,13 @@ class HomeData with ChangeNotifier {
                   .timeStamp
                   .difference(_dateFormat
                       .parse(breakIn)
-                      .add(const Duration(seconds: 360)))
+                      .add(const Duration(seconds: 300)))
                   .inSeconds;
               var differenceSec = Duration(seconds: inDifference).inSeconds;
 
               // late
               if (inDifference > 0) {
-                latePenaltyBreak = latePenaltyBreak + inDifference;
+                latePenaltyBreak = latePenaltyBreak + inDifference + 300;
               }
               var lateBreak = Duration(seconds: latePenaltyBreak).inMinutes;
               log('lateBreak $name $differenceSec seconds $lateBreak minutes');
