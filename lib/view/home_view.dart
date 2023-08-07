@@ -38,10 +38,10 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void dispose() {
+    super.dispose();
     idController.dispose();
     fromController.dispose();
     toController.dispose();
-    super.dispose();
   }
 
   Future<DateTime> showDateFromDialog({required BuildContext context}) async {
@@ -152,44 +152,49 @@ class _HomeViewState extends State<HomeView> {
       appBar: AppBar(
         title: const Text(title),
         actions: [
-          InkWell(
-            onTap: () async {
-              instance.changeLoadingState(true);
-              await Future.delayed(const Duration(seconds: 1));
-              if (idController.text.isEmpty) {
-                // get records all
-                await instance.getRecordsAll(department: dropdownValue);
-              } else {
-                // get records with id or name
-                await instance.getRecords(
-                    employeeId: idController.text.trim(),
-                    department: dropdownValue);
-              }
-              instance.changeLoadingState(false);
-              instance.exportExcel(false);
-              if (mounted) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ExcelView(),
-                  ),
-                );
-              }
-            },
-            child: Ink(
-              padding: const EdgeInsets.all(5.0),
-              child: const Row(
-                children: [
-                  Text(
-                    'Excel Mode',
-                    style: TextStyle(
-                      fontSize: 18.0,
+          if (instance.historyList.isNotEmpty) ...[
+            InkWell(
+              onTap: () async {
+                instance.changeLoadingState(true);
+                await Future.delayed(const Duration(seconds: 1));
+                if (idController.text.isEmpty) {
+                  // get records all
+                  await instance.getRecordsAll(department: dropdownValue);
+                } else {
+                  // get records with id or name
+                  await instance.getRecords(
+                      employeeId: idController.text.trim(),
+                      department: dropdownValue);
+                }
+                instance.changeLoadingState(false);
+                instance.exportExcel(false);
+                if (mounted) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ExcelView(
+                        idController: idController,
+                        dropdownValue: dropdownValue,
+                      ),
                     ),
-                  ),
-                  Icon(Icons.arrow_forward),
-                ],
+                  );
+                }
+              },
+              child: Ink(
+                padding: const EdgeInsets.all(5.0),
+                child: const Row(
+                  children: [
+                    Text(
+                      'Excel Mode',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward),
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
       body: Scrollbar(
@@ -468,15 +473,29 @@ class _HomeViewState extends State<HomeView> {
                     width: 150.0,
                     height: 30.0,
                     child: TextButton(
-                      onPressed: () {
-                        bool result = instance.exportExcel(true);
-                        if (!result) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                            content:
-                                Text('Error exporting, try click view again'),
-                          ));
+                      onPressed: () async {
+                        instance.changeLoadingState(true);
+                        await Future.delayed(const Duration(seconds: 1));
+                        if (idController.text.isEmpty) {
+                          // get records all
+                          await instance.getRecordsAll(
+                              department: dropdownValue);
+                        } else {
+                          // get records with id or name
+                          await instance.getRecords(
+                              employeeId: idController.text.trim(),
+                              department: dropdownValue);
                         }
+                        instance.changeLoadingState(false);
+                        instance.exportExcel(true);
+                        // bool result = instance.exportExcel(true);
+                        // if (!result) {
+                        //   ScaffoldMessenger.of(context)
+                        //       .showSnackBar(const SnackBar(
+                        //     content:
+                        //         Text('Error exporting, try click view again'),
+                        //   ));
+                        // }
                       },
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,

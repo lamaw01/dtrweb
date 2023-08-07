@@ -4,7 +4,7 @@ import 'dart:convert';
 
 import '../model/department_model.dart';
 import '../model/schedule_model.dart';
-import '../model/user_model.dart';
+import '../model/history_model.dart';
 
 class HttpService {
   static const String _serverUrl = 'http://103.62.153.74:53000/dtr_history_api';

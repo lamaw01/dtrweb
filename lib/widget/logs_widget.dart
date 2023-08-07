@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/home_data.dart';
-import '../model/user_model.dart';
+import '../model/log_model.dart';
 import '../services/http_service.dart';
 
 class LogsWidget extends StatefulWidget {

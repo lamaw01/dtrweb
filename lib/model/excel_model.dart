@@ -1,14 +1,17 @@
+import 'package:dtrweb/model/schedule_model.dart';
+
 class ExcelModel {
-  int rowCount;
+  String rowCount;
   String employeeId;
   String name;
   String timeIn1;
   String timeOut1;
   String timeIn2;
   String timeOut2;
-  int duration;
-  int lateIn;
-  int lateBreak;
+  String duration;
+  String lateIn;
+  String lateBreak;
+  ScheduleModel? scheduleModel;
 
   ExcelModel({
     required this.rowCount,
@@ -21,5 +24,6 @@ class ExcelModel {
     required this.duration,
     required this.lateIn,
     required this.lateBreak,
+    this.scheduleModel,
   });
 }
