@@ -65,9 +65,7 @@ class HomeData with ChangeNotifier {
     _isLogging.value = state;
   }
 
-  bool exportExcel(bool isExcel) {
-    bool success = true;
-
+  void exportExcel(bool isExcel) {
     final historyListExcel = <HistoryModel>[..._historyList];
 
     // sort list alphabetically and by date, very important
@@ -378,9 +376,11 @@ class HomeData with ChangeNotifier {
           debugPrint('$e time slot');
         }
 
+        var employeeId = int.tryParse(historyListExcel[i].employeeId);
+
         List<dynamic> dataList = [
           rowCountUser,
-          historyListExcel[i].employeeId,
+          employeeId,
           nameIndex(historyListExcel[i]),
           timeIn1,
           timeOut1,
@@ -402,6 +402,7 @@ class HomeData with ChangeNotifier {
           lateIn: duration.lateIn.toString(),
           lateBreak: duration.lateBreak.toString(),
           scheduleModel: todaySched,
+          logs: timeLogs,
         ));
         sheetObject.appendRow(dataList);
       }
@@ -414,12 +415,139 @@ class HomeData with ChangeNotifier {
                 'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
       }
     } catch (e) {
-      debugPrint('$e ');
-      success = false;
+      debugPrint('$e');
     } finally {
       _excelList = result;
     }
-    return success;
+  }
+
+  void reCalcLate({
+    required ExcelModel model,
+    required ScheduleModel newSchedule,
+  }) {
+    late LateModel duration;
+    try {
+      duration = calcDurationInOutSameDay(
+        logs: model.logs!,
+        name: model.name,
+        sched: newSchedule,
+      );
+      model.duration = duration.hour.toString();
+      model.lateIn = duration.lateIn.toString();
+      model.lateBreak = duration.lateBreak.toString();
+      model.scheduleModel = newSchedule;
+    } catch (e) {
+      debugPrint('$e');
+    }
+  }
+
+  void remakeExcel() {
+    try {
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Sheet1'];
+      var cellStyle = CellStyle(
+        backgroundColorHex: '#dddddd',
+        fontFamily: getFontFamily(FontFamily.Arial),
+        horizontalAlign: HorizontalAlign.Center,
+      );
+
+      var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
+      column1
+        ..value = ''
+        ..cellStyle = cellStyle;
+
+      var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
+      column2
+        ..value = 'Emp ID'
+        ..cellStyle = cellStyle;
+
+      var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
+      column3
+        ..value = 'Name'
+        ..cellStyle = cellStyle;
+
+      var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
+      column4
+        ..value = 'In'
+        ..cellStyle = cellStyle;
+
+      var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
+      column5
+        ..value = 'Out'
+        ..cellStyle = cellStyle;
+
+      var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
+      column6
+        ..value = 'In'
+        ..cellStyle = cellStyle;
+
+      var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
+      column7
+        ..value = 'Out'
+        ..cellStyle = cellStyle;
+
+      var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
+      column8
+        ..value = 'Duration(Hours)'
+        ..cellStyle = cellStyle;
+
+      var column10 = sheetObject.cell(CellIndex.indexByString('I1'));
+      column10
+        ..value = 'Late In(Minutes)'
+        ..cellStyle = cellStyle;
+
+      var column11 = sheetObject.cell(CellIndex.indexByString('J1'));
+      column11
+        ..value = 'Late Break(Minutes)'
+        ..cellStyle = cellStyle;
+
+      var column12 = sheetObject.cell(CellIndex.indexByString('K1'));
+      column12
+        ..value = 'Undertime'
+        ..cellStyle = cellStyle;
+
+      var column13 = sheetObject.cell(CellIndex.indexByString('L1'));
+      column13
+        ..value = 'Tardy'
+        ..cellStyle = cellStyle;
+
+      var column14 = sheetObject.cell(CellIndex.indexByString('M1'));
+      column14
+        ..value = 'Overtime'
+        ..cellStyle = cellStyle;
+
+      for (int i = 0; i < _excelList.length; i++) {
+        var rowCount = int.tryParse(_excelList[i].rowCount);
+        var employeeId = int.tryParse(_excelList[i].employeeId);
+        var duration = int.tryParse(_excelList[i].duration);
+        var lateIn = int.tryParse(_excelList[i].lateIn);
+        var lateBreak = int.tryParse(_excelList[i].lateBreak);
+
+        if (i != 0) {
+          List<dynamic> dataList = [
+            rowCount,
+            employeeId,
+            _excelList[i].name,
+            _excelList[i].timeIn1,
+            _excelList[i].timeOut1,
+            _excelList[i].timeIn2,
+            _excelList[i].timeOut2,
+            duration,
+            lateIn,
+            lateBreak,
+          ];
+          sheetObject.appendRow(dataList);
+        }
+      }
+
+      sheetObject.setColWidth(2, 25);
+
+      excel.save(
+          fileName:
+              'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
+    } catch (e) {
+      debugPrint('$e remakeExcel');
+    }
   }
 
   String selectDay({required String day, required HistoryModel model}) {

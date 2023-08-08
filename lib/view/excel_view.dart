@@ -1,4 +1,5 @@
 import 'package:dtrweb/model/department_model.dart';
+import 'package:dtrweb/model/excel_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +31,10 @@ class _ExcelViewState extends State<ExcelView> {
     }
   }
 
-  Future<void> showChangeScheduleDialog({required BuildContext context}) async {
+  Future<ExcelModel> showChangeScheduleDialog({
+    required BuildContext context,
+    required ExcelModel model,
+  }) async {
     var instance = Provider.of<HomeData>(context, listen: false);
     await showDialog<void>(
       context: context,
@@ -73,6 +77,7 @@ class _ExcelViewState extends State<ExcelView> {
                 ),
               ),
               onPressed: () {
+                instance.reCalcLate(model: model, newSchedule: dropdownValue);
                 Navigator.of(context).pop();
               },
             ),
@@ -92,6 +97,8 @@ class _ExcelViewState extends State<ExcelView> {
         );
       },
     );
+    debugPrint('${model.duration} ${model.lateIn} ${model.lateBreak}');
+    return model;
   }
 
   @override
@@ -104,21 +111,8 @@ class _ExcelViewState extends State<ExcelView> {
         title: const Text(title),
         actions: [
           InkWell(
-            onTap: () async {
-              instance.exportExcel(true);
-              instance.changeLoadingState(true);
-              await Future.delayed(const Duration(seconds: 1));
-              if (widget.idController.text.isEmpty) {
-                // get records all
-                await instance.getRecordsAll(department: widget.dropdownValue);
-              } else {
-                // get records with id or name
-                await instance.getRecords(
-                    employeeId: widget.idController.text.trim(),
-                    department: widget.dropdownValue);
-              }
-              instance.changeLoadingState(false);
-              instance.exportExcel(true);
+            onTap: () {
+              instance.remakeExcel();
             },
             child: Ink(
               decoration: BoxDecoration(
@@ -167,12 +161,18 @@ class _ExcelViewState extends State<ExcelView> {
                 itemBuilder: (ctx, i) {
                   return InkWell(
                     hoverColor: Colors.lightBlue,
-                    onTap: () {
+                    onTap: () async {
                       try {
                         dropdownValue = provider.scheduleList.singleWhere((e) =>
                             e.schedId ==
                             provider.excelList[i].scheduleModel!.schedId);
-                        showChangeScheduleDialog(context: context);
+                        var result = await showChangeScheduleDialog(
+                          context: context,
+                          model: provider.excelList[i],
+                        );
+                        setState(() {
+                          provider.excelList[i] = result;
+                        });
                       } catch (e) {
                         debugPrint('$e showChangeScheduleDialog');
                       }

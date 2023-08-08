@@ -1,3 +1,4 @@
+import 'package:dtrweb/model/log_model.dart';
 import 'package:dtrweb/model/schedule_model.dart';
 
 class ExcelModel {
@@ -12,6 +13,7 @@ class ExcelModel {
   String lateIn;
   String lateBreak;
   ScheduleModel? scheduleModel;
+  List<Log>? logs;
 
   ExcelModel({
     required this.rowCount,
@@ -25,5 +27,6 @@ class ExcelModel {
     required this.lateIn,
     required this.lateBreak,
     this.scheduleModel,
+    this.logs,
   });
 }

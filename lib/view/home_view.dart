@@ -488,14 +488,6 @@ class _HomeViewState extends State<HomeView> {
                         }
                         instance.changeLoadingState(false);
                         instance.exportExcel(true);
-                        // bool result = instance.exportExcel(true);
-                        // if (!result) {
-                        //   ScaffoldMessenger.of(context)
-                        //       .showSnackBar(const SnackBar(
-                        //     content:
-                        //         Text('Error exporting, try click view again'),
-                        //   ));
-                        // }
                       },
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
