@@ -85,8 +85,16 @@ class HomeData with ChangeNotifier {
         timeIn2: 'In',
         timeOut2: 'Out',
         duration: 'Duration(Hours)',
-        lateIn: 'Late Break(Minutes)',
-        lateBreak: 'Late In(Minutes)',
+        lateIn: 'Tardy(Minutes)',
+        lateBreak: 'Late Break(Minutes)',
+        scheduleModel: ScheduleModel(
+          schedId: 'Sched Code',
+          schedIn: '',
+          schedOut: '',
+          schedType: '',
+          breakStart: '',
+          breakEnd: '',
+        ),
       )
     ];
 
@@ -493,7 +501,7 @@ class HomeData with ChangeNotifier {
 
       var column10 = sheetObject.cell(CellIndex.indexByString('I1'));
       column10
-        ..value = 'Late In(Minutes)'
+        ..value = 'Tardy(Minutes)'
         ..cellStyle = cellStyle;
 
       var column11 = sheetObject.cell(CellIndex.indexByString('J1'));
@@ -508,13 +516,13 @@ class HomeData with ChangeNotifier {
 
       var column13 = sheetObject.cell(CellIndex.indexByString('L1'));
       column13
-        ..value = 'Tardy'
-        ..cellStyle = cellStyle;
-
-      var column14 = sheetObject.cell(CellIndex.indexByString('M1'));
-      column14
         ..value = 'Overtime'
         ..cellStyle = cellStyle;
+
+      // var column14 = sheetObject.cell(CellIndex.indexByString('M1'));
+      // column14
+      //   ..value = 'Overtime'
+      //   ..cellStyle = cellStyle;
 
       for (int i = 0; i < _excelList.length; i++) {
         var rowCount = int.tryParse(_excelList[i].rowCount);

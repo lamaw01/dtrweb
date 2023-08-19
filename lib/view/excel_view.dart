@@ -159,6 +159,11 @@ class _ExcelViewState extends State<ExcelView> {
               child: ListView.builder(
                 itemCount: provider.excelList.length,
                 itemBuilder: (ctx, i) {
+                  var schedCode = '';
+                  if (provider.excelList[i].scheduleModel != null) {
+                    schedCode = provider.excelList[i].scheduleModel!.schedId;
+                  }
+
                   return InkWell(
                     hoverColor: Colors.lightBlue,
                     onTap: () async {
@@ -198,6 +203,19 @@ class _ExcelViewState extends State<ExcelView> {
                             child: Text(
                               provider.excelList[i].rowCount.toString(),
                               maxLines: 1,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          Container(
+                            width: 80.0,
+                            decoration: const BoxDecoration(
+                              // color: Colors.green,
+                              border: Border(
+                                right: BorderSide(width: 1, color: Colors.grey),
+                              ),
+                            ),
+                            child: Text(
+                              schedCode,
                               textAlign: TextAlign.center,
                             ),
                           ),
