@@ -61,7 +61,11 @@ class _ExcelViewState extends State<ExcelView> {
                         (ScheduleModel value) {
                   return DropdownMenuItem<ScheduleModel>(
                     value: value,
-                    child: Text(value.schedId),
+                    child: Text(
+                      '${value.schedId} | ${value.description}',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                   );
                 }).toList(),
               ),

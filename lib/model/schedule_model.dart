@@ -18,6 +18,7 @@ class ScheduleModel {
   String breakStart;
   String breakEnd;
   String schedOut;
+  String description;
 
   ScheduleModel({
     required this.schedId,
@@ -26,6 +27,7 @@ class ScheduleModel {
     required this.breakStart,
     required this.breakEnd,
     required this.schedOut,
+    required this.description,
   });
 
   factory ScheduleModel.fromJson(Map<String, dynamic> json) => ScheduleModel(
@@ -35,6 +37,7 @@ class ScheduleModel {
         breakStart: json["break_start"],
         breakEnd: json["break_end"],
         schedOut: json["sched_out"],
+        description: json["description"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -44,5 +47,6 @@ class ScheduleModel {
         "break_start": breakStart,
         "break_end": breakEnd,
         "sched_out": schedOut,
+        "description": description,
       };
 }

@@ -184,7 +184,7 @@ class _HomeViewState extends State<HomeView> {
                 child: const Row(
                   children: [
                     Text(
-                      'Excel Mode',
+                      'Advanced Mode',
                       style: TextStyle(
                         fontSize: 18.0,
                       ),
@@ -464,50 +464,50 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
                 if (instance.historyList.isNotEmpty) ...[
-                  const SizedBox(height: 10.0),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.orange[300],
-                    ),
-                    width: 150.0,
-                    height: 30.0,
-                    child: TextButton(
-                      onPressed: () async {
-                        instance.changeLoadingState(true);
-                        await Future.delayed(const Duration(seconds: 1));
-                        if (idController.text.isEmpty) {
-                          // get records all
-                          await instance.getRecordsAll(
-                              department: dropdownValue);
-                        } else {
-                          // get records with id or name
-                          await instance.getRecords(
-                              employeeId: idController.text.trim(),
-                              department: dropdownValue);
-                        }
-                        instance.changeLoadingState(false);
-                        instance.exportExcel(true);
-                      },
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.download,
-                            color: Colors.white,
-                          ),
-                          Text(
-                            'Export excel',
-                            style: TextStyle(
-                              fontSize: 14.0,
-                              decoration: TextDecoration.underline,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  // const SizedBox(height: 10.0),
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //     borderRadius: BorderRadius.circular(10),
+                  //     color: Colors.orange[300],
+                  //   ),
+                  //   width: 150.0,
+                  //   height: 30.0,
+                  //   child: TextButton(
+                  //     onPressed: () async {
+                  //       instance.changeLoadingState(true);
+                  //       await Future.delayed(const Duration(seconds: 1));
+                  //       if (idController.text.isEmpty) {
+                  //         // get records all
+                  //         await instance.getRecordsAll(
+                  //             department: dropdownValue);
+                  //       } else {
+                  //         // get records with id or name
+                  //         await instance.getRecords(
+                  //             employeeId: idController.text.trim(),
+                  //             department: dropdownValue);
+                  //       }
+                  //       instance.changeLoadingState(false);
+                  //       instance.exportExcel(true);
+                  //     },
+                  //     child: const Row(
+                  //       mainAxisSize: MainAxisSize.min,
+                  //       children: [
+                  //         Icon(
+                  //           Icons.download,
+                  //           color: Colors.white,
+                  //         ),
+                  //         Text(
+                  //           'Export excel',
+                  //           style: TextStyle(
+                  //             fontSize: 14.0,
+                  //             decoration: TextDecoration.underline,
+                  //             color: Colors.white,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                   DataTable(
                     showCheckboxColumn: false,
                     dataRowColor:
@@ -600,13 +600,22 @@ class _HomeViewState extends State<HomeView> {
                   const SizedBox(height: 50.0),
                 ] else if (instance.historyList.isEmpty) ...[
                   const SizedBox(height: 25.0),
-                  const Text(
-                    'No data found.',
-                    style: TextStyle(
-                      fontSize: 16.0,
+                  if (instance.selectedFrom.isAfter(instance.selectedTo)) ...[
+                    const Text(
+                      'Date From is advance than Date To.',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                      ),
                     ),
-                  ),
-                ],
+                  ] else ...[
+                    const Text(
+                      'No data found.',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  ]
+                ]
               ],
             ),
           ),

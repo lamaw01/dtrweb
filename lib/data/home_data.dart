@@ -70,9 +70,9 @@ class HomeData with ChangeNotifier {
 
     // sort list alphabetically and by date, very important
     historyListExcel.sort((a, b) {
-      return '${a.lastName.toLowerCase()} ${a.firstName.toLowerCase()} ${a.middleName.toLowerCase()}  ${a.date.toString()}'
-          .compareTo(
-              '${b.lastName.toLowerCase()} ${b.firstName.toLowerCase()} ${b.middleName.toLowerCase()}  ${b.date.toString()}');
+      var valueA = '${a.lastName.toLowerCase()} ${a.date}';
+      var valueB = '${b.lastName.toLowerCase()} ${b.date}';
+      return valueA.compareTo(valueB);
     });
 
     final result = <ExcelModel>[
@@ -94,6 +94,7 @@ class HomeData with ChangeNotifier {
           schedType: '',
           breakStart: '',
           breakEnd: '',
+          description: '',
         ),
       )
     ];
@@ -238,7 +239,7 @@ class HomeData with ChangeNotifier {
 
         rowCountUser = rowCountUser + 1;
 
-        late LateModel duration;
+        var duration = LateModel(hour: 0, lateIn: 0, lateBreak: 0);
         var timeLogs = <Log>[];
 
         if (i > 0) {
