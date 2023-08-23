@@ -356,6 +356,21 @@ class _ExcelViewState extends State<ExcelView> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          Container(
+                            width: 180.0,
+                            decoration: const BoxDecoration(
+                              // color: Colors.teal,
+                              border: Border(
+                                right: BorderSide(width: 1, color: Colors.grey),
+                              ),
+                            ),
+                            child: Text(
+                              provider.excelList[i].overtime.toString(),
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ),

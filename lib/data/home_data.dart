@@ -1,5 +1,4 @@
-// import 'dart:developer';
-
+import 'dart:developer';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -87,6 +86,7 @@ class HomeData with ChangeNotifier {
         duration: 'Duration(Hours)',
         lateIn: 'Tardy(Minutes)',
         lateBreak: 'Late Break(Minutes)',
+        overtime: 'Overtime(Hours)',
         scheduleModel: ScheduleModel(
           schedId: 'Sched Code',
           schedIn: '',
@@ -108,6 +108,71 @@ class HomeData with ChangeNotifier {
         horizontalAlign: HorizontalAlign.Center,
       );
 
+      // var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
+      // column1
+      //   ..value = ''
+      //   ..cellStyle = cellStyle;
+
+      // var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
+      // column2
+      //   ..value = 'Emp ID'
+      //   ..cellStyle = cellStyle;
+
+      // var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
+      // column3
+      //   ..value = 'Name'
+      //   ..cellStyle = cellStyle;
+
+      // var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
+      // column4
+      //   ..value = 'In'
+      //   ..cellStyle = cellStyle;
+
+      // var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
+      // column5
+      //   ..value = 'Out'
+      //   ..cellStyle = cellStyle;
+
+      // var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
+      // column6
+      //   ..value = 'In'
+      //   ..cellStyle = cellStyle;
+
+      // var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
+      // column7
+      //   ..value = 'Out'
+      //   ..cellStyle = cellStyle;
+
+      // var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
+      // column8
+      //   ..value = 'Duration(Hours)'
+      //   ..cellStyle = cellStyle;
+
+      // var column10 = sheetObject.cell(CellIndex.indexByString('I1'));
+      // column10
+      //   ..value = 'Tardy(Minutes)'
+      //   ..cellStyle = cellStyle;
+
+      // var column11 = sheetObject.cell(CellIndex.indexByString('J1'));
+      // column11
+      //   ..value = 'Late Break(Minutes)'
+      //   ..cellStyle = cellStyle;
+
+      // var column12 = sheetObject.cell(CellIndex.indexByString('K1'));
+      // column12
+      //   ..value = 'Overtime'
+      //   ..cellStyle = cellStyle;
+
+      // var column13 = sheetObject.cell(CellIndex.indexByString('L1'));
+      // column13
+      //   ..value = 'Undertime'
+      //   ..cellStyle = cellStyle;
+
+      // var column14 = sheetObject.cell(CellIndex.indexByString('M1'));
+      // column14
+      //   ..value = 'Sched Code'
+      //   ..cellStyle = cellStyle;
+
       var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
       column1
         ..value = ''
@@ -120,101 +185,110 @@ class HomeData with ChangeNotifier {
 
       var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
       column3
-        ..value = 'Name'
+        ..value = 'Emp ID'
         ..cellStyle = cellStyle;
 
       var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
       column4
-        ..value = 'In'
+        ..value = 'Name'
         ..cellStyle = cellStyle;
 
       var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
       column5
-        ..value = 'Out'
+        ..value = 'In'
         ..cellStyle = cellStyle;
 
       var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
       column6
-        ..value = 'In'
+        ..value = 'Out'
         ..cellStyle = cellStyle;
 
       var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
       column7
-        ..value = 'Out'
+        ..value = 'In'
         ..cellStyle = cellStyle;
 
       var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
       column8
+        ..value = 'Out'
+        ..cellStyle = cellStyle;
+
+      var column9 = sheetObject.cell(CellIndex.indexByString('I1'));
+      column9
         ..value = 'Duration(Hours)'
         ..cellStyle = cellStyle;
 
-      var column10 = sheetObject.cell(CellIndex.indexByString('I1'));
+      var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
       column10
-        ..value = 'Late In(Minutes)'
+        ..value = 'Tardy(Minutes)'
         ..cellStyle = cellStyle;
 
-      var column11 = sheetObject.cell(CellIndex.indexByString('J1'));
+      var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
       column11
         ..value = 'Late Break(Minutes)'
         ..cellStyle = cellStyle;
 
-      var column12 = sheetObject.cell(CellIndex.indexByString('K1'));
+      var column12 = sheetObject.cell(CellIndex.indexByString('L1'));
       column12
-        ..value = 'Undertime'
-        ..cellStyle = cellStyle;
-
-      var column13 = sheetObject.cell(CellIndex.indexByString('L1'));
-      column13
-        ..value = 'Tardy'
-        ..cellStyle = cellStyle;
-
-      var column14 = sheetObject.cell(CellIndex.indexByString('M1'));
-      column14
         ..value = 'Overtime'
+        ..cellStyle = cellStyle;
+
+      var column13 = sheetObject.cell(CellIndex.indexByString('M1'));
+      column13
+        ..value = 'Undertime'
         ..cellStyle = cellStyle;
 
       var rowCountUser = 0;
 
       try {
         for (int k = 0; k < historyListExcel.length; k++) {
-          if (k == 0 &&
-              historyListExcel[k].logs.length == 1 &&
-              historyListExcel[k].logs.first.logType == 'OUT') {
-            historyListExcel.removeAt(k);
-          } else if (k > 0) {
-            //remove solo out and move to yesterday
-            if (historyListExcel[k].logs.length == 1 &&
+          if (historyListExcel[k].logs.isNotEmpty) {
+            if (k == 0 &&
+                historyListExcel[k].logs.length == 1 &&
+                historyListExcel[k].logs.first.logType == 'OUT') {
+              historyListExcel.removeAt(k);
+            } else if (k > 0) {
+              //remove solo out and move to yesterday
+              if (historyListExcel[k].logs.length == 1 &&
+                  historyListExcel[k].logs.first.logType == 'OUT' &&
+                  historyListExcel[k - 1].logs.last.logType == 'IN') {
+                if (nameIndex(historyListExcel[k]) ==
+                    nameIndex(historyListExcel[k - 1])) {
+                  historyListExcel[k - 1]
+                      .logs
+                      .add(historyListExcel[k].logs.first);
+                }
+                if (k - 1 == 0) {
+                  historyListExcel[k - 1].logs.removeAt(0);
+                  // log('remove solo 0');
+                }
+                historyListExcel.removeAt(k);
+                // log('remove solo 1');
+              }
+            } else if (k > 0 && k < 3) {
+              if (nameIndex(historyListExcel[k]) !=
+                      nameIndex(historyListExcel[k - 1]) &&
+                  nameIndex(historyListExcel[k]) !=
+                      nameIndex(historyListExcel[k + 1])) {
+                // log('remove solo 2');
+                historyListExcel.removeAt(k);
+              }
+            }
+            if (k + 1 < historyListExcel.length &&
+                nameIndex(historyListExcel[k]) ==
+                    nameIndex(historyListExcel[k + 1]) &&
                 historyListExcel[k].logs.first.logType == 'OUT' &&
-                historyListExcel[k - 1].logs.last.logType == 'IN') {
-              if (nameIndex(historyListExcel[k]) ==
-                  nameIndex(historyListExcel[k - 1])) {
-                historyListExcel[k - 1]
-                    .logs
-                    .add(historyListExcel[k].logs.first);
-              }
-              if (k - 1 == 0) {
-                historyListExcel[k - 1].logs.removeAt(0);
-                // log('remove solo 0');
-              }
-              historyListExcel.removeAt(k);
-              // log('remove solo 1');
-            }
-          } else if (k > 0 && k < 3) {
-            if (nameIndex(historyListExcel[k]) !=
-                    nameIndex(historyListExcel[k - 1]) &&
-                nameIndex(historyListExcel[k]) !=
-                    nameIndex(historyListExcel[k + 1])) {
-              // log('remove solo 2');
+                historyListExcel[k].logs.length == 1) {
+              // log('remove solo 3');
               historyListExcel.removeAt(k);
             }
-          }
-          if (k + 1 < historyListExcel.length &&
-              nameIndex(historyListExcel[k]) ==
-                  nameIndex(historyListExcel[k + 1]) &&
-              historyListExcel[k].logs.first.logType == 'OUT' &&
-              historyListExcel[k].logs.length == 1) {
-            // log('remove solo 3');
-            historyListExcel.removeAt(k);
+            if (k == historyListExcel.length - 1) {
+              if (nameIndex(historyListExcel[k - 1]) !=
+                      nameIndex(historyListExcel[k]) &&
+                  historyListExcel[k].logs.first.logType == 'OUT') {
+                historyListExcel[k].logs.removeAt(0);
+              }
+            }
           }
         }
       } catch (e) {
@@ -239,7 +313,7 @@ class HomeData with ChangeNotifier {
 
         rowCountUser = rowCountUser + 1;
 
-        var duration = LateModel(hour: 0, lateIn: 0, lateBreak: 0);
+        var duration = LateModel(hour: 0, lateIn: 0, lateBreak: 0, overtime: 0);
         var timeLogs = <Log>[];
 
         if (i > 0) {
@@ -247,6 +321,10 @@ class HomeData with ChangeNotifier {
           if (nameIndex(historyListExcel[i - 1]) !=
               nameIndex(historyListExcel[i])) {
             List<dynamic> emptyRow = [
+              '',
+              '',
+              '',
+              '',
               '',
               '',
               '',
@@ -268,6 +346,16 @@ class HomeData with ChangeNotifier {
               duration: '',
               lateIn: '',
               lateBreak: '',
+              overtime: '',
+              scheduleModel: ScheduleModel(
+                schedId: '',
+                schedIn: '',
+                schedOut: '',
+                schedType: '',
+                breakStart: '',
+                breakEnd: '',
+                description: '',
+              ),
             ));
             rowCountUser = 1;
           }
@@ -287,14 +375,27 @@ class HomeData with ChangeNotifier {
                 if (nameIndex(historyListExcel[i]) ==
                     nameIndex(historyListExcel[i + 1])) {
                   // log('dire 0');
-
                   duration = calcDurationInOutOtherDay(
                     logs1: historyListExcel[i].logs,
                     logs2: historyListExcel[i + 1].logs,
                     name: historyListExcel[i].firstName,
                     sched: todaySched,
                   );
-                  timeLogs.add(historyListExcel[i].logs.last);
+                  var differenceForgotOut = 0;
+                  if (historyListExcel[i + 1].logs[0].logType == 'OUT' &&
+                      historyListExcel[i + 1].logs[1].logType == 'IN') {
+                    differenceForgotOut = historyListExcel[i + 1]
+                        .logs[1]
+                        .timeStamp
+                        .difference(historyListExcel[i + 1].logs[0].timeStamp)
+                        .inMinutes;
+                    // log('test2 $differenceForgotOut differenceForgotOut ${historyListExcel[i].firstName} ${historyListExcel[i + 1].logs[0].logType} ${historyListExcel[i + 1].logs[0].timeStamp} ${historyListExcel[i + 1].logs[1].logType} ${historyListExcel[i + 1].logs[1].timeStamp}');
+                    // dont calc if out and in if less than 30 minutes gap
+                    // means user forgot to out
+                    if (differenceForgotOut > 30) {
+                      timeLogs.add(historyListExcel[i].logs.last);
+                    }
+                  }
                   // move first log other day to yesterday if out
                   timeLogs.add(historyListExcel[i + 1].logs[0]);
                   // if next log is out and is solo, remove
@@ -398,6 +499,8 @@ class HomeData with ChangeNotifier {
           duration.hour,
           duration.lateIn,
           duration.lateBreak,
+          duration.overtime,
+          todaySched.schedId,
         ];
         result.add(ExcelModel(
           rowCount: rowCountUser.toString(),
@@ -410,6 +513,7 @@ class HomeData with ChangeNotifier {
           duration: duration.hour.toString(),
           lateIn: duration.lateIn.toString(),
           lateBreak: duration.lateBreak.toString(),
+          overtime: duration.overtime.toString(),
           scheduleModel: todaySched,
           logs: timeLogs,
         ));
@@ -434,7 +538,7 @@ class HomeData with ChangeNotifier {
     required ExcelModel model,
     required ScheduleModel newSchedule,
   }) {
-    late LateModel duration;
+    var duration = LateModel(hour: 0, lateIn: 0, lateBreak: 0, overtime: 0);
     try {
       duration = calcDurationInOutSameDay(
         logs: model.logs!,
@@ -444,6 +548,7 @@ class HomeData with ChangeNotifier {
       model.duration = duration.hour.toString();
       model.lateIn = duration.lateIn.toString();
       model.lateBreak = duration.lateBreak.toString();
+      model.overtime = duration.overtime.toString();
       model.scheduleModel = newSchedule;
     } catch (e) {
       debugPrint('$e');
@@ -472,58 +577,58 @@ class HomeData with ChangeNotifier {
 
       var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
       column3
-        ..value = 'Name'
+        ..value = 'Emp ID'
         ..cellStyle = cellStyle;
 
       var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
       column4
-        ..value = 'In'
+        ..value = 'Name'
         ..cellStyle = cellStyle;
 
       var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
       column5
-        ..value = 'Out'
+        ..value = 'In'
         ..cellStyle = cellStyle;
 
       var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
       column6
-        ..value = 'In'
+        ..value = 'Out'
         ..cellStyle = cellStyle;
 
       var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
       column7
-        ..value = 'Out'
+        ..value = 'In'
         ..cellStyle = cellStyle;
 
       var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
       column8
+        ..value = 'Out'
+        ..cellStyle = cellStyle;
+
+      var column9 = sheetObject.cell(CellIndex.indexByString('I1'));
+      column9
         ..value = 'Duration(Hours)'
         ..cellStyle = cellStyle;
 
-      var column10 = sheetObject.cell(CellIndex.indexByString('I1'));
+      var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
       column10
         ..value = 'Tardy(Minutes)'
         ..cellStyle = cellStyle;
 
-      var column11 = sheetObject.cell(CellIndex.indexByString('J1'));
+      var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
       column11
         ..value = 'Late Break(Minutes)'
         ..cellStyle = cellStyle;
 
-      var column12 = sheetObject.cell(CellIndex.indexByString('K1'));
+      var column12 = sheetObject.cell(CellIndex.indexByString('L1'));
       column12
-        ..value = 'Undertime'
-        ..cellStyle = cellStyle;
-
-      var column13 = sheetObject.cell(CellIndex.indexByString('L1'));
-      column13
         ..value = 'Overtime'
         ..cellStyle = cellStyle;
 
-      // var column14 = sheetObject.cell(CellIndex.indexByString('M1'));
-      // column14
-      //   ..value = 'Overtime'
-      //   ..cellStyle = cellStyle;
+      var column13 = sheetObject.cell(CellIndex.indexByString('M1'));
+      column13
+        ..value = 'Undertime'
+        ..cellStyle = cellStyle;
 
       for (int i = 0; i < _excelList.length; i++) {
         var rowCount = int.tryParse(_excelList[i].rowCount);
@@ -531,10 +636,13 @@ class HomeData with ChangeNotifier {
         var duration = int.tryParse(_excelList[i].duration);
         var lateIn = int.tryParse(_excelList[i].lateIn);
         var lateBreak = int.tryParse(_excelList[i].lateBreak);
+        var overtime = int.tryParse(_excelList[i].overtime);
+        var schedCode = '${_excelList[i].scheduleModel?.schedId}';
 
         if (i != 0) {
           List<dynamic> dataList = [
             rowCount,
+            schedCode,
             employeeId,
             _excelList[i].name,
             _excelList[i].timeIn1,
@@ -544,6 +652,7 @@ class HomeData with ChangeNotifier {
             duration,
             lateIn,
             lateBreak,
+            overtime,
           ];
           sheetObject.appendRow(dataList);
         }
@@ -629,11 +738,32 @@ class HomeData with ChangeNotifier {
     var hours = Duration(seconds: seconds).inHours;
     var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
     var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
-    return LateModel(
+    var overtime = Duration(seconds: latePenalty.overtimeSeconds).inMinutes;
+    var model = LateModel(
       hour: hours,
       lateIn: lateIn,
       lateBreak: lateBreak,
+      overtime: overtime,
     );
+    // for (var lo1 in logs1) {
+    //   log('lo1 $name ${lo1.logType} ${lo1.timeStamp}');
+    // }
+    // for (var lo2 in logs2) {
+    //   log('lo2 $name ${lo2.logType} ${lo2.timeStamp}');
+    // }
+    // log('-------------');
+    var differenceForgotOut = 0;
+    if (logs2[0].logType == 'OUT' && logs2[1].logType == 'IN') {
+      differenceForgotOut =
+          logs2[1].timeStamp.difference(logs2[0].timeStamp).inMinutes;
+      log('test $differenceForgotOut differenceForgotOut $name ${logs2[0].logType} ${logs2[0].timeStamp} ${logs2[1].logType} ${logs2[1].timeStamp}');
+      // dont calc if out and in if less than 30 minutes gap
+      // means user forgot to out
+      if (differenceForgotOut < 30) {
+        model = LateModel(hour: 0, lateIn: 0, lateBreak: 0, overtime: 0);
+      }
+    }
+    return model;
   }
 
   // calculate duration in hours if in and out same day
@@ -666,10 +796,12 @@ class HomeData with ChangeNotifier {
     var hours = Duration(seconds: seconds).inHours;
     var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
     var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
+    var overtime = Duration(seconds: latePenalty.overtimeSeconds).inHours;
     return LateModel(
       hour: hours,
       lateIn: lateIn,
       lateBreak: lateBreak,
+      overtime: overtime,
     );
   }
 
@@ -680,10 +812,14 @@ class HomeData with ChangeNotifier {
   }) {
     var sIn = sched.schedIn;
     var bEnd = sched.breakEnd;
+    var sOut = sched.schedOut;
     var schedIn = '';
     var breakIn = '';
+    var schedOut = '';
     var latePenaltyIn = 0;
     var latePenaltyBreak = 0;
+    var overtime = 0;
+    var calc2 = true;
     try {
       // log('lateIn $name schedType ${sched.schedType} schedIn ${sched.schedIn} breakEnd ${sched.breakEnd}');
       if (sched.schedType.toLowerCase() != 'c') {
@@ -708,6 +844,7 @@ class HomeData with ChangeNotifier {
             // log('lateIn $name $differenceSec seconds $lateIn minutes');
           }
           if (logs.length >= 4 && sched.schedType.toLowerCase() == 'b') {
+            calc2 = false;
             if (logs[2].logType == 'IN' && logs[3].logType == 'OUT') {
               // log('${_dateFormat.format(logs[2].timeStamp)} $breakIn');
               breakIn =
@@ -729,6 +866,22 @@ class HomeData with ChangeNotifier {
               // log('lateBreak $name $differenceSec seconds $lateBreak minutes');
             }
           }
+          if (calc2) {
+            schedOut = '${logs[1].timeStamp.toString().substring(0, 10)} $sOut';
+            overtime = logs[1]
+                .timeStamp
+                .difference(_dateFormat.parse(schedOut))
+                .inSeconds;
+            // log('$overtime calc2 true');
+          } else {
+            schedOut = '${logs[3].timeStamp.toString().substring(0, 10)} $sOut';
+            overtime = logs[3]
+                .timeStamp
+                .difference(_dateFormat.parse(schedOut))
+                .inSeconds;
+            // log('$overtime calc2 false');
+          }
+          if (overtime < 0) overtime = 0;
         }
       }
     } catch (e) {
@@ -737,8 +890,26 @@ class HomeData with ChangeNotifier {
     return LateMinutesModel(
       lateInMinutes: latePenaltyIn,
       lateBreakMinutes: latePenaltyBreak,
+      overtimeSeconds: overtime,
     );
   }
+
+  // int calOvertime({
+  //   required List<Log> logs,
+  //   required String name,
+  //   required ScheduleModel sched,
+  // }) {
+  //   var sOut = sched.schedOut;
+  //   var schedOut = '';
+  //   var overtime = 0;
+  //   try {
+
+  //   } catch (e) {
+  //     debugPrint('$e calOvertime');
+  //   }
+
+  //   return overtime;
+  // }
 
   // get initial data for history and put 30 it ui
   void setData(List<HistoryModel> data) {

@@ -12,6 +12,7 @@ class ExcelModel {
   String duration;
   String lateIn;
   String lateBreak;
+  String overtime;
   ScheduleModel? scheduleModel;
   List<Log>? logs;
 
@@ -26,6 +27,7 @@ class ExcelModel {
     required this.duration,
     required this.lateIn,
     required this.lateBreak,
+    required this.overtime,
     this.scheduleModel,
     this.logs,
   });
