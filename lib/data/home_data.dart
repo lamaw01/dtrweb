@@ -36,8 +36,17 @@ class HomeData with ChangeNotifier {
   final _is24HourFormat = ValueNotifier(false);
   ValueNotifier<bool> get is24HourFormat => _is24HourFormat;
 
-  final _dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+  final _dateFormat1 = DateFormat('yyyy-MM-dd HH:mm:ss');
+  final _dateFormat2 = DateFormat('yyyy-MM-dd hh:mm:ss aa');
   final _dateFormatFileExcel = DateFormat().add_yMMMMd();
+
+  DateFormat dateFormat12or24() {
+    if (_is24HourFormat.value) {
+      return _dateFormat1;
+    } else {
+      return _dateFormat2;
+    }
+  }
 
   String dateFormat12or24Excel(DateTime dateTime) {
     if (_is24HourFormat.value) {
@@ -107,71 +116,6 @@ class HomeData with ChangeNotifier {
         fontFamily: getFontFamily(FontFamily.Arial),
         horizontalAlign: HorizontalAlign.Center,
       );
-
-      // var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
-      // column1
-      //   ..value = ''
-      //   ..cellStyle = cellStyle;
-
-      // var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
-      // column2
-      //   ..value = 'Emp ID'
-      //   ..cellStyle = cellStyle;
-
-      // var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
-      // column3
-      //   ..value = 'Name'
-      //   ..cellStyle = cellStyle;
-
-      // var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
-      // column4
-      //   ..value = 'In'
-      //   ..cellStyle = cellStyle;
-
-      // var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
-      // column5
-      //   ..value = 'Out'
-      //   ..cellStyle = cellStyle;
-
-      // var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
-      // column6
-      //   ..value = 'In'
-      //   ..cellStyle = cellStyle;
-
-      // var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
-      // column7
-      //   ..value = 'Out'
-      //   ..cellStyle = cellStyle;
-
-      // var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
-      // column8
-      //   ..value = 'Duration(Hours)'
-      //   ..cellStyle = cellStyle;
-
-      // var column10 = sheetObject.cell(CellIndex.indexByString('I1'));
-      // column10
-      //   ..value = 'Tardy(Minutes)'
-      //   ..cellStyle = cellStyle;
-
-      // var column11 = sheetObject.cell(CellIndex.indexByString('J1'));
-      // column11
-      //   ..value = 'Late Break(Minutes)'
-      //   ..cellStyle = cellStyle;
-
-      // var column12 = sheetObject.cell(CellIndex.indexByString('K1'));
-      // column12
-      //   ..value = 'Overtime'
-      //   ..cellStyle = cellStyle;
-
-      // var column13 = sheetObject.cell(CellIndex.indexByString('L1'));
-      // column13
-      //   ..value = 'Undertime'
-      //   ..cellStyle = cellStyle;
-
-      // var column14 = sheetObject.cell(CellIndex.indexByString('M1'));
-      // column14
-      //   ..value = 'Sched Code'
-      //   ..cellStyle = cellStyle;
 
       var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
       column1
@@ -520,7 +464,7 @@ class HomeData with ChangeNotifier {
         sheetObject.appendRow(dataList);
       }
 
-      sheetObject.setColWidth(2, 25);
+      sheetObject.setColWidth(3, 30);
 
       if (isExcel) {
         excel.save(
@@ -528,9 +472,115 @@ class HomeData with ChangeNotifier {
                 'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
       }
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('$e exportExcel');
     } finally {
       _excelList = result;
+      finalizeData();
+    }
+  }
+
+  void finalizeData() {
+    for (int i = 0; i < _excelList.length; i++) {
+      if (i + 1 != _excelList.length &&
+          _excelList[i].logs != null &&
+          _excelList[i + 1].logs != null) {
+        // ignore: unused_local_variable
+        var name = _excelList[i].name;
+        var timeOut1 = _excelList[i].timeOut1;
+        var timeOut2 = _excelList[i].timeOut2;
+        var timeIn1Plus1 = _excelList[i + 1].timeIn1;
+        var timeOut1Plus1 = _excelList[i + 1].timeOut1;
+        var timeIn1Plus2 = _excelList[i + 1].timeIn2;
+        var timeOut1Plus2 = _excelList[i + 1].timeOut2;
+
+        if (timeOut2 == '' && timeOut1 != '') {
+          var timeGapNight = 0;
+
+          timeGapNight = dateFormat12or24()
+              .parse(timeIn1Plus1)
+              .difference(dateFormat12or24().parse(timeOut1))
+              .inHours;
+
+          if (timeGapNight <= 2 && timeOut1Plus2 != '') {
+            _excelList[i].timeIn2 = timeIn1Plus1;
+            _excelList[i].timeOut2 = timeOut1Plus1;
+            _excelList[i + 1].timeIn1 = timeIn1Plus2;
+            _excelList[i + 1].timeOut1 = timeOut1Plus2;
+            _excelList[i + 1].timeIn2 = '';
+            _excelList[i + 1].timeOut2 = '';
+
+            var logs1 = <Log>[];
+            var logs2 = <Log>[];
+
+            logs1 = <Log>[
+              Log(
+                timeStamp: dateFormat12or24().parse(_excelList[i].timeIn1),
+                logType: 'IN',
+                id: '',
+                isSelfie: '',
+              ),
+              Log(
+                timeStamp: dateFormat12or24().parse(_excelList[i].timeOut1),
+                logType: 'OUT',
+                id: '',
+                isSelfie: '',
+              ),
+              Log(
+                timeStamp: dateFormat12or24().parse(_excelList[i].timeIn2),
+                logType: 'IN',
+                id: '',
+                isSelfie: '',
+              ),
+              Log(
+                timeStamp: dateFormat12or24().parse(_excelList[i].timeOut2),
+                logType: 'OUT',
+                id: '',
+                isSelfie: '',
+              ),
+            ];
+
+            logs2 = <Log>[
+              Log(
+                timeStamp: dateFormat12or24().parse(_excelList[i + 1].timeIn1),
+                logType: 'IN',
+                id: '',
+                isSelfie: '',
+              ),
+              Log(
+                timeStamp: dateFormat12or24().parse(_excelList[i + 1].timeOut1),
+                logType: 'OUT',
+                id: '',
+                isSelfie: '',
+              ),
+            ];
+
+            // recalc
+            var duration1 = calcDurationInOutSameDay(
+              logs: logs1,
+              name: _excelList[i].name,
+              sched: _excelList[i].scheduleModel!,
+            );
+
+            _excelList[i].duration = duration1.hour.toString();
+            _excelList[i].lateIn = duration1.lateIn.toString();
+            _excelList[i].lateBreak = duration1.lateBreak.toString();
+
+            log('duration1 ${_excelList[i].duration} ${_excelList[i].scheduleModel!.schedId}');
+
+            var duration2 = calcDurationInOutSameDay(
+              logs: logs2,
+              name: _excelList[i + 1].name,
+              sched: _excelList[i + 1].scheduleModel!,
+            );
+
+            _excelList[i + 1].duration = duration2.hour.toString();
+            _excelList[i + 1].lateIn = duration2.lateIn.toString();
+            _excelList[i + 1].lateBreak = duration2.lateBreak.toString();
+
+            log('duration2 ${_excelList[i + 1].duration} ${_excelList[i + 1].scheduleModel!.schedId}');
+          }
+        }
+      }
     }
   }
 
@@ -551,7 +601,7 @@ class HomeData with ChangeNotifier {
       model.overtime = duration.overtime.toString();
       model.scheduleModel = newSchedule;
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('$e reCalcLate');
     }
   }
 
@@ -658,7 +708,7 @@ class HomeData with ChangeNotifier {
         }
       }
 
-      sheetObject.setColWidth(2, 25);
+      sheetObject.setColWidth(3, 25);
 
       excel.save(
           fileName:
@@ -756,7 +806,7 @@ class HomeData with ChangeNotifier {
     if (logs2[0].logType == 'OUT' && logs2[1].logType == 'IN') {
       differenceForgotOut =
           logs2[1].timeStamp.difference(logs2[0].timeStamp).inMinutes;
-      log('test $differenceForgotOut differenceForgotOut $name ${logs2[0].logType} ${logs2[0].timeStamp} ${logs2[1].logType} ${logs2[1].timeStamp}');
+      // log('test $differenceForgotOut differenceForgotOut $name ${logs2[0].logType} ${logs2[0].timeStamp} ${logs2[1].logType} ${logs2[1].timeStamp}');
       // dont calc if out and in if less than 30 minutes gap
       // means user forgot to out
       if (differenceForgotOut < 30) {
@@ -778,6 +828,7 @@ class HomeData with ChangeNotifier {
       for (int i = 0; i < logs.length; i++) {
         if (i + 1 < logs.length) {
           if (logs[i].logType == 'IN' && logs[i + 1].logType == 'OUT') {
+            log('$name ${logs[i].timeStamp} ${logs[i + 1].timeStamp}');
             seconds = seconds +
                 logs[i + 1].timeStamp.difference(logs[i].timeStamp).inSeconds;
           }
@@ -830,7 +881,7 @@ class HomeData with ChangeNotifier {
 
             var inDifference = logs[0]
                 .timeStamp
-                .difference(_dateFormat
+                .difference(_dateFormat1
                     .parse(schedIn)
                     .add(const Duration(seconds: 300)))
                 .inSeconds;
@@ -852,7 +903,7 @@ class HomeData with ChangeNotifier {
 
               var inDifference = logs[2]
                   .timeStamp
-                  .difference(_dateFormat
+                  .difference(_dateFormat1
                       .parse(breakIn)
                       .add(const Duration(seconds: 300)))
                   .inSeconds;
@@ -870,14 +921,14 @@ class HomeData with ChangeNotifier {
             schedOut = '${logs[1].timeStamp.toString().substring(0, 10)} $sOut';
             overtime = logs[1]
                 .timeStamp
-                .difference(_dateFormat.parse(schedOut))
+                .difference(_dateFormat1.parse(schedOut))
                 .inSeconds;
             // log('$overtime calc2 true');
           } else {
             schedOut = '${logs[3].timeStamp.toString().substring(0, 10)} $sOut';
             overtime = logs[3]
                 .timeStamp
-                .difference(_dateFormat.parse(schedOut))
+                .difference(_dateFormat1.parse(schedOut))
                 .inSeconds;
             // log('$overtime calc2 false');
           }
@@ -893,23 +944,6 @@ class HomeData with ChangeNotifier {
       overtimeSeconds: overtime,
     );
   }
-
-  // int calOvertime({
-  //   required List<Log> logs,
-  //   required String name,
-  //   required ScheduleModel sched,
-  // }) {
-  //   var sOut = sched.schedOut;
-  //   var schedOut = '';
-  //   var overtime = 0;
-  //   try {
-
-  //   } catch (e) {
-  //     debugPrint('$e calOvertime');
-  //   }
-
-  //   return overtime;
-  // }
 
   // get initial data for history and put 30 it ui
   void setData(List<HistoryModel> data) {
@@ -946,13 +980,13 @@ class HomeData with ChangeNotifier {
     try {
       var result = await HttpService.getRecords(
         employeeId: employeeId,
-        dateFrom: _dateFormat.format(newselectedFrom),
-        dateTo: _dateFormat.format(newselectedTo),
+        dateFrom: _dateFormat1.format(newselectedFrom),
+        dateTo: _dateFormat1.format(newselectedTo),
         department: department,
       );
       setData(result);
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('$e getRecords');
     }
   }
 
@@ -964,13 +998,13 @@ class HomeData with ChangeNotifier {
       debugPrint(newselectedFrom.toString());
       debugPrint(newselectedTo.toString());
       var result = await HttpService.getRecordsAll(
-        dateFrom: _dateFormat.format(newselectedFrom),
-        dateTo: _dateFormat.format(newselectedTo),
+        dateFrom: _dateFormat1.format(newselectedFrom),
+        dateTo: _dateFormat1.format(newselectedTo),
         department: department,
       );
       setData(result);
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('$e getRecordsAll');
     }
   }
 
@@ -980,7 +1014,7 @@ class HomeData with ChangeNotifier {
       _departmentList.addAll(result);
       notifyListeners();
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('$e getDepartment');
     }
   }
 
@@ -990,7 +1024,7 @@ class HomeData with ChangeNotifier {
       _scheduleList.addAll(result);
       notifyListeners();
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('$e getSchedule');
     }
   }
 }
