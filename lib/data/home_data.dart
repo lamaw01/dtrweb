@@ -233,6 +233,13 @@ class HomeData with ChangeNotifier {
                 historyListExcel[k].logs.removeAt(0);
               }
             }
+            if (k != historyListExcel.length - 1 && k != 0) {
+              if (nameIndex(historyListExcel[k - 1]) !=
+                      nameIndex(historyListExcel[k]) &&
+                  historyListExcel[k].logs.first.logType == 'OUT') {
+                historyListExcel[k].logs.removeAt(0);
+              }
+            }
           }
         }
       } catch (e) {
@@ -431,6 +438,7 @@ class HomeData with ChangeNotifier {
         }
 
         var employeeId = int.tryParse(historyListExcel[i].employeeId);
+        var finalOtString = calcOvertimeHour(duration.overtime);
 
         List<dynamic> dataList = [
           rowCountUser,
@@ -443,7 +451,7 @@ class HomeData with ChangeNotifier {
           duration.hour,
           duration.lateIn,
           duration.lateBreak,
-          duration.overtime,
+          finalOtString,
           todaySched.schedId,
         ];
         result.add(ExcelModel(
@@ -457,7 +465,7 @@ class HomeData with ChangeNotifier {
           duration: duration.hour.toString(),
           lateIn: duration.lateIn.toString(),
           lateBreak: duration.lateBreak.toString(),
-          overtime: duration.overtime.toString(),
+          overtime: finalOtString,
           scheduleModel: todaySched,
           logs: timeLogs,
         ));
@@ -477,6 +485,28 @@ class HomeData with ChangeNotifier {
       _excelList = result;
       finalizeData();
     }
+  }
+
+  String calcOvertimeHour(int overtime) {
+    var finalOtString = '';
+    try {
+      var overtimeDouble = overtime / 60;
+      var overtimeDoubleString = overtimeDouble.toStringAsFixed(1);
+      var rounderDigit = overtimeDouble.toStringAsFixed(1).substring(2, 3);
+      // log('kani ${overtimeIntDouble.toStringAsFixed(1)} ${overtimeIntDouble.toStringAsFixed(1).substring(2, 3)}');
+      if (int.parse(rounderDigit) >= 5) {
+        finalOtString = overtimeDoubleString.replaceRange(2, 3, '5');
+      } else {
+        finalOtString = overtimeDoubleString.replaceRange(2, 3, '0');
+      }
+      if (overtimeDouble < 0.5) {
+        finalOtString = '0';
+      }
+      // log('last $finalOtString');
+    } catch (e) {
+      debugPrint('$e calcOvertimeHour');
+    }
+    return finalOtString;
   }
 
   void finalizeData() {
@@ -554,7 +584,6 @@ class HomeData with ChangeNotifier {
               ),
             ];
 
-            // recalc
             var duration1 = calcDurationInOutSameDay(
               logs: logs1,
               name: _excelList[i].name,
@@ -595,10 +624,11 @@ class HomeData with ChangeNotifier {
         name: model.name,
         sched: newSchedule,
       );
+      var finalOtString = calcOvertimeHour(duration.overtime);
       model.duration = duration.hour.toString();
       model.lateIn = duration.lateIn.toString();
       model.lateBreak = duration.lateBreak.toString();
-      model.overtime = duration.overtime.toString();
+      model.overtime = finalOtString;
       model.scheduleModel = newSchedule;
     } catch (e) {
       debugPrint('$e reCalcLate');
@@ -847,7 +877,7 @@ class HomeData with ChangeNotifier {
     var hours = Duration(seconds: seconds).inHours;
     var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
     var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
-    var overtime = Duration(seconds: latePenalty.overtimeSeconds).inHours;
+    var overtime = Duration(seconds: latePenalty.overtimeSeconds).inMinutes;
     return LateModel(
       hour: hours,
       lateIn: lateIn,
@@ -870,7 +900,7 @@ class HomeData with ChangeNotifier {
     var latePenaltyIn = 0;
     var latePenaltyBreak = 0;
     var overtime = 0;
-    var calc2 = true;
+    var calcOvertimebreak = true;
     try {
       // log('lateIn $name schedType ${sched.schedType} schedIn ${sched.schedIn} breakEnd ${sched.breakEnd}');
       if (sched.schedType.toLowerCase() != 'c') {
@@ -895,7 +925,7 @@ class HomeData with ChangeNotifier {
             // log('lateIn $name $differenceSec seconds $lateIn minutes');
           }
           if (logs.length >= 4 && sched.schedType.toLowerCase() == 'b') {
-            calc2 = false;
+            calcOvertimebreak = false;
             if (logs[2].logType == 'IN' && logs[3].logType == 'OUT') {
               // log('${_dateFormat.format(logs[2].timeStamp)} $breakIn');
               breakIn =
@@ -917,7 +947,7 @@ class HomeData with ChangeNotifier {
               // log('lateBreak $name $differenceSec seconds $lateBreak minutes');
             }
           }
-          if (calc2) {
+          if (calcOvertimebreak) {
             schedOut = '${logs[1].timeStamp.toString().substring(0, 10)} $sOut';
             overtime = logs[1]
                 .timeStamp
@@ -965,10 +995,10 @@ class HomeData with ChangeNotifier {
           _historyList.getRange(_uiList.length, _uiList.length + 30).toList());
     }
     notifyListeners();
-    debugPrint(_historyList
-        .getRange(_uiList.length, _historyList.length)
-        .length
-        .toString());
+    // debugPrint(_historyList
+    //     .getRange(_uiList.length, _historyList.length)
+    //     .length
+    //     .toString());
   }
 
   Future<void> getRecords({
@@ -995,8 +1025,8 @@ class HomeData with ChangeNotifier {
     var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
 
     try {
-      debugPrint(newselectedFrom.toString());
-      debugPrint(newselectedTo.toString());
+      // debugPrint(newselectedFrom.toString());
+      // debugPrint(newselectedTo.toString());
       var result = await HttpService.getRecordsAll(
         dateFrom: _dateFormat1.format(newselectedFrom),
         dateTo: _dateFormat1.format(newselectedTo),
