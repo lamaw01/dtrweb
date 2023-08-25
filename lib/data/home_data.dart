@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../model/department_model.dart';
 import '../model/excel_model.dart';
@@ -26,6 +27,9 @@ class HomeData with ChangeNotifier {
 
   final _scheduleList = <ScheduleModel>[];
   List<ScheduleModel> get scheduleList => _scheduleList;
+
+  var _appVersion = "";
+  String get appVersion => _appVersion;
 
   DateTime selectedFrom = DateTime.now();
   DateTime selectedTo = DateTime.now();
@@ -71,6 +75,19 @@ class HomeData with ChangeNotifier {
 
   void changeLoadingState(bool state) {
     _isLogging.value = state;
+  }
+
+  // get device version
+  Future<void> getPackageInfo() async {
+    try {
+      await PackageInfo.fromPlatform().then((result) {
+        _appVersion = result.version;
+        log('_appVersion $_appVersion');
+      });
+    } catch (e) {
+      debugPrint('getPackageInfo $e');
+      notifyListeners();
+    }
   }
 
   void exportExcel(bool isExcel) {
@@ -124,7 +141,7 @@ class HomeData with ChangeNotifier {
 
       var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
       column2
-        ..value = 'Emp ID'
+        ..value = 'Sched Code'
         ..cellStyle = cellStyle;
 
       var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
@@ -442,6 +459,7 @@ class HomeData with ChangeNotifier {
 
         List<dynamic> dataList = [
           rowCountUser,
+          todaySched.schedId,
           employeeId,
           nameIndex(historyListExcel[i]),
           timeIn1,
@@ -452,7 +470,6 @@ class HomeData with ChangeNotifier {
           duration.lateIn,
           duration.lateBreak,
           finalOtString,
-          todaySched.schedId,
         ];
         result.add(ExcelModel(
           rowCount: rowCountUser.toString(),
@@ -472,7 +489,7 @@ class HomeData with ChangeNotifier {
         sheetObject.appendRow(dataList);
       }
 
-      sheetObject.setColWidth(3, 30);
+      // sheetObject.setColWidth(3, 30);
 
       if (isExcel) {
         excel.save(
@@ -652,7 +669,7 @@ class HomeData with ChangeNotifier {
 
       var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
       column2
-        ..value = 'Emp ID'
+        ..value = 'Sched Code'
         ..cellStyle = cellStyle;
 
       var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
@@ -716,7 +733,7 @@ class HomeData with ChangeNotifier {
         var duration = int.tryParse(_excelList[i].duration);
         var lateIn = int.tryParse(_excelList[i].lateIn);
         var lateBreak = int.tryParse(_excelList[i].lateBreak);
-        var overtime = int.tryParse(_excelList[i].overtime);
+        var overtime = double.tryParse(_excelList[i].overtime);
         var schedCode = '${_excelList[i].scheduleModel?.schedId}';
 
         if (i != 0) {
@@ -738,7 +755,7 @@ class HomeData with ChangeNotifier {
         }
       }
 
-      sheetObject.setColWidth(3, 25);
+      // sheetObject.setColWidth(3, 30);
 
       excel.save(
           fileName:

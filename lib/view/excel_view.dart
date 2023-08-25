@@ -109,10 +109,22 @@ class _ExcelViewState extends State<ExcelView> {
   Widget build(BuildContext context) {
     var instance = Provider.of<HomeData>(context, listen: false);
     const String title = 'UC-1 DTR History';
+    var version = 'v${instance.appVersion}';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(title),
+        title: Row(
+          children: [
+            const Text(title),
+            const SizedBox(
+              width: 2.5,
+            ),
+            Text(
+              version,
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
         actions: [
           InkWell(
             onTap: () {
@@ -205,7 +217,7 @@ class _ExcelViewState extends State<ExcelView> {
                               ),
                             ),
                             child: Text(
-                              provider.excelList[i].rowCount.toString(),
+                              provider.excelList[i].rowCount,
                               maxLines: 1,
                               textAlign: TextAlign.center,
                             ),
@@ -320,7 +332,7 @@ class _ExcelViewState extends State<ExcelView> {
                               ),
                             ),
                             child: Text(
-                              provider.excelList[i].duration.toString(),
+                              provider.excelList[i].duration,
                               maxLines: 1,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
@@ -335,7 +347,7 @@ class _ExcelViewState extends State<ExcelView> {
                               ),
                             ),
                             child: Text(
-                              provider.excelList[i].lateIn.toString(),
+                              provider.excelList[i].lateIn,
                               maxLines: 1,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
@@ -350,7 +362,7 @@ class _ExcelViewState extends State<ExcelView> {
                               ),
                             ),
                             child: Text(
-                              provider.excelList[i].lateBreak.toString(),
+                              provider.excelList[i].lateBreak,
                               maxLines: 1,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
@@ -365,7 +377,7 @@ class _ExcelViewState extends State<ExcelView> {
                               ),
                             ),
                             child: Text(
-                              provider.excelList[i].overtime.toString(),
+                              provider.excelList[i].overtime,
                               maxLines: 1,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,

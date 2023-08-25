@@ -31,6 +31,7 @@ class _HomeViewState extends State<HomeView> {
     var instance = Provider.of<HomeData>(context, listen: false);
     instance.departmentList.add(dropdownValue);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await instance.getPackageInfo();
       await instance.getDepartment();
       await instance.getSchedule();
     });
@@ -147,10 +148,22 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     var instance = Provider.of<HomeData>(context);
     const String title = 'UC-1 DTR History';
+    var version = 'v${instance.appVersion}';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(title),
+        title: Row(
+          children: [
+            const Text(title),
+            const SizedBox(
+              width: 2.5,
+            ),
+            Text(
+              version,
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
         actions: [
           if (instance.historyList.isNotEmpty) ...[
             InkWell(
