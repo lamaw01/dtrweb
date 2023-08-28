@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dtrweb/model/department_model.dart';
 import 'package:dtrweb/model/excel_model.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,7 @@ class ExcelView extends StatefulWidget {
 
 class _ExcelViewState extends State<ExcelView> {
   late ScheduleModel dropdownValue;
+  var scrollController = ScrollController();
 
   @override
   void initState() {
@@ -155,31 +158,28 @@ class _ExcelViewState extends State<ExcelView> {
           ),
         ],
       ),
-      body: Consumer<HomeData>(builder: (ctx, provider, widget) {
-        return Column(
-          children: [
-            ValueListenableBuilder<bool>(
-              valueListenable: instance.isLogging,
-              builder: (context, value, child) {
-                if (value) {
-                  return LinearProgressIndicator(
-                    backgroundColor: Colors.grey,
-                    color: Colors.orange[300],
-                    minHeight: 10,
-                  );
-                }
-                return const SizedBox();
-              },
-            ),
-            Expanded(
+      body: Scrollbar(
+        thumbVisibility: true,
+        // trackVisibility: true,
+        child: SingleChildScrollView(
+          primary: true,
+          scrollDirection: Axis.horizontal,
+          child: Consumer<HomeData>(builder: (ctx, provider, widget) {
+            var w = MediaQuery.of(context).size.width;
+            var h = MediaQuery.of(context).size.height;
+            log('w $w h $h');
+            return SizedBox(
+              width: 1920.0,
+              height: 1080.0,
               child: ListView.builder(
+                shrinkWrap: true,
+                controller: scrollController,
                 itemCount: provider.excelList.length,
                 itemBuilder: (ctx, i) {
                   var schedCode = '';
                   if (provider.excelList[i].scheduleModel != null) {
                     schedCode = provider.excelList[i].scheduleModel!.schedId;
                   }
-
                   return InkWell(
                     hoverColor: Colors.lightBlue,
                     onTap: () async {
@@ -208,179 +208,215 @@ class _ExcelViewState extends State<ExcelView> {
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            width: 50.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.orange,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 50.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.orange,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].rowCount,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
+                              child: Text(
+                                provider.excelList[i].rowCount,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 80.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.green,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 80.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.green,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              schedCode,
-                              textAlign: TextAlign.center,
+                              child: Text(
+                                schedCode,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 80.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.green,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 80.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.green,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].employeeId,
-                              textAlign: TextAlign.center,
+                              child: Text(
+                                provider.excelList[i].employeeId,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 200.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.blue,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 200.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.blue,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].name,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                provider.excelList[i].name,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 180.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.red,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 180.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.red,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].timeIn1,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                provider.excelList[i].timeIn1,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 180.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.yellow,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 180.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.yellow,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].timeOut1,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                provider.excelList[i].timeOut1,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 180.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.purple,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 180.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.purple,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].timeIn2,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                provider.excelList[i].timeIn2,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 180.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.pink,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 180.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.pink,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].timeOut2,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                provider.excelList[i].timeOut2,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 180.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.cyan,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 180.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.cyan,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].duration,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                provider.excelList[i].duration,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 180.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.indigo,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 180.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.indigo,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].lateIn,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                provider.excelList[i].lateIn,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 180.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.lime,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 180.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.lime,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].lateBreak,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                provider.excelList[i].lateBreak,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
-                          Container(
-                            width: 180.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.teal,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              width: 180.0,
+                              decoration: const BoxDecoration(
+                                // color: Colors.teal,
+                                border: Border(
+                                  right:
+                                      BorderSide(width: 1, color: Colors.grey),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              provider.excelList[i].overtime,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                provider.excelList[i].overtime,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
                         ],
@@ -389,10 +425,10 @@ class _ExcelViewState extends State<ExcelView> {
                   );
                 },
               ),
-            ),
-          ],
-        );
-      }),
+            );
+          }),
+        ),
+      ),
     );
   }
 }
