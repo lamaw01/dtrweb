@@ -1,12 +1,12 @@
-import 'dart:developer';
-
 import 'package:dtrweb/model/department_model.dart';
 import 'package:dtrweb/model/excel_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/home_data.dart';
 import '../model/schedule_model.dart';
+import '../services/http_service.dart';
 
 class ExcelView extends StatefulWidget {
   const ExcelView({
@@ -134,12 +134,15 @@ class _ExcelViewState extends State<ExcelView> {
               instance.remakeExcel();
             },
             child: Ink(
+              height: 50.0,
+              width: 125.0,
               decoration: BoxDecoration(
-                // borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(5.0),
                 color: Colors.orange[300],
               ),
               padding: const EdgeInsets.all(5.0),
               child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.download,
@@ -148,7 +151,7 @@ class _ExcelViewState extends State<ExcelView> {
                   Text(
                     'Export excel',
                     style: TextStyle(
-                      fontSize: 18.0,
+                      fontSize: 16.0,
                       color: Colors.white,
                     ),
                   ),
@@ -160,14 +163,14 @@ class _ExcelViewState extends State<ExcelView> {
       ),
       body: Scrollbar(
         thumbVisibility: true,
-        // trackVisibility: true,
+        trackVisibility: true,
         child: SingleChildScrollView(
           primary: true,
           scrollDirection: Axis.horizontal,
           child: Consumer<HomeData>(builder: (ctx, provider, widget) {
             var w = MediaQuery.of(context).size.width;
             var h = MediaQuery.of(context).size.height;
-            log('w $w h $h');
+            debugPrint('w $w h $h');
             return SizedBox(
               width: 1920.0,
               height: 1080.0,
@@ -177,250 +180,266 @@ class _ExcelViewState extends State<ExcelView> {
                 itemCount: provider.excelList.length,
                 itemBuilder: (ctx, i) {
                   var schedCode = '';
+                  var timeLogIn2isSelfie =
+                      provider.excelList[i].timeLogIn2?.isSelfie ?? '';
+                  var timeLogOut2isSelfie =
+                      provider.excelList[i].timeLogOut2?.isSelfie ?? '';
                   if (provider.excelList[i].scheduleModel != null) {
                     schedCode = provider.excelList[i].scheduleModel!.schedId;
                   }
-                  return InkWell(
-                    hoverColor: Colors.lightBlue,
-                    onTap: () async {
-                      try {
-                        dropdownValue = provider.scheduleList.singleWhere((e) =>
-                            e.schedId ==
-                            provider.excelList[i].scheduleModel!.schedId);
-                        var result = await showChangeScheduleDialog(
-                          context: context,
-                          model: provider.excelList[i],
-                        );
-                        setState(() {
-                          provider.excelList[i] = result;
-                        });
-                      } catch (e) {
-                        debugPrint('$e showChangeScheduleDialog');
-                      }
-                    },
-                    child: Ink(
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(width: 1, color: Colors.grey),
+
+                  var in1 = provider.friendlyDateFormat(
+                      provider.excelList[i].timeLogIn1.timeLog);
+                  var out1 = provider.friendlyDateFormat(
+                      provider.excelList[i].timeLogOut1.timeLog);
+
+                  var in2 = provider.friendlyDateFormat(
+                      provider.excelList[i].timeLogIn2?.timeLog ?? '');
+                  var out2 = provider.friendlyDateFormat(
+                      provider.excelList[i].timeLogOut2?.timeLog ?? '');
+
+                  return Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 50.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.orange,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
+                            ),
+                          ),
+                          child: Text(
+                            provider.excelList[i].rowCount,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Container(
-                              width: 50.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.orange,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
+                        InkWell(
+                          hoverColor: Colors.grey,
+                          onTap: () async {
+                            try {
+                              dropdownValue = provider.scheduleList.singleWhere(
+                                  (e) =>
+                                      e.schedId ==
+                                      provider
+                                          .excelList[i].scheduleModel!.schedId);
+                              var result = await showChangeScheduleDialog(
+                                context: context,
+                                model: provider.excelList[i],
+                              );
+                              setState(() {
+                                provider.excelList[i] = result;
+                              });
+                            } catch (e) {
+                              debugPrint('$e showChangeScheduleDialog');
+                            }
+                          },
+                          child: Ink(
+                            width: 80.0,
+                            decoration: const BoxDecoration(
+                              // color: Colors.green,
+                              border: Border(
+                                right: BorderSide(width: 1, color: Colors.grey),
                               ),
-                              child: Text(
-                                provider.excelList[i].rowCount,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
+                            ),
+                            child: Text(
+                              schedCode,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 80.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.green,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
+                            ),
+                          ),
+                          child: Text(
+                            provider.excelList[i].employeeId,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Container(
+                          width: 200.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.blue,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
+                            ),
+                          ),
+                          child: Text(
+                            provider.excelList[i].name,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            if (provider.excelList[i].timeLogIn1.isSelfie ==
+                                '1') {
+                              launchUrl(
+                                Uri.parse(
+                                    '${HttpService.serverUrl}/show_image.php?id=${provider.excelList[i].logs![0].id}'),
+                              );
+                            }
+                          },
+                          child: Ink(
+                            width: 220.0,
+                            decoration: const BoxDecoration(
+                              // color: Colors.red,
+                              border: Border(
+                                right: BorderSide(width: 1, color: Colors.grey),
+                              ),
+                            ),
+                            child: Text(
+                              in1,
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color:
+                                    provider.excelList[i].timeLogIn1.isSelfie ==
+                                            '1'
+                                        ? Colors.blue
+                                        : Colors.black,
                               ),
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 80.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.green,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                schedCode,
-                                textAlign: TextAlign.center,
-                              ),
+                        ),
+                        Container(
+                          width: 220.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.yellow,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 80.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.green,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].employeeId,
-                                textAlign: TextAlign.center,
-                              ),
+                          child: Text(
+                            out1,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color:
+                                  provider.excelList[i].timeLogOut1.isSelfie ==
+                                          '1'
+                                      ? Colors.blue
+                                      : Colors.black,
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 200.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.blue,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].name,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                        ),
+                        Container(
+                          width: 220.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.purple,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 180.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.red,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].timeIn1,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                          child: Text(
+                            in2,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: timeLogIn2isSelfie == '1'
+                                  ? Colors.blue
+                                  : Colors.black,
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 180.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.yellow,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].timeOut1,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                        ),
+                        Container(
+                          width: 220.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.pink,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 180.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.purple,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].timeIn2,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                          child: Text(
+                            out2,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: timeLogOut2isSelfie == '1'
+                                  ? Colors.blue
+                                  : Colors.black,
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 180.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.pink,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].timeOut2,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                        ),
+                        Container(
+                          width: 150.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.cyan,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 180.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.cyan,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].duration,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                          child: Text(
+                            provider.excelList[i].duration,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          width: 150.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.indigo,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 180.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.indigo,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].lateIn,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                          child: Text(
+                            provider.excelList[i].lateIn,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          width: 150.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.lime,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 180.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.lime,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].lateBreak,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                          child: Text(
+                            provider.excelList[i].lateBreak,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          width: 150.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.teal,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
                             ),
                           ),
-                          Flexible(
-                            child: Container(
-                              width: 180.0,
-                              decoration: const BoxDecoration(
-                                // color: Colors.teal,
-                                border: Border(
-                                  right:
-                                      BorderSide(width: 1, color: Colors.grey),
-                                ),
-                              ),
-                              child: Text(
-                                provider.excelList[i].overtime,
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
+                          child: Text(
+                            provider.excelList[i].overtime,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   );
                 },

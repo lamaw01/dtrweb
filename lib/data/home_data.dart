@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -52,6 +53,14 @@ class HomeData with ChangeNotifier {
     }
   }
 
+  String dateFormat12or24Time() {
+    if (_is24HourFormat.value) {
+      return 'HH:mm';
+    } else {
+      return 'hh:mm aa';
+    }
+  }
+
   String dateFormat12or24Excel(DateTime dateTime) {
     if (_is24HourFormat.value) {
       return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
@@ -77,12 +86,28 @@ class HomeData with ChangeNotifier {
     _isLogging.value = state;
   }
 
+  String friendlyDateFormat(String date) {
+    var friendlyDate = '';
+    if (date == '' || date == 'In' || date == 'Out') {
+      return date;
+    }
+    try {
+      friendlyDate = DateFormat.yMEd()
+          .addPattern(dateFormat12or24Time())
+          .format(dateFormat12or24().parse(date));
+    } catch (e) {
+      debugPrint('friendlyDateFormat $e');
+      log(date);
+    }
+    return friendlyDate;
+  }
+
   // get device version
   Future<void> getPackageInfo() async {
     try {
       await PackageInfo.fromPlatform().then((result) {
         _appVersion = result.version;
-        log('_appVersion $_appVersion');
+        debugPrint('_appVersion $_appVersion');
       });
     } catch (e) {
       debugPrint('getPackageInfo $e');
@@ -105,10 +130,10 @@ class HomeData with ChangeNotifier {
         rowCount: '',
         employeeId: 'Emp ID',
         name: 'Name',
-        timeIn1: 'In',
-        timeOut1: 'Out',
-        timeIn2: 'In',
-        timeOut2: 'Out',
+        // timeIn1: 'In',
+        // timeOut1: 'Out',
+        // timeIn2: 'In',
+        // timeOut2: 'Out',
         duration: 'Duration(Hours)',
         lateIn: 'Tardy(Minutes)',
         lateBreak: 'Late Break(Minutes)',
@@ -122,6 +147,10 @@ class HomeData with ChangeNotifier {
           breakEnd: '',
           description: '',
         ),
+        timeLogIn1: TimeLog(timeLog: 'In', isSelfie: ''),
+        timeLogOut1: TimeLog(timeLog: 'Out', isSelfie: ''),
+        timeLogIn2: TimeLog(timeLog: 'In', isSelfie: ''),
+        timeLogOut2: TimeLog(timeLog: 'Out', isSelfie: ''),
       )
     ];
 
@@ -223,7 +252,9 @@ class HomeData with ChangeNotifier {
                   historyListExcel[k - 1].logs.removeAt(0);
                   // log('remove solo 0');
                 }
-                historyListExcel.removeAt(k);
+                if (historyListExcel[k].logs.isEmpty) {
+                  historyListExcel.removeAt(k);
+                }
                 // log('remove solo 1');
               }
             } else if (k > 0 && k < 3) {
@@ -307,10 +338,10 @@ class HomeData with ChangeNotifier {
               rowCount: '',
               employeeId: '',
               name: '',
-              timeIn1: '',
-              timeOut1: '',
-              timeIn2: '',
-              timeOut2: '',
+              // timeIn1: '',
+              // timeOut1: '',
+              // timeIn2: '',
+              // timeOut2: '',
               duration: '',
               lateIn: '',
               lateBreak: '',
@@ -324,6 +355,10 @@ class HomeData with ChangeNotifier {
                 breakEnd: '',
                 description: '',
               ),
+              timeLogIn1: TimeLog(timeLog: '', isSelfie: ''),
+              timeLogOut1: TimeLog(timeLog: '', isSelfie: ''),
+              timeLogIn2: TimeLog(timeLog: '', isSelfie: ''),
+              timeLogOut2: TimeLog(timeLog: '', isSelfie: ''),
             ));
             rowCountUser = 1;
           }
@@ -365,7 +400,11 @@ class HomeData with ChangeNotifier {
                     }
                   }
                   // move first log other day to yesterday if out
-                  timeLogs.add(historyListExcel[i + 1].logs[0]);
+                  if (todaySched.schedId.substring(0, 1).toUpperCase() == 'E') {
+                    timeLogs.add(historyListExcel[i + 1].logs[0]);
+                  } else {
+                    timeLogs.add(historyListExcel[i].logs[0]);
+                  }
                   // if next log is out and is solo, remove
                   if (historyListExcel[i + 1].logs.isNotEmpty) {
                     historyListExcel[i + 1].logs.removeAt(0);
@@ -423,10 +462,10 @@ class HomeData with ChangeNotifier {
           }
         }
 
-        var timeIn1 = '';
-        var timeOut1 = '';
-        var timeIn2 = '';
-        var timeOut2 = '';
+        var timeIn1 = TimeLog(timeLog: '', isSelfie: '');
+        var timeOut1 = TimeLog(timeLog: '', isSelfie: '');
+        var timeIn2 = TimeLog(timeLog: '', isSelfie: '');
+        var timeOut2 = TimeLog(timeLog: '', isSelfie: '');
 
         try {
           if (timeLogs.length > 1 &&
@@ -438,18 +477,22 @@ class HomeData with ChangeNotifier {
             timeLogs[1] = tempList[1];
           }
 
-          timeIn1 = dateFormat12or24Excel(timeLogs[0].timeStamp);
+          timeIn1.timeLog = dateFormat12or24Excel(timeLogs[0].timeStamp);
+          timeIn1.isSelfie = timeLogs[0].isSelfie;
 
           if (timeLogs.length >= 2) {
-            timeOut1 = dateFormat12or24Excel(timeLogs[1].timeStamp);
+            timeOut1.timeLog = dateFormat12or24Excel(timeLogs[1].timeStamp);
+            timeOut1.isSelfie = timeLogs[0].isSelfie;
           }
           if (timeLogs.length >= 3) {
-            timeIn2 = dateFormat12or24Excel(timeLogs[2].timeStamp);
+            timeIn2.timeLog = dateFormat12or24Excel(timeLogs[2].timeStamp);
+            timeIn2.isSelfie = timeLogs[2].isSelfie;
           }
           if (timeLogs.length >= 4) {
-            timeOut2 = dateFormat12or24Excel(timeLogs[3].timeStamp);
+            timeOut2.timeLog = dateFormat12or24Excel(timeLogs[3].timeStamp);
+            timeOut2.isSelfie = timeLogs[3].isSelfie;
           }
-          if (timeLogs.length == 1) timeOut1 = '';
+          // if (timeLogs.length == 1) timeOut1 = '';
         } catch (e) {
           debugPrint('$e time slot');
         }
@@ -475,16 +518,20 @@ class HomeData with ChangeNotifier {
           rowCount: rowCountUser.toString(),
           employeeId: historyListExcel[i].employeeId,
           name: nameIndex(historyListExcel[i]),
-          timeIn1: timeIn1,
-          timeOut1: timeOut1,
-          timeIn2: timeIn2,
-          timeOut2: timeOut2,
+          // timeIn1: timeIn1,
+          // timeOut1: timeOut1,
+          // timeIn2: timeIn2,
+          // timeOut2: timeOut2,
           duration: duration.hour.toString(),
           lateIn: duration.lateIn.toString(),
           lateBreak: duration.lateBreak.toString(),
           overtime: finalOtString,
           scheduleModel: todaySched,
           logs: timeLogs,
+          timeLogIn1: timeIn1,
+          timeLogOut1: timeOut1,
+          timeLogIn2: timeIn2,
+          timeLogOut2: timeOut2,
         ));
         sheetObject.appendRow(dataList);
       }
@@ -533,12 +580,12 @@ class HomeData with ChangeNotifier {
           _excelList[i + 1].logs != null) {
         // ignore: unused_local_variable
         var name = _excelList[i].name;
-        var timeOut1 = _excelList[i].timeOut1;
-        var timeOut2 = _excelList[i].timeOut2;
-        var timeIn1Plus1 = _excelList[i + 1].timeIn1;
-        var timeOut1Plus1 = _excelList[i + 1].timeOut1;
-        var timeIn1Plus2 = _excelList[i + 1].timeIn2;
-        var timeOut1Plus2 = _excelList[i + 1].timeOut2;
+        var timeOut1 = _excelList[i].timeLogOut1.timeLog;
+        var timeOut2 = _excelList[i].timeLogOut2?.timeLog ?? '';
+        var timeIn1Plus1 = _excelList[i + 1].timeLogIn1.timeLog;
+        var timeOut1Plus1 = _excelList[i + 1].timeLogOut1.timeLog;
+        var timeIn1Plus2 = _excelList[i + 1].timeLogIn2?.timeLog ?? '';
+        var timeOut1Plus2 = _excelList[i + 1].timeLogOut2?.timeLog ?? '';
 
         if (timeOut2 == '' && timeOut1 != '') {
           var timeGapNight = 0;
@@ -549,37 +596,41 @@ class HomeData with ChangeNotifier {
               .inHours;
 
           if (timeGapNight <= 2 && timeOut1Plus2 != '') {
-            _excelList[i].timeIn2 = timeIn1Plus1;
-            _excelList[i].timeOut2 = timeOut1Plus1;
-            _excelList[i + 1].timeIn1 = timeIn1Plus2;
-            _excelList[i + 1].timeOut1 = timeOut1Plus2;
-            _excelList[i + 1].timeIn2 = '';
-            _excelList[i + 1].timeOut2 = '';
+            _excelList[i].timeLogIn2?.timeLog = timeIn1Plus1;
+            _excelList[i].timeLogOut2?.timeLog = timeOut1Plus1;
+            _excelList[i + 1].timeLogIn1.timeLog = timeIn1Plus2;
+            _excelList[i + 1].timeLogOut1.timeLog = timeOut1Plus2;
+            _excelList[i + 1].timeLogIn2!.timeLog = '';
+            _excelList[i + 1].timeLogOut2!.timeLog = '';
 
             var logs1 = <Log>[];
             var logs2 = <Log>[];
 
             logs1 = <Log>[
               Log(
-                timeStamp: dateFormat12or24().parse(_excelList[i].timeIn1),
+                timeStamp:
+                    dateFormat12or24().parse(_excelList[i].timeLogIn1.timeLog),
                 logType: 'IN',
                 id: '',
                 isSelfie: '',
               ),
               Log(
-                timeStamp: dateFormat12or24().parse(_excelList[i].timeOut1),
+                timeStamp:
+                    dateFormat12or24().parse(_excelList[i].timeLogOut1.timeLog),
                 logType: 'OUT',
                 id: '',
                 isSelfie: '',
               ),
               Log(
-                timeStamp: dateFormat12or24().parse(_excelList[i].timeIn2),
+                timeStamp:
+                    dateFormat12or24().parse(_excelList[i].timeLogIn2!.timeLog),
                 logType: 'IN',
                 id: '',
                 isSelfie: '',
               ),
               Log(
-                timeStamp: dateFormat12or24().parse(_excelList[i].timeOut2),
+                timeStamp: dateFormat12or24()
+                    .parse(_excelList[i].timeLogOut2!.timeLog),
                 logType: 'OUT',
                 id: '',
                 isSelfie: '',
@@ -588,13 +639,15 @@ class HomeData with ChangeNotifier {
 
             logs2 = <Log>[
               Log(
-                timeStamp: dateFormat12or24().parse(_excelList[i + 1].timeIn1),
+                timeStamp: dateFormat12or24()
+                    .parse(_excelList[i + 1].timeLogIn1.timeLog),
                 logType: 'IN',
                 id: '',
                 isSelfie: '',
               ),
               Log(
-                timeStamp: dateFormat12or24().parse(_excelList[i + 1].timeOut1),
+                timeStamp: dateFormat12or24()
+                    .parse(_excelList[i + 1].timeLogOut1.timeLog),
                 logType: 'OUT',
                 id: '',
                 isSelfie: '',
@@ -611,7 +664,7 @@ class HomeData with ChangeNotifier {
             _excelList[i].lateIn = duration1.lateIn.toString();
             _excelList[i].lateBreak = duration1.lateBreak.toString();
 
-            log('duration1 ${_excelList[i].duration} ${_excelList[i].scheduleModel!.schedId}');
+            // log('duration1 ${_excelList[i].duration} ${_excelList[i].scheduleModel!.schedId}');
 
             var duration2 = calcDurationInOutSameDay(
               logs: logs2,
@@ -623,7 +676,7 @@ class HomeData with ChangeNotifier {
             _excelList[i + 1].lateIn = duration2.lateIn.toString();
             _excelList[i + 1].lateBreak = duration2.lateBreak.toString();
 
-            log('duration2 ${_excelList[i + 1].duration} ${_excelList[i + 1].scheduleModel!.schedId}');
+            // log('duration2 ${_excelList[i + 1].duration} ${_excelList[i + 1].scheduleModel!.schedId}');
           }
         }
       }
@@ -742,10 +795,10 @@ class HomeData with ChangeNotifier {
             schedCode,
             employeeId,
             _excelList[i].name,
-            _excelList[i].timeIn1,
-            _excelList[i].timeOut1,
-            _excelList[i].timeIn2,
-            _excelList[i].timeOut2,
+            _excelList[i].timeLogIn1.timeLog,
+            _excelList[i].timeLogOut1.timeLog,
+            _excelList[i].timeLogIn2?.timeLog ?? '',
+            _excelList[i].timeLogOut2?.timeLog ?? '',
             duration,
             lateIn,
             lateBreak,
@@ -875,7 +928,7 @@ class HomeData with ChangeNotifier {
       for (int i = 0; i < logs.length; i++) {
         if (i + 1 < logs.length) {
           if (logs[i].logType == 'IN' && logs[i + 1].logType == 'OUT') {
-            log('$name ${logs[i].timeStamp} ${logs[i + 1].timeStamp}');
+            // log('$name ${logs[i].timeStamp} ${logs[i + 1].timeStamp}');
             seconds = seconds +
                 logs[i + 1].timeStamp.difference(logs[i].timeStamp).inSeconds;
           }
