@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/home_data.dart';
+import '../model/log_model.dart';
 import '../model/schedule_model.dart';
 import '../services/http_service.dart';
 
@@ -84,7 +85,7 @@ class _ExcelViewState extends State<ExcelView> {
                 ),
               ),
               onPressed: () {
-                instance.reCalcLate(model: model, newSchedule: dropdownValue);
+                // instance.reCalcLate(model: model, newSchedule: dropdownValue);
                 Navigator.of(context).pop();
               },
             ),
@@ -114,6 +115,13 @@ class _ExcelViewState extends State<ExcelView> {
     const String title = 'UC-1 DTR History';
     var version = 'v${instance.appVersion}';
 
+    Color colorIsSelfie(String selfie) {
+      if (selfie == '1') {
+        return Colors.blue;
+      }
+      return Colors.black;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -131,7 +139,7 @@ class _ExcelViewState extends State<ExcelView> {
         actions: [
           InkWell(
             onTap: () {
-              instance.remakeExcel();
+              // instance.remakeExcel();
             },
             child: Ink(
               height: 50.0,
@@ -177,26 +185,39 @@ class _ExcelViewState extends State<ExcelView> {
               child: ListView.builder(
                 shrinkWrap: true,
                 controller: scrollController,
-                itemCount: provider.excelList.length,
+                itemCount: provider.cleanExcelData.length,
                 itemBuilder: (ctx, i) {
-                  var schedCode = '';
-                  var timeLogIn2isSelfie =
-                      provider.excelList[i].timeLogIn2?.isSelfie ?? '';
-                  var timeLogOut2isSelfie =
-                      provider.excelList[i].timeLogOut2?.isSelfie ?? '';
-                  if (provider.excelList[i].scheduleModel != null) {
-                    schedCode = provider.excelList[i].scheduleModel!.schedId;
+                  // var timeLogIn2isSelfie =
+                  //     provider.excelList[i].timeLogIn2?.isSelfie ?? '';
+                  // var timeLogOut2isSelfie =
+                  //     provider.excelList[i].timeLogOut2?.isSelfie ?? '';
+
+                  // var in1 = provider.friendlyDateFormat(
+                  //     provider.excelList[i].timeLogIn1.timeLog);
+                  // var out1 = provider.friendlyDateFormat(
+                  //     provider.excelList[i].timeLogOut1.timeLog);
+
+                  // var in2 = provider.friendlyDateFormat(
+                  //     provider.excelList[i].timeLogIn2?.timeLog ?? '');
+                  // var out2 = provider.friendlyDateFormat(
+                  //     provider.excelList[i].timeLogOut2?.timeLog ?? '');
+                  Log? in1;
+                  Log? out1;
+                  Log? in2;
+                  Log? out2;
+
+                  if (provider.cleanExcelData[i].logs.isNotEmpty) {
+                    in1 = provider.cleanExcelData[i].logs[0];
                   }
-
-                  var in1 = provider.friendlyDateFormat(
-                      provider.excelList[i].timeLogIn1.timeLog);
-                  var out1 = provider.friendlyDateFormat(
-                      provider.excelList[i].timeLogOut1.timeLog);
-
-                  var in2 = provider.friendlyDateFormat(
-                      provider.excelList[i].timeLogIn2?.timeLog ?? '');
-                  var out2 = provider.friendlyDateFormat(
-                      provider.excelList[i].timeLogOut2?.timeLog ?? '');
+                  if (provider.cleanExcelData[i].logs.length >= 2) {
+                    out1 = provider.cleanExcelData[i].logs[1];
+                  }
+                  if (provider.cleanExcelData[i].logs.length >= 3) {
+                    in2 = provider.cleanExcelData[i].logs[2];
+                  }
+                  if (provider.cleanExcelData[i].logs.length >= 4) {
+                    out2 = provider.cleanExcelData[i].logs[3];
+                  }
 
                   return Container(
                     decoration: const BoxDecoration(
@@ -217,7 +238,7 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.excelList[i].rowCount,
+                            provider.cleanExcelData[i].rowCount,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                           ),
@@ -225,22 +246,22 @@ class _ExcelViewState extends State<ExcelView> {
                         InkWell(
                           hoverColor: Colors.grey,
                           onTap: () async {
-                            try {
-                              dropdownValue = provider.scheduleList.singleWhere(
-                                  (e) =>
-                                      e.schedId ==
-                                      provider
-                                          .excelList[i].scheduleModel!.schedId);
-                              var result = await showChangeScheduleDialog(
-                                context: context,
-                                model: provider.excelList[i],
-                              );
-                              setState(() {
-                                provider.excelList[i] = result;
-                              });
-                            } catch (e) {
-                              debugPrint('$e showChangeScheduleDialog');
-                            }
+                            // try {
+                            //   dropdownValue = provider.scheduleList.singleWhere(
+                            //       (e) =>
+                            //           e.schedId ==
+                            //           provider
+                            //               .cleanExcelData[i].currentSched.schedId);
+                            //   var result = await showChangeScheduleDialog(
+                            //     context: context,
+                            //     model: provider.excelList[i],
+                            //   );
+                            //   setState(() {
+                            //     provider.excelList[i] = result;
+                            //   });
+                            // } catch (e) {
+                            //   debugPrint('$e showChangeScheduleDialog');
+                            // }
                           },
                           child: Ink(
                             width: 80.0,
@@ -251,7 +272,7 @@ class _ExcelViewState extends State<ExcelView> {
                               ),
                             ),
                             child: Text(
-                              schedCode,
+                              provider.cleanExcelData[i].currentSched.schedId,
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -265,7 +286,7 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.excelList[i].employeeId,
+                            provider.cleanExcelData[i].employeeId,
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -278,7 +299,7 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.excelList[i].name,
+                            provider.cleanExcelData[i].name,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
@@ -286,11 +307,11 @@ class _ExcelViewState extends State<ExcelView> {
                         ),
                         InkWell(
                           onTap: () {
-                            if (provider.excelList[i].timeLogIn1.isSelfie ==
+                            if (provider.cleanExcelData[i].logs[0].isSelfie ==
                                 '1') {
                               launchUrl(
                                 Uri.parse(
-                                    '${HttpService.serverUrl}/show_image.php?id=${provider.excelList[i].logs![0].id}'),
+                                    '${HttpService.serverUrl}/show_image.php?id=${provider.cleanExcelData[i].logs[0].id}'),
                               );
                             }
                           },
@@ -303,16 +324,12 @@ class _ExcelViewState extends State<ExcelView> {
                               ),
                             ),
                             child: Text(
-                              in1,
+                              provider.formatPrettyDate(in1?.timeStamp),
                               maxLines: 1,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color:
-                                    provider.excelList[i].timeLogIn1.isSelfie ==
-                                            '1'
-                                        ? Colors.blue
-                                        : Colors.black,
+                                color: colorIsSelfie(in1?.isSelfie ?? '0'),
                               ),
                             ),
                           ),
@@ -326,16 +343,12 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            out1,
+                            provider.formatPrettyDate(out1?.timeStamp),
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color:
-                                  provider.excelList[i].timeLogOut1.isSelfie ==
-                                          '1'
-                                      ? Colors.blue
-                                      : Colors.black,
+                              color: colorIsSelfie(out1?.isSelfie ?? '0'),
                             ),
                           ),
                         ),
@@ -348,14 +361,13 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            in2,
+                            provider.formatPrettyDate(in2?.timeStamp),
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: timeLogIn2isSelfie == '1'
-                                  ? Colors.blue
-                                  : Colors.black,
+                              color: colorIsSelfie(
+                                  in2?.isSelfie.toString() ?? '0'),
                             ),
                           ),
                         ),
@@ -368,14 +380,14 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            out2,
+                            provider.formatPrettyDate(out2?.timeStamp),
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: timeLogOut2isSelfie == '1'
-                                  ? Colors.blue
-                                  : Colors.black,
+                              color: colorIsSelfie(
+                                out2?.isSelfie.toString() ?? '0',
+                              ),
                             ),
                           ),
                         ),
@@ -388,7 +400,7 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.excelList[i].duration,
+                            provider.cleanExcelData[i].duration,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
@@ -403,7 +415,7 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.excelList[i].lateIn,
+                            provider.cleanExcelData[i].lateIn,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
@@ -418,7 +430,7 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.excelList[i].lateBreak,
+                            provider.cleanExcelData[i].lateBreak,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
@@ -433,7 +445,7 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.excelList[i].overtime,
+                            provider.cleanExcelData[i].overtime,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,

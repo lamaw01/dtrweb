@@ -7,6 +7,7 @@ import '../data/home_data.dart';
 import '../model/department_model.dart';
 import '../widget/logs_widget.dart';
 import 'excel_view.dart';
+// import 'test_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -180,7 +181,8 @@ class _HomeViewState extends State<HomeView> {
                       department: dropdownValue);
                 }
                 instance.changeLoadingState(false);
-                instance.exportExcel(false);
+                // instance.exportExcel(false);
+                instance.sortData();
                 if (mounted) {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -191,6 +193,14 @@ class _HomeViewState extends State<HomeView> {
                     ),
                   );
                 }
+
+                // if (mounted) {
+                //   Navigator.of(context).push(
+                //     MaterialPageRoute(
+                //       builder: (context) => const TestView(),
+                //     ),
+                //   );
+                // }
               },
               child: Ink(
                 padding: const EdgeInsets.all(5.0),
@@ -405,6 +415,7 @@ class _HomeViewState extends State<HomeView> {
                                     } else {
                                       // get records with id or name
                                       await instance.getRecords(
+                                          // employeeId: idController.text.trim(),
                                           employeeId: idController.text.trim(),
                                           department: dropdownValue);
                                     }
