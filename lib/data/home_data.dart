@@ -363,25 +363,32 @@ class HomeData with ChangeNotifier {
     if (i == 0) {
       try {
         var logs = <Log>[];
+        bool isSoloOut = false;
         if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 1) {
-          for (int k = 0; k < c[i].logs.length; k++) {
+          for (int k = 1; k < c[i].logs.length; k++) {
             logs.add(c[i].logs[k]);
           }
+        } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'IN') {
+          logs.add(c[i].logs.first);
+        } else if (c[i].logs.first.logType == 'OUT' && c[i].logs.length == 1) {
+          isSoloOut = true;
         } else {
           logs.addAll(c[i].logs);
         }
 
-        dayCleanData.add(
-          CleanDataModel(
-            employeeId: c[i].employeeId,
-            firstName: c[i].firstName,
-            lastName: c[i].lastName,
-            middleName: c[i].middleName,
-            date: c[i].date,
-            logs: logs,
-            currentSched: c[i].currentSched,
-          ),
-        );
+        if (!isSoloOut) {
+          dayCleanData.add(
+            CleanDataModel(
+              employeeId: c[i].employeeId,
+              firstName: c[i].firstName,
+              lastName: c[i].lastName,
+              middleName: c[i].middleName,
+              date: c[i].date,
+              logs: logs,
+              currentSched: c[i].currentSched,
+            ),
+          );
+        }
       } catch (e) {
         debugPrint('if $e');
       }
