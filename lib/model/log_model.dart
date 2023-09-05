@@ -25,3 +25,15 @@ class Log {
         "is_selfie": isSelfie,
       };
 }
+
+class TimeLog {
+  String isSelfie;
+  String timestamp;
+  String id;
+
+  TimeLog({
+    this.isSelfie = '0',
+    this.timestamp = '',
+    this.id = '',
+  });
+}

@@ -1,13 +1,11 @@
-import 'package:dtrweb/model/department_model.dart';
-import 'package:dtrweb/model/excel_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../data/home_data.dart';
-import '../model/log_model.dart';
+import '../model/clean_excel_model.dart';
+import '../model/department_model.dart';
 import '../model/schedule_model.dart';
-import '../services/http_service.dart';
+import '../widget/timelog_widget.dart';
 
 class ExcelView extends StatefulWidget {
   const ExcelView({
@@ -35,9 +33,9 @@ class _ExcelViewState extends State<ExcelView> {
     }
   }
 
-  Future<ExcelModel> showChangeScheduleDialog({
+  Future<CleanExcelDataModel> showChangeScheduleDialog({
     required BuildContext context,
-    required ExcelModel model,
+    required CleanExcelDataModel model,
   }) async {
     var instance = Provider.of<HomeData>(context, listen: false);
     await showDialog<void>(
@@ -85,7 +83,7 @@ class _ExcelViewState extends State<ExcelView> {
                 ),
               ),
               onPressed: () {
-                // instance.reCalcLate(model: model, newSchedule: dropdownValue);
+                instance.reCalcLate(model: model, newSchedule: dropdownValue);
                 Navigator.of(context).pop();
               },
             ),
@@ -115,13 +113,6 @@ class _ExcelViewState extends State<ExcelView> {
     const String title = 'UC-1 DTR History';
     var version = 'v${instance.appVersion}';
 
-    Color colorIsSelfie(String selfie) {
-      if (selfie == '1') {
-        return Colors.blue;
-      }
-      return Colors.black;
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -139,7 +130,7 @@ class _ExcelViewState extends State<ExcelView> {
         actions: [
           InkWell(
             onTap: () {
-              // instance.remakeExcel();
+              instance.exportExcel();
             },
             child: Ink(
               height: 50.0,
@@ -187,38 +178,6 @@ class _ExcelViewState extends State<ExcelView> {
                 controller: scrollController,
                 itemCount: provider.cleanExcelData.length,
                 itemBuilder: (ctx, i) {
-                  // var timeLogIn2isSelfie =
-                  //     provider.excelList[i].timeLogIn2?.isSelfie ?? '';
-                  // var timeLogOut2isSelfie =
-                  //     provider.excelList[i].timeLogOut2?.isSelfie ?? '';
-
-                  // var in1 = provider.friendlyDateFormat(
-                  //     provider.excelList[i].timeLogIn1.timeLog);
-                  // var out1 = provider.friendlyDateFormat(
-                  //     provider.excelList[i].timeLogOut1.timeLog);
-
-                  // var in2 = provider.friendlyDateFormat(
-                  //     provider.excelList[i].timeLogIn2?.timeLog ?? '');
-                  // var out2 = provider.friendlyDateFormat(
-                  //     provider.excelList[i].timeLogOut2?.timeLog ?? '');
-                  Log? in1;
-                  Log? out1;
-                  Log? in2;
-                  Log? out2;
-
-                  if (provider.cleanExcelData[i].logs.isNotEmpty) {
-                    in1 = provider.cleanExcelData[i].logs[0];
-                  }
-                  if (provider.cleanExcelData[i].logs.length >= 2) {
-                    out1 = provider.cleanExcelData[i].logs[1];
-                  }
-                  if (provider.cleanExcelData[i].logs.length >= 3) {
-                    in2 = provider.cleanExcelData[i].logs[2];
-                  }
-                  if (provider.cleanExcelData[i].logs.length >= 4) {
-                    out2 = provider.cleanExcelData[i].logs[3];
-                  }
-
                   return Container(
                     decoration: const BoxDecoration(
                       border: Border(
@@ -244,24 +203,24 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                         ),
                         InkWell(
-                          hoverColor: Colors.grey,
+                          hoverColor: Colors.grey[300],
                           onTap: () async {
-                            // try {
-                            //   dropdownValue = provider.scheduleList.singleWhere(
-                            //       (e) =>
-                            //           e.schedId ==
-                            //           provider
-                            //               .cleanExcelData[i].currentSched.schedId);
-                            //   var result = await showChangeScheduleDialog(
-                            //     context: context,
-                            //     model: provider.excelList[i],
-                            //   );
-                            //   setState(() {
-                            //     provider.excelList[i] = result;
-                            //   });
-                            // } catch (e) {
-                            //   debugPrint('$e showChangeScheduleDialog');
-                            // }
+                            try {
+                              dropdownValue = provider.scheduleList.singleWhere(
+                                  (e) =>
+                                      e.schedId ==
+                                      provider.cleanExcelData[i].currentSched
+                                          .schedId);
+                              var result = await showChangeScheduleDialog(
+                                context: context,
+                                model: provider.cleanExcelData[i],
+                              );
+                              setState(() {
+                                provider.cleanExcelData[i] = result;
+                              });
+                            } catch (e) {
+                              debugPrint('$e showChangeScheduleDialog');
+                            }
                           },
                           child: Ink(
                             width: 80.0,
@@ -305,92 +264,98 @@ class _ExcelViewState extends State<ExcelView> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        InkWell(
-                          onTap: () {
-                            if (provider.cleanExcelData[i].logs[0].isSelfie ==
-                                '1') {
-                              launchUrl(
-                                Uri.parse(
-                                    '${HttpService.serverUrl}/show_image.php?id=${provider.cleanExcelData[i].logs[0].id}'),
-                              );
-                            }
-                          },
-                          child: Ink(
-                            width: 220.0,
-                            decoration: const BoxDecoration(
-                              // color: Colors.red,
-                              border: Border(
-                                right: BorderSide(width: 1, color: Colors.grey),
-                              ),
-                            ),
-                            child: Text(
-                              provider.formatPrettyDate(in1?.timeStamp),
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: colorIsSelfie(in1?.isSelfie ?? '0'),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 220.0,
-                          decoration: const BoxDecoration(
-                            // color: Colors.yellow,
-                            border: Border(
-                              right: BorderSide(width: 1, color: Colors.grey),
-                            ),
-                          ),
-                          child: Text(
-                            provider.formatPrettyDate(out1?.timeStamp),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: colorIsSelfie(out1?.isSelfie ?? '0'),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 220.0,
-                          decoration: const BoxDecoration(
-                            // color: Colors.purple,
-                            border: Border(
-                              right: BorderSide(width: 1, color: Colors.grey),
-                            ),
-                          ),
-                          child: Text(
-                            provider.formatPrettyDate(in2?.timeStamp),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: colorIsSelfie(
-                                  in2?.isSelfie.toString() ?? '0'),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 220.0,
-                          decoration: const BoxDecoration(
-                            // color: Colors.pink,
-                            border: Border(
-                              right: BorderSide(width: 1, color: Colors.grey),
-                            ),
-                          ),
-                          child: Text(
-                            provider.formatPrettyDate(out2?.timeStamp),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: colorIsSelfie(
-                                out2?.isSelfie.toString() ?? '0',
-                              ),
-                            ),
-                          ),
-                        ),
+                        TimelogWidget(tl: provider.cleanExcelData[i].in1),
+                        TimelogWidget(tl: provider.cleanExcelData[i].out1),
+                        TimelogWidget(tl: provider.cleanExcelData[i].in2),
+                        TimelogWidget(tl: provider.cleanExcelData[i].out2),
+                        // InkWell(
+                        //   hoverColor: Colors.grey[300],
+                        //   onTap: () {
+                        //     if (provider.cleanExcelData[i].in1.isSelfie ==
+                        //         '1') {
+                        //       launchUrl(
+                        //         Uri.parse(
+                        //             '${HttpService.serverUrl}/show_image.php?id=${provider.cleanExcelData[i].logs[0].id}'),
+                        //       );
+                        //     }
+                        //   },
+                        //   child: Ink(
+                        //     width: 220.0,
+                        //     decoration: const BoxDecoration(
+                        //       // color: Colors.red,
+                        //       border: Border(
+                        //         right: BorderSide(width: 1, color: Colors.grey),
+                        //       ),
+                        //     ),
+                        //     child: Text(
+                        //       provider.cleanExcelData[i].in1.timestamp,
+                        //       maxLines: 1,
+                        //       textAlign: TextAlign.center,
+                        //       overflow: TextOverflow.ellipsis,
+                        //       style: TextStyle(
+                        //         color: colorIsSelfie(
+                        //             provider.cleanExcelData[i].in1.isSelfie),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        // Ink(
+                        //   width: 220.0,
+                        //   decoration: const BoxDecoration(
+                        //     // color: Colors.yellow,
+                        //     border: Border(
+                        //       right: BorderSide(width: 1, color: Colors.grey),
+                        //     ),
+                        //   ),
+                        //   child: Text(
+                        //     provider.cleanExcelData[i].out1.timestamp,
+                        //     maxLines: 1,
+                        //     textAlign: TextAlign.center,
+                        //     overflow: TextOverflow.ellipsis,
+                        //     style: TextStyle(
+                        //       color: colorIsSelfie(
+                        //           provider.cleanExcelData[i].out1.isSelfie),
+                        //     ),
+                        //   ),
+                        // ),
+                        // Container(
+                        //   width: 220.0,
+                        //   decoration: const BoxDecoration(
+                        //     // color: Colors.purple,
+                        //     border: Border(
+                        //       right: BorderSide(width: 1, color: Colors.grey),
+                        //     ),
+                        //   ),
+                        //   child: Text(
+                        //     provider.cleanExcelData[i].in2.timestamp,
+                        //     maxLines: 1,
+                        //     textAlign: TextAlign.center,
+                        //     overflow: TextOverflow.ellipsis,
+                        //     style: TextStyle(
+                        //       color: colorIsSelfie(
+                        //           provider.cleanExcelData[i].in2.isSelfie),
+                        //     ),
+                        //   ),
+                        // ),
+                        // Container(
+                        //   width: 220.0,
+                        //   decoration: const BoxDecoration(
+                        //     // color: Colors.pink,
+                        //     border: Border(
+                        //       right: BorderSide(width: 1, color: Colors.grey),
+                        //     ),
+                        //   ),
+                        //   child: Text(
+                        //     provider.cleanExcelData[i].out1.timestamp,
+                        //     maxLines: 1,
+                        //     textAlign: TextAlign.center,
+                        //     overflow: TextOverflow.ellipsis,
+                        //     style: TextStyle(
+                        //       color: colorIsSelfie(
+                        //           provider.cleanExcelData[i].out1.isSelfie),
+                        //     ),
+                        //   ),
+                        // ),
                         Container(
                           width: 150.0,
                           decoration: const BoxDecoration(
@@ -445,7 +410,7 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.cleanExcelData[i].overtime,
+                            provider.cleanExcelData[i].overtime.toString(),
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,

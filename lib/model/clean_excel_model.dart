@@ -12,6 +12,10 @@ class CleanExcelDataModel {
   String lateBreak;
   String overtime;
   String rowCount;
+  TimeLog in1;
+  TimeLog out1;
+  TimeLog in2;
+  TimeLog out2;
 
   CleanExcelDataModel({
     required this.employeeId,
@@ -24,5 +28,9 @@ class CleanExcelDataModel {
     required this.lateBreak,
     required this.overtime,
     required this.rowCount,
+    required this.in1,
+    required this.out1,
+    required this.in2,
+    required this.out2,
   });
 }
