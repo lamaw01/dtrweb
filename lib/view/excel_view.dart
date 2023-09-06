@@ -380,7 +380,7 @@ class _ExcelViewState extends State<ExcelView> {
                               tl: provider.cleanExcelData[i].out2),
                         ),
                         Container(
-                          width: 150.0,
+                          width: 100.0,
                           decoration: const BoxDecoration(
                             // color: Colors.cyan,
                             border: Border(
@@ -395,7 +395,7 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                         ),
                         Container(
-                          width: 150.0,
+                          width: 100.0,
                           decoration: const BoxDecoration(
                             // color: Colors.indigo,
                             border: Border(
@@ -410,7 +410,7 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                         ),
                         Container(
-                          width: 150.0,
+                          width: 100.0,
                           decoration: const BoxDecoration(
                             // color: Colors.lime,
                             border: Border(
@@ -425,7 +425,7 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                         ),
                         Container(
-                          width: 150.0,
+                          width: 100.0,
                           decoration: const BoxDecoration(
                             // color: Colors.teal,
                             border: Border(
@@ -434,6 +434,37 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                           child: Text(
                             provider.cleanExcelData[i].overtime.toString(),
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          width: 100.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.teal,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
+                            ),
+                          ),
+                          child: Text(
+                            provider.cleanExcelData[i].undertimeIn.toString(),
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          width: 100.0,
+                          decoration: const BoxDecoration(
+                            // color: Colors.teal,
+                            border: Border(
+                              right: BorderSide(width: 1, color: Colors.grey),
+                            ),
+                          ),
+                          child: Text(
+                            provider.cleanExcelData[i].undertimeBreak
+                                .toString(),
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,

@@ -16,7 +16,7 @@ class TimelogWidget extends StatelessWidget {
     }
 
     return Container(
-      width: 220.0,
+      width: 180.0,
       decoration: const BoxDecoration(
         border: Border(
           right: BorderSide(width: 1, color: Colors.grey),

@@ -11,6 +11,8 @@ class CleanExcelDataModel {
   String lateIn;
   String lateBreak;
   String overtime;
+  String undertimeIn;
+  String undertimeBreak;
   String rowCount;
   TimeLog in1;
   TimeLog out1;
@@ -27,6 +29,8 @@ class CleanExcelDataModel {
     required this.lateIn,
     required this.lateBreak,
     required this.overtime,
+    required this.undertimeIn,
+    required this.undertimeBreak,
     required this.rowCount,
     required this.in1,
     required this.out1,

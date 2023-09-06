@@ -14,6 +14,8 @@ class CleanDataModel {
   String? lateIn;
   String? lateBreak;
   String? overtime;
+  String? undertimeIn;
+  String? undertimeBreak;
   int? rowCount;
 
   CleanDataModel({
@@ -28,6 +30,8 @@ class CleanDataModel {
     this.lateIn,
     this.lateBreak,
     this.overtime,
+    this.undertimeIn,
+    this.undertimeBreak,
     this.rowCount,
   });
 }

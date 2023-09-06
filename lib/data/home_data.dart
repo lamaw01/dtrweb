@@ -113,7 +113,13 @@ class HomeData with ChangeNotifier {
     required CleanExcelDataModel model,
     required ScheduleModel newSchedule,
   }) {
-    var duration = LateModel(hour: 0, lateIn: 0, lateBreak: 0, overtime: 0);
+    var duration = LateModel(
+        hour: 0,
+        lateIn: 0,
+        lateBreak: 0,
+        overtime: 0,
+        undertimeIn: 0,
+        undertimelateBreak: 0);
     try {
       duration = calcDurationInOutSameDay(
         logs: model.logs,
@@ -125,6 +131,8 @@ class HomeData with ChangeNotifier {
       model.lateIn = duration.lateIn.toString();
       model.lateBreak = duration.lateBreak.toString();
       model.overtime = finalOtString;
+      model.undertimeIn = duration.undertimeIn.toString();
+      model.undertimeBreak = duration.undertimelateBreak.toString();
       model.currentSched = newSchedule;
     } catch (e) {
       debugPrint('$e reCalcLate');
@@ -144,6 +152,8 @@ class HomeData with ChangeNotifier {
       model.lateIn = duration.lateIn.toString();
       model.lateBreak = duration.lateBreak.toString();
       model.overtime = finalOtString;
+      model.undertimeIn = duration.undertimeIn.toString();
+      model.undertimeBreak = duration.undertimelateBreak.toString();
     } catch (e) {
       debugPrint('$e reCalcLate');
     }
@@ -187,27 +197,32 @@ class HomeData with ChangeNotifier {
 
       var column6 = sheetObject.cell(CellIndex.indexByString('F1'));
       column6
-        ..value = 'D(h)'
+        ..value = 'd(h)'
         ..cellStyle = cellStyle;
 
       var column7 = sheetObject.cell(CellIndex.indexByString('G1'));
       column7
-        ..value = 'T(m)'
+        ..value = 't'
         ..cellStyle = cellStyle;
 
       var column8 = sheetObject.cell(CellIndex.indexByString('H1'));
       column8
-        ..value = 'BT(m)'
+        ..value = 'bt'
         ..cellStyle = cellStyle;
 
       var column9 = sheetObject.cell(CellIndex.indexByString('I1'));
       column9
-        ..value = 'OT'
+        ..value = 'ot'
         ..cellStyle = cellStyle;
 
       var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
       column10
-        ..value = 'UD'
+        ..value = 'ut1'
+        ..cellStyle = cellStyle;
+
+      var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
+      column11
+        ..value = 'ut2'
         ..cellStyle = cellStyle;
 
       var cellStyleData = CellStyle(
@@ -227,6 +242,9 @@ class HomeData with ChangeNotifier {
         var lateIn = int.tryParse(_cleanExcelData[i].lateIn);
         var lateBreak = int.tryParse(_cleanExcelData[i].lateBreak);
         var overtime = _cleanExcelData[i].overtime;
+        var undertimeIn = int.tryParse(_cleanExcelData[i].undertimeIn);
+        var undertimeBreak = int.tryParse(_cleanExcelData[i].undertimeBreak);
+
         List<dynamic> dataList = [
           idName,
           _cleanExcelData[i].in1.timestamp,
@@ -237,6 +255,8 @@ class HomeData with ChangeNotifier {
           lateIn,
           lateBreak,
           overtime,
+          undertimeIn,
+          undertimeBreak,
         ];
         sheetObject.appendRow(dataList);
         sheetObject.setColWidth(0, 25.70);
@@ -245,10 +265,11 @@ class HomeData with ChangeNotifier {
         sheetObject.setColWidth(3, 15.72);
         sheetObject.setColWidth(4, 15.73);
         sheetObject.setColWidth(5, 3.50);
-        sheetObject.setColWidth(6, 3.90);
-        sheetObject.setColWidth(7, 4.70);
-        sheetObject.setColWidth(8, 2.90);
-        sheetObject.setColWidth(9, 2.91);
+        sheetObject.setColWidth(6, 3.51);
+        sheetObject.setColWidth(7, 3.52);
+        sheetObject.setColWidth(8, 3.53);
+        sheetObject.setColWidth(9, 3.54);
+        sheetObject.setColWidth(10, 3.55);
 
         sheetObject.updateCell(
           CellIndex.indexByColumnRow(
@@ -327,7 +348,15 @@ class HomeData with ChangeNotifier {
             columnIndex: 9,
             rowIndex: i,
           ),
-          '',
+          undertimeIn,
+          cellStyle: cellStyleData,
+        );
+        sheetObject.updateCell(
+          CellIndex.indexByColumnRow(
+            columnIndex: 10,
+            rowIndex: i,
+          ),
+          undertimeBreak,
           cellStyle: cellStyleData,
         );
       }
@@ -715,6 +744,8 @@ class HomeData with ChangeNotifier {
       c[i].lateIn = duration.lateIn.toString();
       c[i].lateBreak = duration.lateBreak.toString();
       c[i].overtime = finalOtString;
+      c[i].undertimeIn = duration.undertimeIn.toString();
+      c[i].undertimeBreak = duration.undertimelateBreak.toString();
     }
 
     _cleanData = c;
@@ -738,10 +769,12 @@ class HomeData with ChangeNotifier {
         ),
         date: DateTime.now(),
         logs: <Log>[],
-        duration: 'Duration(Hrs)',
-        lateIn: 'Tardy(Mns)',
-        lateBreak: 'Late Break(Mns)',
-        overtime: 'Overtime',
+        duration: 'D(h)',
+        lateIn: 'T(m)',
+        lateBreak: 'LB(m)',
+        overtime: 'OT',
+        undertimeIn: 'UDI(m)',
+        undertimeBreak: 'UDB(m)',
         rowCount: '',
         in1: TimeLog(timestamp: 'In'),
         out1: TimeLog(timestamp: 'Out'),
@@ -772,6 +805,8 @@ class HomeData with ChangeNotifier {
             lateIn: '',
             lateBreak: '',
             overtime: '',
+            undertimeIn: '',
+            undertimeBreak: '',
             rowCount: '',
             in1: TimeLog(),
             out1: TimeLog(),
@@ -793,6 +828,8 @@ class HomeData with ChangeNotifier {
           lateIn: c[i].lateIn!,
           lateBreak: c[i].lateBreak!,
           overtime: c[i].overtime!,
+          undertimeIn: c[i].undertimeIn!,
+          undertimeBreak: c[i].undertimeBreak!,
           rowCount: '$count',
           in1: TimeLog(),
           out1: TimeLog(),
@@ -926,70 +963,74 @@ class HomeData with ChangeNotifier {
     return finalOtString;
   }
 
-  // calculate duration in hours if log out is other day
-  LateModel calcDurationInOutOtherDay({
-    required List<Log> logs1,
-    required List<Log> logs2,
-    required String name,
-    required ScheduleModel sched,
-  }) {
-    var seconds = 0;
-    var logs = <Log>[];
+  // // calculate duration in hours if log out is other day
+  // LateModel calcDurationInOutOtherDay({
+  //   required List<Log> logs1,
+  //   required List<Log> logs2,
+  //   required String name,
+  //   required ScheduleModel sched,
+  // }) {
+  //   var seconds = 0;
+  //   var logs = <Log>[];
 
-    try {
-      if (logs1.last.logType == 'IN') {
-        logs.add(logs1.last);
-        if (logs2.first.logType == 'IN') {
-          for (int j = 0; j < logs2.length; j++) {
-            if (logs2[j].logType == 'OUT') {
-              logs.add(logs2[j]);
-              break;
-            }
-          }
-        } else {
-          logs.add(logs2.first);
-        }
-      }
+  //   try {
+  //     if (logs1.last.logType == 'IN') {
+  //       logs.add(logs1.last);
+  //       if (logs2.first.logType == 'IN') {
+  //         for (int j = 0; j < logs2.length; j++) {
+  //           if (logs2[j].logType == 'OUT') {
+  //             logs.add(logs2[j]);
+  //             break;
+  //           }
+  //         }
+  //       } else {
+  //         logs.add(logs2.first);
+  //       }
+  //     }
 
-      for (int i = 0; i < logs.length; i++) {
-        if (i + 1 < logs.length) {
-          if (logs[i].logType == 'IN' && logs[i + 1].logType == 'OUT') {
-            seconds = seconds +
-                logs[i + 1].timeStamp.difference(logs[i].timeStamp).inSeconds;
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('other error $e');
-    }
-    var latePenalty = calcLate(
-      logs: logs,
-      name: name,
-      sched: sched,
-    );
-    seconds = seconds + 300;
-    var hours = Duration(seconds: seconds).inHours;
-    var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
-    var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
-    var overtime = Duration(seconds: latePenalty.overtimeSeconds).inMinutes;
-    var model = LateModel(
-      hour: hours,
-      lateIn: lateIn,
-      lateBreak: lateBreak,
-      overtime: overtime,
-    );
-    var differenceForgotOut = 0;
-    if (logs2[0].logType == 'OUT' && logs2[1].logType == 'IN') {
-      differenceForgotOut =
-          logs2[1].timeStamp.difference(logs2[0].timeStamp).inMinutes;
-      // dont calc if out and in if less than 30 minutes gap
-      // means user forgot to out
-      if (differenceForgotOut < 30) {
-        model = LateModel(hour: 0, lateIn: 0, lateBreak: 0, overtime: 0);
-      }
-    }
-    return model;
-  }
+  //     for (int i = 0; i < logs.length; i++) {
+  //       if (i + 1 < logs.length) {
+  //         if (logs[i].logType == 'IN' && logs[i + 1].logType == 'OUT') {
+  //           seconds = seconds +
+  //               logs[i + 1].timeStamp.difference(logs[i].timeStamp).inSeconds;
+  //         }
+  //       }
+  //     }
+  //   } catch (e) {
+  //     debugPrint('other error $e');
+  //   }
+  //   var latePenalty = calcLate(
+  //     logs: logs,
+  //     name: name,
+  //     sched: sched,
+  //   );
+  //   seconds = seconds + 300;
+  //   var hours = Duration(seconds: seconds).inHours;
+  //   var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
+  //   var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
+  //   var overtime = Duration(seconds: latePenalty.overtimeSeconds).inMinutes;
+  //   var undertime = Duration(seconds: latePenalty.undertimeMinutes).inMinutes;
+
+  //   var model = LateModel(
+  //     hour: hours,
+  //     lateIn: lateIn,
+  //     lateBreak: lateBreak,
+  //     overtime: overtime,
+  //     undertime: undertime,
+  //   );
+  //   var differenceForgotOut = 0;
+  //   if (logs2[0].logType == 'OUT' && logs2[1].logType == 'IN') {
+  //     differenceForgotOut =
+  //         logs2[1].timeStamp.difference(logs2[0].timeStamp).inMinutes;
+  //     // dont calc if out and in if less than 30 minutes gap
+  //     // means user forgot to out
+  //     if (differenceForgotOut < 30) {
+  //       model = LateModel(
+  //           hour: 0, lateIn: 0, lateBreak: 0, overtime: 0, undertime: 0);
+  //     }
+  //   }
+  //   return model;
+  // }
 
   // calculate duration in hours if in and out same day
   LateModel calcDurationInOutSameDay({
@@ -1020,11 +1061,18 @@ class HomeData with ChangeNotifier {
     var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
     var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
     var overtime = Duration(seconds: latePenalty.overtimeSeconds).inMinutes;
+    var undertimeIn =
+        Duration(seconds: latePenalty.undertimeInMinutes).inMinutes;
+    var undertimeBreak =
+        Duration(seconds: latePenalty.undertimeBreakMinutes).inMinutes;
+
     return LateModel(
       hour: hours,
       lateIn: lateIn,
       lateBreak: lateBreak,
       overtime: overtime,
+      undertimeIn: undertimeIn,
+      undertimelateBreak: undertimeBreak,
     );
   }
 
@@ -1034,14 +1082,18 @@ class HomeData with ChangeNotifier {
     required ScheduleModel sched,
   }) {
     var sIn = sched.schedIn;
+    var bS = sched.breakStart;
     var bEnd = sched.breakEnd;
     var sOut = sched.schedOut;
-    var schedIn = '';
-    var breakIn = '';
-    var schedOut = '';
+    var schedIn = ''; //0
+    var breakStart = ''; //1
+    var breakEnd = ''; //2
+    var schedOut = ''; //3
     var latePenaltyIn = 0;
     var latePenaltyBreak = 0;
     var overtime = 0;
+    var undertimeIn = 0;
+    var undertimeBreak = 0;
     var calcOvertimebreak = true;
     try {
       if (sched.schedType.toLowerCase() != 'c') {
@@ -1063,12 +1115,12 @@ class HomeData with ChangeNotifier {
           if (logs.length >= 4 && sched.schedType.toLowerCase() == 'b') {
             calcOvertimebreak = false;
             if (logs[2].logType == 'IN' && logs[3].logType == 'OUT') {
-              breakIn =
+              breakEnd =
                   '${logs[2].timeStamp.toString().substring(0, 10)} $bEnd';
               var inDifference = logs[2]
                   .timeStamp
                   .difference(_dateFormat1
-                      .parse(breakIn)
+                      .parse(breakEnd)
                       .add(const Duration(seconds: 300)))
                   .inSeconds;
               // late
@@ -1077,8 +1129,11 @@ class HomeData with ChangeNotifier {
               }
             }
           }
+
+          //calc overtime & undertime
           if (calcOvertimebreak) {
             schedOut = '${logs[1].timeStamp.toString().substring(0, 10)} $sOut';
+
             overtime = logs[1]
                 .timeStamp
                 .difference(_dateFormat1.parse(schedOut))
@@ -1091,6 +1146,32 @@ class HomeData with ChangeNotifier {
                 .inSeconds;
           }
           if (overtime < 0) overtime = 0;
+
+          if (logs.length == 2) {
+            schedOut =
+                '${logs[1].timeStamp.toString().substring(0, 10)} $sOut'; //1
+            undertimeBreak = _dateFormat1
+                .parse(schedOut)
+                .difference(logs[1].timeStamp)
+                .inSeconds;
+            if (undertimeBreak < 0) undertimeBreak = 0;
+          } else if (logs.length == 4) {
+            breakStart =
+                '${logs[1].timeStamp.toString().substring(0, 10)} $bS'; //2
+            undertimeIn = _dateFormat1
+                .parse(breakStart)
+                .difference(logs[1].timeStamp)
+                .inSeconds;
+
+            schedOut =
+                '${logs[3].timeStamp.toString().substring(0, 10)} $sOut'; //3
+            undertimeBreak = _dateFormat1
+                .parse(schedOut)
+                .difference(logs[3].timeStamp)
+                .inSeconds;
+            if (undertimeIn < 0) undertimeIn = 0;
+            if (undertimeBreak < 0) undertimeBreak = 0;
+          }
         }
       }
     } catch (e) {
@@ -1100,6 +1181,8 @@ class HomeData with ChangeNotifier {
       lateInMinutes: latePenaltyIn,
       lateBreakMinutes: latePenaltyBreak,
       overtimeSeconds: overtime,
+      undertimeInMinutes: undertimeIn,
+      undertimeBreakMinutes: undertimeBreak,
     );
   }
 
