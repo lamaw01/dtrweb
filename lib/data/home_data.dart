@@ -109,7 +109,7 @@ class HomeData with ChangeNotifier {
   //   return friendlyDate;
   // }
 
-  void reCalcLate({
+  CleanExcelDataModel reCalcLateModel({
     required CleanExcelDataModel model,
     required ScheduleModel newSchedule,
   }) {
@@ -129,6 +129,25 @@ class HomeData with ChangeNotifier {
     } catch (e) {
       debugPrint('$e reCalcLate');
     }
+    return model;
+  }
+
+  CleanExcelDataModel reCalcNewTime({required CleanExcelDataModel model}) {
+    try {
+      var duration = calcDurationInOutSameDay(
+        logs: model.logs,
+        name: model.name,
+        sched: model.currentSched,
+      );
+      var finalOtString = calcOvertimeHour(duration.overtime);
+      model.duration = duration.hour.toString();
+      model.lateIn = duration.lateIn.toString();
+      model.lateBreak = duration.lateBreak.toString();
+      model.overtime = finalOtString;
+    } catch (e) {
+      debugPrint('$e reCalcLate');
+    }
+    return model;
   }
 
   void exportExcel() {
@@ -208,9 +227,6 @@ class HomeData with ChangeNotifier {
         var lateIn = int.tryParse(_cleanExcelData[i].lateIn);
         var lateBreak = int.tryParse(_cleanExcelData[i].lateBreak);
         var overtime = _cleanExcelData[i].overtime;
-
-        log('kani ${_cleanExcelData[i].overtime} $overtime');
-
         List<dynamic> dataList = [
           idName,
           _cleanExcelData[i].in1.timestamp,
@@ -366,7 +382,10 @@ class HomeData with ChangeNotifier {
         bool isSoloOut = false;
         if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 1) {
           for (int k = 1; k < c[i].logs.length; k++) {
-            logs.add(c[i].logs[k]);
+            if (c[i].logs[k].logType != c[i].logs[k - 1].logType) {
+              logs.add(c[i].logs[k]);
+            }
+            // logs.add(c[i].logs[k]);
           }
         } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'IN') {
           logs.add(c[i].logs.first);
@@ -395,28 +414,54 @@ class HomeData with ChangeNotifier {
     } else if (i == c.length - 1) {
       try {
         var logs = <Log>[];
-
-        if (c[i].logs.first.logType == 'OUT') {
+        bool isSoloOut = false;
+        if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 3) {
           for (int k = 1; k < c[i].logs.length; k++) {
-            logs.add(c[i].logs[k]);
+            if (c[i].logs[k].logType != c[i].logs[k - 1].logType) {
+              logs.add(c[i].logs[k]);
+            }
           }
-        } else {
+        } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
+          isSoloOut = true;
+        } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'IN') {
+          logs.add(c[i].logs.first);
+        } else if (c[i].logs.length == 2 &&
+            c[i].logs.first.logType == 'IN' &&
+            c[i].logs.last.logType == 'OUT') {
           logs.addAll(c[i].logs);
+        } else if (c[i].logs.length < 4 && c[i].logs.first.logType == 'OUT') {
+          logs.addAll(c[i].logs.sublist(1));
+        } else if (c[i].logs.length > 3 && c[i].logs.first.logType == 'IN') {
+          // logs.addAll(c[i].logs);
+          // for (int k = 0; k < c[i].logs.length; k++) {
+          //   if (k > 0 && c[i].logs[k].logType != c[i].logs[k - 1].logType) {
+          //     logs.add(c[i].logs[k]);
+          //   }
+          // }
+          for (int k = 0; k < c[i].logs.length; k++) {
+            if (k > 0 && c[i].logs[k].logType != c[i].logs[k - 1].logType) {
+              logs.add(c[i].logs[k]);
+            } else if (k == 0) {
+              logs.add(c[i].logs[k]);
+            }
+          }
         }
 
-        dayCleanData.add(
-          CleanDataModel(
-            employeeId: c[i].employeeId,
-            firstName: c[i].firstName,
-            lastName: c[i].lastName,
-            middleName: c[i].middleName,
-            date: c[i].date,
-            logs: logs,
-            currentSched: c[i].currentSched,
-          ),
-        );
+        if (!isSoloOut) {
+          dayCleanData.add(
+            CleanDataModel(
+              employeeId: c[i].employeeId,
+              firstName: c[i].firstName,
+              lastName: c[i].lastName,
+              middleName: c[i].middleName,
+              date: c[i].date,
+              logs: logs,
+              currentSched: c[i].currentSched,
+            ),
+          );
+        }
       } catch (e) {
-        debugPrint('else $e');
+        debugPrint('else if $e');
       }
     } else {
       try {
@@ -448,13 +493,26 @@ class HomeData with ChangeNotifier {
           bool isSoloOut = false;
           if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 2) {
             for (int k = 1; k < c[i].logs.length; k++) {
-              logs.add(c[i].logs[k]);
+              if (c[i].logs[k].logType != c[i].logs[k - 1].logType) {
+                logs.add(c[i].logs[k]);
+              }
             }
           } else if (c[i].logs.length == 1 &&
               c[i].logs.first.logType == 'OUT') {
             isSoloOut = true;
-          } else {
+          } else if (c[i].logs.length == 2 &&
+              c[i].logs.first.logType == 'IN' &&
+              c[i].logs.last.logType == 'OUT') {
             logs.addAll(c[i].logs);
+          } else if (c[i].logs.length > 3) {
+            // logs.addAll(c[i].logs);
+            for (int k = 0; k < c[i].logs.length; k++) {
+              if (k > 0 && c[i].logs[k].logType != c[i].logs[k - 1].logType) {
+                logs.add(c[i].logs[k]);
+              } else if (k == 0) {
+                logs.add(c[i].logs[k]);
+              }
+            }
           }
 
           if (!isSoloOut) {
@@ -472,7 +530,7 @@ class HomeData with ChangeNotifier {
           }
         }
       } catch (e) {
-        debugPrint('else $e ${c[i].date} ${c[i].firstName}');
+        debugPrint('else $e');
       }
     }
     return dayCleanData;
@@ -486,33 +544,52 @@ class HomeData with ChangeNotifier {
     if (i == 0) {
       try {
         var logs = <Log>[];
-        if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 1) {
-          for (int k = 0; k < c[i].logs.length; k++) {
-            logs.add(c[i].logs[k]);
-          }
-        } else if (c[i].logs.first.logType == 'IN' && c[i].logs.length == 1) {
+        bool isSoloOut = false;
+        // if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 1) {
+        //   for (int k = 0; k < c[i].logs.length; k++) {
+        //     logs.add(c[i].logs[k]);
+        //   }
+        // } else
+        if (c[i].logs.first.logType == 'IN' && c[i].logs.length == 1) {
           logs.add(c[i].logs.first);
           logs.add(c[i + 1].logs.first);
           if (isInCloseEvening(c[i + 1])) {
             logs.add(c[i + 1].logs[1]);
             logs.add(c[i + 1].logs[2]);
           }
-        } else if (c[i].logs.length > 3 && c[i].logs.first.logType == 'OUT') {
-          logs.addAll(c[i].logs.sublist(1, 4));
-        } else {
-          logs.addAll(c[i].logs);
+        } else if (c[i].logs.length >= 3 &&
+            c[i].logs.first.logType == 'OUT' &&
+            c[i].logs.last.logType == 'IN') {
+          logs.add(c[i].logs.last);
+
+          if (c[i + 1].logs.length == 1) {
+            logs.add(c[i + 1].logs.last);
+          } else if (c[i + 1].logs.length > 3 &&
+              c[i].logs.last.logType == 'IN') {
+            logs.addAll(c[i + 1].logs.sublist(0, 3));
+          } else {
+            logs.addAll(c[i + 1].logs);
+          }
+        } else if (c[i].logs.first.logType == 'OUT' && c[i].logs.length == 1) {
+          isSoloOut = true;
         }
-        dayCleanData.add(
-          CleanDataModel(
-            employeeId: c[i].employeeId,
-            firstName: c[i].firstName,
-            lastName: c[i].lastName,
-            middleName: c[i].middleName,
-            date: c[i].date,
-            logs: logs,
-            currentSched: c[i].currentSched,
-          ),
-        );
+        //  else {
+        //   // logs.addAll(c[i].logs);
+        //   logs.add(c[i].logs.last);
+        // }
+        if (!isSoloOut) {
+          dayCleanData.add(
+            CleanDataModel(
+              employeeId: c[i].employeeId,
+              firstName: c[i].firstName,
+              lastName: c[i].lastName,
+              middleName: c[i].middleName,
+              date: c[i].date,
+              logs: logs,
+              currentSched: c[i].currentSched,
+            ),
+          );
+        }
       } catch (e) {
         debugPrint('if $e');
       }
@@ -525,6 +602,8 @@ class HomeData with ChangeNotifier {
           isSoloOut = true;
         } else if (c[i].logs.length > 3 && c[i].logs.first.logType == 'OUT') {
           logs.addAll(c[i].logs.sublist(1));
+        } else if (c[i].logs.length < 4 && c[i].logs.last.logType == 'OUT') {
+          isSoloOut = true;
         } else {
           logs.addAll(c[i].logs);
         }
@@ -570,7 +649,8 @@ class HomeData with ChangeNotifier {
             logs.addAll(c[i + 1].logs.sublist(0, 3));
           } else if (c[i + 1].logs.length < 4 &&
               c[i + 1].logs.first.logType == 'OUT') {
-            logs.add(c[i + 1].logs.first);
+            // logs.add(c[i + 1].logs.first);
+            logs.addAll(c[i + 1].logs);
           }
         } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
           isSoloOut = true;
@@ -579,6 +659,10 @@ class HomeData with ChangeNotifier {
             c[i + 1].logs.first.logType == 'OUT') {
           logs.addAll(c[i].logs.sublist(1));
           logs.add(c[i + 1].logs.first);
+        } else if (c[i].logs.length < 4 &&
+            c[i].logs.last.logType == 'OUT' &&
+            fullName(c[i]) != fullName(c[i + 1])) {
+          isSoloOut = true;
         } else {
           logs.addAll(c[i].logs);
         }
@@ -718,10 +802,11 @@ class HomeData with ChangeNotifier {
       );
     }
     for (var cxd in _cleanExcelData) {
-      if (cxd.logs.isNotEmpty) {
+      // ignore: prefer_is_empty
+      if (cxd.logs.length >= 1) {
         cxd.in1.timestamp = formatPrettyDate(cxd.logs[0].timeStamp);
         cxd.in1.isSelfie = cxd.logs[0].isSelfie;
-        cxd.in1.isSelfie = cxd.logs[0].id;
+        cxd.in1.id = cxd.logs[0].id;
       }
       if (cxd.logs.length >= 2) {
         cxd.out1.timestamp = formatPrettyDate(cxd.logs[1].timeStamp);
@@ -835,7 +920,6 @@ class HomeData with ChangeNotifier {
       if (overtimeDouble < 0.5) {
         finalOtString = '0';
       }
-      log('last $finalOtString');
     } catch (e) {
       debugPrint('$e calcOvertimeHour');
     }
