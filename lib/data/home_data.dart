@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -36,6 +34,9 @@ class HomeData with ChangeNotifier {
   var _appVersion = "";
   String get appVersion => _appVersion;
 
+  var _errorString = "";
+  String get errorString => _errorString;
+
   DateTime selectedFrom = DateTime.now();
   DateTime selectedTo = DateTime.now();
 
@@ -52,6 +53,10 @@ class HomeData with ChangeNotifier {
 
   void changeLoadingState(bool state) {
     _isLogging.value = state;
+  }
+
+  void resetErrorString() {
+    _appVersion = '';
   }
 
   DateFormat dateFormat12or24() {
@@ -136,6 +141,7 @@ class HomeData with ChangeNotifier {
       model.currentSched = newSchedule;
     } catch (e) {
       debugPrint('$e reCalcLate');
+      _errorString = e.toString();
     }
     return model;
   }
@@ -156,6 +162,7 @@ class HomeData with ChangeNotifier {
       model.undertimeBreak = duration.undertimelateBreak.toString();
     } catch (e) {
       debugPrint('$e reCalcLate');
+      _errorString = e.toString();
     }
     return model;
   }
@@ -365,6 +372,7 @@ class HomeData with ChangeNotifier {
               'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
     } catch (e) {
       debugPrint('exportExcel $e');
+      _errorString = e.toString();
     }
   }
 
@@ -710,7 +718,7 @@ class HomeData with ChangeNotifier {
           );
         }
       } catch (e) {
-        debugPrint('else $e ${c[i].date} ${c[i].firstName}');
+        debugPrint('else $e');
       }
     }
     return dayCleanData;
@@ -718,37 +726,45 @@ class HomeData with ChangeNotifier {
 
   void cleanseData(List<CleanDataModel> c) {
     _cleanData.clear();
-    for (int i = 0; i < c.length; i++) {
-      if (isEvening(c[i])) {
-        var resultdayClean = eveningCleanData(i: i, c: c);
-        _cleanData.addAll(resultdayClean);
-      } else {
-        var resultdayClean = dayCleanData(i: i, c: c);
-        _cleanData.addAll(resultdayClean);
+    try {
+      for (int i = 0; i < c.length; i++) {
+        if (isEvening(c[i])) {
+          var resultdayClean = eveningCleanData(i: i, c: c);
+          _cleanData.addAll(resultdayClean);
+        } else {
+          var resultdayClean = dayCleanData(i: i, c: c);
+          _cleanData.addAll(resultdayClean);
+        }
       }
+      calcLogs(_cleanData);
+      finalizeData(_cleanData);
+    } catch (e) {
+      debugPrint('$e cleanseData');
+      _errorString = e.toString();
     }
-    calcLogs(_cleanData);
-    finalizeData(_cleanData);
   }
 
   void calcLogs(List<CleanDataModel> c) {
-    for (int i = 0; i < c.length; i++) {
-      var duration = calcDurationInOutSameDay(
-        logs: c[i].logs,
-        name: c[i].firstName,
-        sched: c[i].currentSched,
-      );
-      var finalOtString = calcOvertimeHour(duration.overtime);
-
-      c[i].duration = duration.hour.toString();
-      c[i].lateIn = duration.lateIn.toString();
-      c[i].lateBreak = duration.lateBreak.toString();
-      c[i].overtime = finalOtString;
-      c[i].undertimeIn = duration.undertimeIn.toString();
-      c[i].undertimeBreak = duration.undertimelateBreak.toString();
+    try {
+      for (int i = 0; i < c.length; i++) {
+        var duration = calcDurationInOutSameDay(
+          logs: c[i].logs,
+          name: c[i].firstName,
+          sched: c[i].currentSched,
+        );
+        var finalOtString = calcOvertimeHour(duration.overtime);
+        c[i].duration = duration.hour.toString();
+        c[i].lateIn = duration.lateIn.toString();
+        c[i].lateBreak = duration.lateBreak.toString();
+        c[i].overtime = finalOtString;
+        c[i].undertimeIn = duration.undertimeIn.toString();
+        c[i].undertimeBreak = duration.undertimelateBreak.toString();
+      }
+      _cleanData = c;
+    } catch (e) {
+      debugPrint('$e calcLogs');
+      _errorString = e.toString();
     }
-
-    _cleanData = c;
   }
 
   void finalizeData(List<CleanDataModel> c) {
@@ -782,93 +798,87 @@ class HomeData with ChangeNotifier {
         out2: TimeLog(timestamp: 'Out'),
       ),
     );
-    for (int i = 0; i < c.length; i++) {
-      count = count + 1;
-
-      if (i > 0 && c[i].employeeId != c[i - 1].employeeId) {
+    try {
+      for (int i = 0; i < c.length; i++) {
+        count = count + 1;
+        if (i > 0 && c[i].employeeId != c[i - 1].employeeId) {
+          _cleanExcelData.add(
+            CleanExcelDataModel(
+              employeeId: '',
+              name: '',
+              currentSched: ScheduleModel(
+                schedId: '',
+                schedType: '',
+                schedIn: '',
+                breakStart: '',
+                breakEnd: '',
+                schedOut: '',
+                description: '',
+              ),
+              date: DateTime.now(),
+              logs: <Log>[],
+              duration: '',
+              lateIn: '',
+              lateBreak: '',
+              overtime: '',
+              undertimeIn: '',
+              undertimeBreak: '',
+              rowCount: '',
+              in1: TimeLog(),
+              out1: TimeLog(),
+              in2: TimeLog(),
+              out2: TimeLog(),
+            ),
+          );
+          count = 1;
+        }
         _cleanExcelData.add(
           CleanExcelDataModel(
-            employeeId: '',
-            name: '',
-            currentSched: ScheduleModel(
-              schedId: '',
-              schedType: '',
-              schedIn: '',
-              breakStart: '',
-              breakEnd: '',
-              schedOut: '',
-              description: '',
-            ),
-            date: DateTime.now(),
-            logs: <Log>[],
-            duration: '',
-            lateIn: '',
-            lateBreak: '',
-            overtime: '',
-            undertimeIn: '',
-            undertimeBreak: '',
-            rowCount: '',
+            employeeId: c[i].employeeId,
+            name: fullName(c[i]),
+            currentSched: c[i].currentSched,
+            date: c[i].date,
+            logs: c[i].logs,
+            duration: c[i].duration!,
+            lateIn: c[i].lateIn!,
+            lateBreak: c[i].lateBreak!,
+            overtime: c[i].overtime!,
+            undertimeIn: c[i].undertimeIn!,
+            undertimeBreak: c[i].undertimeBreak!,
+            rowCount: '$count',
             in1: TimeLog(),
             out1: TimeLog(),
             in2: TimeLog(),
             out2: TimeLog(),
           ),
         );
-        count = 1;
       }
-
-      _cleanExcelData.add(
-        CleanExcelDataModel(
-          employeeId: c[i].employeeId,
-          name: fullName(c[i]),
-          currentSched: c[i].currentSched,
-          date: c[i].date,
-          logs: c[i].logs,
-          duration: c[i].duration!,
-          lateIn: c[i].lateIn!,
-          lateBreak: c[i].lateBreak!,
-          overtime: c[i].overtime!,
-          undertimeIn: c[i].undertimeIn!,
-          undertimeBreak: c[i].undertimeBreak!,
-          rowCount: '$count',
-          in1: TimeLog(),
-          out1: TimeLog(),
-          in2: TimeLog(),
-          out2: TimeLog(),
-        ),
-      );
-    }
-    for (var cxd in _cleanExcelData) {
-      // ignore: prefer_is_empty
-      if (cxd.logs.length >= 1) {
-        cxd.in1.timestamp = formatPrettyDate(cxd.logs[0].timeStamp);
-        cxd.in1.isSelfie = cxd.logs[0].isSelfie;
-        cxd.in1.id = cxd.logs[0].id;
+      for (var cxd in _cleanExcelData) {
+        // ignore: prefer_is_empty
+        if (cxd.logs.length >= 1) {
+          cxd.in1.timestamp = formatPrettyDate(cxd.logs[0].timeStamp);
+          cxd.in1.isSelfie = cxd.logs[0].isSelfie;
+          cxd.in1.id = cxd.logs[0].id;
+        }
+        if (cxd.logs.length >= 2) {
+          cxd.out1.timestamp = formatPrettyDate(cxd.logs[1].timeStamp);
+          cxd.out1.isSelfie = cxd.logs[1].isSelfie;
+          cxd.out1.id = cxd.logs[1].id;
+        }
+        if (cxd.logs.length >= 3) {
+          cxd.in2.timestamp = formatPrettyDate(cxd.logs[2].timeStamp);
+          cxd.in2.isSelfie = cxd.logs[2].isSelfie;
+          cxd.in2.id = cxd.logs[2].id;
+        }
+        if (cxd.logs.length >= 4) {
+          cxd.out2.timestamp = formatPrettyDate(cxd.logs[3].timeStamp);
+          cxd.out2.isSelfie = cxd.logs[3].isSelfie;
+          cxd.out2.id = cxd.logs[3].id;
+        }
       }
-      if (cxd.logs.length >= 2) {
-        cxd.out1.timestamp = formatPrettyDate(cxd.logs[1].timeStamp);
-        cxd.out1.isSelfie = cxd.logs[1].isSelfie;
-        cxd.out1.id = cxd.logs[1].id;
-      }
-      if (cxd.logs.length >= 3) {
-        cxd.in2.timestamp = formatPrettyDate(cxd.logs[2].timeStamp);
-        cxd.in2.isSelfie = cxd.logs[2].isSelfie;
-        cxd.in2.id = cxd.logs[2].id;
-      }
-      if (cxd.logs.length >= 4) {
-        cxd.out2.timestamp = formatPrettyDate(cxd.logs[3].timeStamp);
-        cxd.out2.isSelfie = cxd.logs[3].isSelfie;
-        cxd.out2.id = cxd.logs[3].id;
-      }
-    }
-  }
-
-  void checkData() {
-    for (int i = 0; i < _cleanData.length; i++) {
-      log('${_cleanData[i].date}');
-      for (int k = 0; k < _cleanData[i].logs.length; k++) {
-        log('${_cleanData[i].logs[k].logType} ${_cleanData[i].logs[k].timeStamp}');
-      }
+    } catch (e) {
+      debugPrint('$e finalizeData');
+      _errorString = e.toString();
     }
   }
 
@@ -893,6 +903,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e isForgotOut');
+      _errorString = e.toString();
     }
     return false;
   }
@@ -911,6 +922,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e isInCloseEvening');
+      _errorString = e.toString();
     }
     return false;
   }
@@ -938,11 +950,6 @@ class HomeData with ChangeNotifier {
     }
   }
 
-  String nameIndex(HistoryModel model) {
-    final name = "${model.lastName}, ${model.firstName} ${model.middleName}";
-    return name;
-  }
-
   String calcOvertimeHour(int overtime) {
     var finalOtString = '';
     try {
@@ -959,6 +966,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e calcOvertimeHour');
+      _errorString = e.toString();
     }
     return finalOtString;
   }
@@ -1050,6 +1058,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('same day error $e');
+      _errorString = e.toString();
     }
     var latePenalty = calcLate(
       logs: logs,
@@ -1176,6 +1185,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e calcLate');
+      _errorString = e.toString();
     }
     return LateMinutesModel(
       lateInMinutes: latePenaltyIn,
@@ -1217,6 +1227,7 @@ class HomeData with ChangeNotifier {
       });
     } catch (e) {
       debugPrint('getPackageInfo $e');
+      _errorString = e.toString();
       notifyListeners();
     }
   }
@@ -1237,6 +1248,7 @@ class HomeData with ChangeNotifier {
       setData(result);
     } catch (e) {
       debugPrint('$e getRecords');
+      _errorString = e.toString();
     }
   }
 
@@ -1253,6 +1265,7 @@ class HomeData with ChangeNotifier {
       setData(result);
     } catch (e) {
       debugPrint('$e getRecordsAll');
+      _errorString = e.toString();
     }
   }
 
@@ -1263,6 +1276,7 @@ class HomeData with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('$e getDepartment');
+      _errorString = e.toString();
     }
   }
 
@@ -1273,6 +1287,7 @@ class HomeData with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('$e getSchedule');
+      _errorString = e.toString();
     }
   }
 }

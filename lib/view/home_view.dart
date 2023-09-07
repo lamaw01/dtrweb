@@ -151,6 +151,10 @@ class _HomeViewState extends State<HomeView> {
     const String title = 'UC-1 DTR History';
     var version = 'v${instance.appVersion}';
 
+    final snackBar = SnackBar(
+      content: Text(instance.errorString),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -181,8 +185,8 @@ class _HomeViewState extends State<HomeView> {
                       department: dropdownValue);
                 }
                 instance.changeLoadingState(false);
-                // instance.exportExcel(false);
                 instance.sortData();
+
                 if (mounted) {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -193,14 +197,10 @@ class _HomeViewState extends State<HomeView> {
                     ),
                   );
                 }
-
-                // if (mounted) {
-                //   Navigator.of(context).push(
-                //     MaterialPageRoute(
-                //       builder: (context) => const TestView(),
-                //     ),
-                //   );
-                // }
+                if (mounted && instance.errorString != '') {
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  instance.resetErrorString();
+                }
               },
               child: Ink(
                 padding: const EdgeInsets.all(5.0),
@@ -488,50 +488,6 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
                 if (instance.historyList.isNotEmpty) ...[
-                  // const SizedBox(height: 10.0),
-                  // Container(
-                  //   decoration: BoxDecoration(
-                  //     borderRadius: BorderRadius.circular(10),
-                  //     color: Colors.orange[300],
-                  //   ),
-                  //   width: 150.0,
-                  //   height: 30.0,
-                  //   child: TextButton(
-                  //     onPressed: () async {
-                  //       instance.changeLoadingState(true);
-                  //       await Future.delayed(const Duration(seconds: 1));
-                  //       if (idController.text.isEmpty) {
-                  //         // get records all
-                  //         await instance.getRecordsAll(
-                  //             department: dropdownValue);
-                  //       } else {
-                  //         // get records with id or name
-                  //         await instance.getRecords(
-                  //             employeeId: idController.text.trim(),
-                  //             department: dropdownValue);
-                  //       }
-                  //       instance.changeLoadingState(false);
-                  //       instance.exportExcel(true);
-                  //     },
-                  //     child: const Row(
-                  //       mainAxisSize: MainAxisSize.min,
-                  //       children: [
-                  //         Icon(
-                  //           Icons.download,
-                  //           color: Colors.white,
-                  //         ),
-                  //         Text(
-                  //           'Export excel',
-                  //           style: TextStyle(
-                  //             fontSize: 14.0,
-                  //             decoration: TextDecoration.underline,
-                  //             color: Colors.white,
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
                   DataTable(
                     showCheckboxColumn: false,
                     dataRowColor:

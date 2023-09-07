@@ -172,6 +172,10 @@ class _ExcelViewState extends State<ExcelView> {
     const String title = 'UC-1 DTR History';
     var version = 'v${instance.appVersion}';
 
+    final snackBar = SnackBar(
+      content: Text(instance.errorString),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -276,6 +280,11 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
+                            if (mounted && instance.errorString != '') {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                              instance.resetErrorString();
+                            }
                           },
                           child: Ink(
                             width: 80.0,
@@ -330,6 +339,11 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
+                            if (mounted && instance.errorString != '') {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                              instance.resetErrorString();
+                            }
                           },
                           child:
                               TimelogWidget(tl: provider.cleanExcelData[i].in1),
@@ -345,6 +359,11 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
+                            if (mounted && instance.errorString != '') {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                              instance.resetErrorString();
+                            }
                           },
                           child: TimelogWidget(
                               tl: provider.cleanExcelData[i].out1),
@@ -360,6 +379,11 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
+                            if (mounted && instance.errorString != '') {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                              instance.resetErrorString();
+                            }
                           },
                           child:
                               TimelogWidget(tl: provider.cleanExcelData[i].in2),
@@ -375,6 +399,11 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
+                            if (mounted && instance.errorString != '') {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                              instance.resetErrorString();
+                            }
                           },
                           child: TimelogWidget(
                               tl: provider.cleanExcelData[i].out2),
