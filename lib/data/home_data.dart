@@ -1,4 +1,5 @@
 import 'package:excel/excel.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -34,8 +35,7 @@ class HomeData with ChangeNotifier {
   var _appVersion = "";
   String get appVersion => _appVersion;
 
-  var _errorString = "";
-  String get errorString => _errorString;
+  final errorString = ValueNotifier<String>("");
 
   DateTime selectedFrom = DateTime.now();
   DateTime selectedTo = DateTime.now();
@@ -53,10 +53,6 @@ class HomeData with ChangeNotifier {
 
   void changeLoadingState(bool state) {
     _isLogging.value = state;
-  }
-
-  void resetErrorString() {
-    _appVersion = '';
   }
 
   DateFormat dateFormat12or24() {
@@ -141,7 +137,7 @@ class HomeData with ChangeNotifier {
       model.currentSched = newSchedule;
     } catch (e) {
       debugPrint('$e reCalcLate');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
     return model;
   }
@@ -162,7 +158,7 @@ class HomeData with ChangeNotifier {
       model.undertimeBreak = duration.undertimelateBreak.toString();
     } catch (e) {
       debugPrint('$e reCalcLate');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
     return model;
   }
@@ -372,7 +368,7 @@ class HomeData with ChangeNotifier {
               'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
     } catch (e) {
       debugPrint('exportExcel $e');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
   }
 
@@ -446,7 +442,7 @@ class HomeData with ChangeNotifier {
           );
         }
       } catch (e) {
-        debugPrint('if $e');
+        debugPrint('if m $e');
       }
     } else if (i == c.length - 1) {
       try {
@@ -498,21 +494,22 @@ class HomeData with ChangeNotifier {
           );
         }
       } catch (e) {
-        debugPrint('else if $e');
+        debugPrint('else if m $e');
       }
     } else {
       try {
         if (c[i].logs.last.logType == 'IN') {
           var logs = <Log>[];
-
+          logs.add(c[i].logs.first);
           if (fullName(c[i]) == fullName(c[i + 1])) {
             if (isForgotOut(c[i + 1])) {
             } else if (c[i].logs.length < 4 &&
+                c[i].logs.length > 1 &&
                 c[i].logs.first.logType == 'IN') {
-              logs.add(c[i].logs[0]);
+              // logs.add(c[i].logs[0]);
               logs.add(c[i].logs[1]);
             } else {
-              logs.add(c[i].logs.last);
+              // logs.add(c[i].logs.last);
               logs.add(c[i + 1].logs.first);
             }
           }
@@ -570,7 +567,7 @@ class HomeData with ChangeNotifier {
           }
         }
       } catch (e) {
-        debugPrint('else $e');
+        debugPrint('else m $e');
       }
     }
     return dayCleanData;
@@ -631,7 +628,7 @@ class HomeData with ChangeNotifier {
           );
         }
       } catch (e) {
-        debugPrint('if $e');
+        debugPrint('if e $e');
       }
     } else if (i == c.length - 1) {
       try {
@@ -661,7 +658,7 @@ class HomeData with ChangeNotifier {
           );
         }
       } catch (e) {
-        debugPrint('else $e');
+        debugPrint('else if e $e');
       }
     } else {
       try {
@@ -721,7 +718,7 @@ class HomeData with ChangeNotifier {
           );
         }
       } catch (e) {
-        debugPrint('else $e');
+        debugPrint('else e $e');
       }
     }
     return dayCleanData;
@@ -743,7 +740,7 @@ class HomeData with ChangeNotifier {
       finalizeData(_cleanData);
     } catch (e) {
       debugPrint('$e cleanseData');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
   }
 
@@ -766,41 +763,41 @@ class HomeData with ChangeNotifier {
       _cleanData = c;
     } catch (e) {
       debugPrint('$e calcLogs');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
   }
 
   void finalizeData(List<CleanDataModel> c) {
     _cleanExcelData.clear();
     var count = 0;
-    _cleanExcelData.add(
-      CleanExcelDataModel(
-        employeeId: 'Emp ID',
-        name: 'Name',
-        currentSched: ScheduleModel(
-          schedId: 'Sched ID',
-          schedType: '',
-          schedIn: '',
-          breakStart: '',
-          breakEnd: '',
-          schedOut: '',
-          description: '',
-        ),
-        date: DateTime.now(),
-        logs: <Log>[],
-        duration: 'D(h)',
-        lateIn: 'T(m)',
-        lateBreak: 'LB(m)',
-        overtime: 'OT',
-        undertimeIn: 'UDI(m)',
-        undertimeBreak: 'UDB(m)',
-        rowCount: '',
-        in1: TimeLog(timestamp: 'In'),
-        out1: TimeLog(timestamp: 'Out'),
-        in2: TimeLog(timestamp: 'In'),
-        out2: TimeLog(timestamp: 'Out'),
-      ),
-    );
+    // _cleanExcelData.add(
+    //   CleanExcelDataModel(
+    //     employeeId: 'Emp ID',
+    //     name: 'Name',
+    //     currentSched: ScheduleModel(
+    //       schedId: 'Sched ID',
+    //       schedType: '',
+    //       schedIn: '',
+    //       breakStart: '',
+    //       breakEnd: '',
+    //       schedOut: '',
+    //       description: '',
+    //     ),
+    //     date: DateTime.now(),
+    //     logs: <Log>[],
+    //     duration: 'D(h)',
+    //     lateIn: 'T(m)',
+    //     lateBreak: 'LB(m)',
+    //     overtime: 'OT',
+    //     undertimeIn: 'UDI(m)',
+    //     undertimeBreak: 'UDB(m)',
+    //     rowCount: '',
+    //     in1: TimeLog(timestamp: 'In'),
+    //     out1: TimeLog(timestamp: 'Out'),
+    //     in2: TimeLog(timestamp: 'In'),
+    //     out2: TimeLog(timestamp: 'Out'),
+    //   ),
+    // );
     try {
       for (int i = 0; i < c.length; i++) {
         count = count + 1;
@@ -881,7 +878,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e finalizeData');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
   }
 
@@ -895,7 +892,9 @@ class HomeData with ChangeNotifier {
   bool isForgotOut(CleanDataModel c) {
     var differenceForgotOut = 0;
     try {
-      if (c.logs[0].logType == 'OUT' && c.logs[1].logType == 'IN') {
+      if (c.logs.length > 1 &&
+          c.logs[0].logType == 'OUT' &&
+          c.logs[1].logType == 'IN') {
         differenceForgotOut =
             c.logs[1].timeStamp.difference(c.logs[0].timeStamp).inMinutes;
         // dont calc if out and in if less than 30 minutes gap
@@ -906,7 +905,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e isForgotOut');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
     return false;
   }
@@ -925,7 +924,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e isInCloseEvening');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
     return false;
   }
@@ -969,7 +968,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e calcOvertimeHour');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
     return finalOtString;
   }
@@ -1061,7 +1060,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('same day error $e');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
     var latePenalty = calcLate(
       logs: logs,
@@ -1188,7 +1187,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e calcLate');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
     return LateMinutesModel(
       lateInMinutes: latePenaltyIn,
@@ -1230,7 +1229,7 @@ class HomeData with ChangeNotifier {
       });
     } catch (e) {
       debugPrint('getPackageInfo $e');
-      _errorString = e.toString();
+      errorString.value = e.toString();
       notifyListeners();
     }
   }
@@ -1251,7 +1250,7 @@ class HomeData with ChangeNotifier {
       setData(result);
     } catch (e) {
       debugPrint('$e getRecords');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
   }
 
@@ -1268,7 +1267,7 @@ class HomeData with ChangeNotifier {
       setData(result);
     } catch (e) {
       debugPrint('$e getRecordsAll');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
   }
 
@@ -1279,7 +1278,7 @@ class HomeData with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('$e getDepartment');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
   }
 
@@ -1290,7 +1289,7 @@ class HomeData with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('$e getSchedule');
-      _errorString = e.toString();
+      errorString.value = e.toString();
     }
   }
 }

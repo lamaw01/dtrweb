@@ -24,7 +24,17 @@ class ExcelView extends StatefulWidget {
 
 class _ExcelViewState extends State<ExcelView> {
   late ScheduleModel dropdownValue;
-  var scrollController = ScrollController();
+  final scl = ScrollController();
+  final sc1 = ScrollController();
+  final sc2 = ScrollController();
+
+  SnackBar showError(String e) {
+    var snackBar = SnackBar(
+      content: Text(e),
+      duration: const Duration(seconds: 3),
+    );
+    return snackBar;
+  }
 
   @override
   void initState() {
@@ -33,6 +43,11 @@ class _ExcelViewState extends State<ExcelView> {
     if (instance.scheduleList.isNotEmpty) {
       dropdownValue = instance.scheduleList[0];
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      sc2.addListener(() {
+        sc1.jumpTo(sc2.position.pixels);
+      });
+    });
   }
 
   Future<CleanExcelDataModel> showChangeScheduleDialog({
@@ -171,10 +186,17 @@ class _ExcelViewState extends State<ExcelView> {
     var instance = Provider.of<HomeData>(context, listen: false);
     const String title = 'UC-1 DTR History';
     var version = 'v${instance.appVersion}';
-
-    final snackBar = SnackBar(
-      content: Text(instance.errorString),
-    );
+    var rcw = 50.0;
+    var schedidw = 80.0;
+    var empidw = 80.0;
+    var namew = 200.0;
+    var timelogw = 160.0;
+    var durw = 100.0;
+    var tardyw = 100.0;
+    var tardybw = 120.0;
+    var otw = 100.0;
+    var udiw = 100.0;
+    var udbw = 100.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -189,6 +211,232 @@ class _ExcelViewState extends State<ExcelView> {
               style: const TextStyle(fontSize: 12),
             ),
           ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size(1920, 30),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            primary: false,
+            controller: sc1,
+            child: Container(
+              color: Colors.white,
+              width: 1920.0,
+              height: 30.0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: rcw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.orange,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      '',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Container(
+                    width: schedidw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.green,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'Sched ID',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Container(
+                    width: empidw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.green,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'Emp ID',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Container(
+                    width: namew,
+                    decoration: const BoxDecoration(
+                      // color: Colors.blue,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'Name',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    width: timelogw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.blue,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'IN',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    width: timelogw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.blue,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'OUT',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    width: timelogw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.blue,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'IN',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    width: timelogw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.blue,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'OUT',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    width: durw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.cyan,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'Duration(hrs)',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    width: tardyw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.indigo,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Tardy(mms)',
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: tardybw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.lime,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'Tardy Break(mms)',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    width: otw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.teal,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'OT(mms)',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    width: udiw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.teal,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'UD In(mms)',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    width: udbw,
+                    decoration: const BoxDecoration(
+                      // color: Colors.teal,
+                      border: Border(
+                        right: BorderSide(width: 1, color: Colors.grey),
+                      ),
+                    ),
+                    child: const Text(
+                      'UD Break(mms)',
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
         actions: [
           InkWell(
@@ -226,9 +474,11 @@ class _ExcelViewState extends State<ExcelView> {
       body: Scrollbar(
         thumbVisibility: true,
         trackVisibility: true,
+        controller: sc2,
         child: SingleChildScrollView(
-          primary: true,
+          controller: sc2,
           scrollDirection: Axis.horizontal,
+          // primary: false,
           child: Consumer<HomeData>(builder: (ctx, provider, widget) {
             var w = MediaQuery.of(context).size.width;
             var h = MediaQuery.of(context).size.height;
@@ -238,7 +488,7 @@ class _ExcelViewState extends State<ExcelView> {
               height: 1080.0,
               child: ListView.builder(
                 shrinkWrap: true,
-                controller: scrollController,
+                controller: scl,
                 itemCount: provider.cleanExcelData.length,
                 itemBuilder: (ctx, i) {
                   return Container(
@@ -252,7 +502,7 @@ class _ExcelViewState extends State<ExcelView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          width: 50.0,
+                          width: rcw,
                           decoration: const BoxDecoration(
                             // color: Colors.orange,
                             border: Border(
@@ -280,14 +530,9 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
-                            if (mounted && instance.errorString != '') {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                              instance.resetErrorString();
-                            }
                           },
                           child: Ink(
-                            width: 80.0,
+                            width: schedidw,
                             decoration: const BoxDecoration(
                               // color: Colors.green,
                               border: Border(
@@ -301,7 +546,7 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                         ),
                         Container(
-                          width: 80.0,
+                          width: empidw,
                           decoration: const BoxDecoration(
                             // color: Colors.green,
                             border: Border(
@@ -314,7 +559,7 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                         ),
                         Container(
-                          width: 200.0,
+                          width: namew,
                           decoration: const BoxDecoration(
                             // color: Colors.blue,
                             border: Border(
@@ -339,11 +584,6 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
-                            if (mounted && instance.errorString != '') {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                              instance.resetErrorString();
-                            }
                           },
                           child:
                               TimelogWidget(tl: provider.cleanExcelData[i].in1),
@@ -359,11 +599,6 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
-                            if (mounted && instance.errorString != '') {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                              instance.resetErrorString();
-                            }
                           },
                           child: TimelogWidget(
                               tl: provider.cleanExcelData[i].out1),
@@ -379,11 +614,6 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
-                            if (mounted && instance.errorString != '') {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                              instance.resetErrorString();
-                            }
                           },
                           child:
                               TimelogWidget(tl: provider.cleanExcelData[i].in2),
@@ -399,17 +629,12 @@ class _ExcelViewState extends State<ExcelView> {
                             setState(() {
                               provider.cleanExcelData[i] = result;
                             });
-                            if (mounted && instance.errorString != '') {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                              instance.resetErrorString();
-                            }
                           },
                           child: TimelogWidget(
                               tl: provider.cleanExcelData[i].out2),
                         ),
                         Container(
-                          width: 100.0,
+                          width: durw,
                           decoration: const BoxDecoration(
                             // color: Colors.cyan,
                             border: Border(
@@ -424,7 +649,7 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                         ),
                         Container(
-                          width: 100.0,
+                          width: tardyw,
                           decoration: const BoxDecoration(
                             // color: Colors.indigo,
                             border: Border(
@@ -439,7 +664,7 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                         ),
                         Container(
-                          width: 100.0,
+                          width: tardybw,
                           decoration: const BoxDecoration(
                             // color: Colors.lime,
                             border: Border(
@@ -454,7 +679,7 @@ class _ExcelViewState extends State<ExcelView> {
                           ),
                         ),
                         Container(
-                          width: 100.0,
+                          width: otw,
                           decoration: const BoxDecoration(
                             // color: Colors.teal,
                             border: Border(
@@ -462,14 +687,14 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.cleanExcelData[i].overtime.toString(),
+                            provider.cleanExcelData[i].overtime,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Container(
-                          width: 100.0,
+                          width: udiw,
                           decoration: const BoxDecoration(
                             // color: Colors.teal,
                             border: Border(
@@ -477,14 +702,14 @@ class _ExcelViewState extends State<ExcelView> {
                             ),
                           ),
                           child: Text(
-                            provider.cleanExcelData[i].undertimeIn.toString(),
+                            provider.cleanExcelData[i].undertimeIn,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Container(
-                          width: 100.0,
+                          width: udbw,
                           decoration: const BoxDecoration(
                             // color: Colors.teal,
                             border: Border(

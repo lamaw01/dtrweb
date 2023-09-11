@@ -16,19 +16,21 @@ class TimelogWidget extends StatelessWidget {
     }
 
     return Container(
-      width: 180.0,
+      width: 160.0,
       decoration: const BoxDecoration(
         border: Border(
           right: BorderSide(width: 1, color: Colors.grey),
         ),
       ),
-      child: Text(
-        tl.timestamp,
-        maxLines: 1,
-        textAlign: TextAlign.center,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: colorIsSelfie(tl.isSelfie),
+      child: Center(
+        child: Text(
+          tl.timestamp,
+          maxLines: 1,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: colorIsSelfie(tl.isSelfie),
+          ),
         ),
       ),
     );

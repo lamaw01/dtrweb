@@ -7,7 +7,6 @@ import '../data/home_data.dart';
 import '../model/department_model.dart';
 import '../widget/logs_widget.dart';
 import 'excel_view.dart';
-// import 'test_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -26,6 +25,14 @@ class _HomeViewState extends State<HomeView> {
   var dropdownValue =
       DepartmentModel(departmentId: '000', departmentName: 'All');
 
+  SnackBar showError(String e) {
+    var snackBar = SnackBar(
+      content: Text(e),
+      duration: const Duration(seconds: 3),
+    );
+    return snackBar;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +42,8 @@ class _HomeViewState extends State<HomeView> {
       await instance.getPackageInfo();
       await instance.getDepartment();
       await instance.getSchedule();
+      instance.errorString.addListener(() => ScaffoldMessenger.of(context)
+          .showSnackBar(showError(instance.errorString.value)));
     });
   }
 
@@ -151,10 +160,6 @@ class _HomeViewState extends State<HomeView> {
     const String title = 'UC-1 DTR History';
     var version = 'v${instance.appVersion}';
 
-    final snackBar = SnackBar(
-      content: Text(instance.errorString),
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -196,10 +201,6 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                   );
-                }
-                if (mounted && instance.errorString != '') {
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  instance.resetErrorString();
                 }
               },
               child: Ink(
