@@ -191,7 +191,7 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 const SizedBox(height: 10.0),
                 SizedBox(
-                  height: 280.0,
+                  height: 315.0,
                   width: 800.0,
                   child: Card(
                     child: Padding(
@@ -392,6 +392,39 @@ class _HomeViewState extends State<HomeView> {
                               ),
                             ],
                           ),
+                          if (instance.historyList.isNotEmpty) ...[
+                            const SizedBox(height: 5.0),
+                            InkWell(
+                              onTap: () {
+                                instance.exportRawLogsExcel();
+                              },
+                              child: Ink(
+                                height: 30.0,
+                                width: 160.0,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  color: Colors.orange[300],
+                                ),
+                                padding: const EdgeInsets.all(5.0),
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.download,
+                                      color: Colors.white,
+                                    ),
+                                    Text(
+                                      'Export Raw Log excel',
+                                      style: TextStyle(
+                                        fontSize: 12.0,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 10.0),
                           Container(
                             color: Colors.green[300],

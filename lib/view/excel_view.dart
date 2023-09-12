@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dtrweb/model/log_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -132,7 +133,7 @@ class _ExcelViewState extends State<ExcelView> {
 
   Future<CleanExcelDataModel> showTimeDialog({
     required BuildContext context,
-    required CleanExcelDataModel model,
+    required CleanExcelDataModel c,
     required int i,
   }) async {
     var instance = Provider.of<HomeData>(context, listen: false);
@@ -141,17 +142,15 @@ class _ExcelViewState extends State<ExcelView> {
     try {
       var d = await showDatePicker(
         context: context,
-        initialDate: model.logs[i].timeStamp,
+        initialDate: c.logs[i].timeStamp,
         firstDate: DateTime(2020, 1, 1),
         lastDate: DateTime.now(),
       );
-      log('d ${d.toString()}');
       if (mounted) {
         var t = await showTimePicker(
           context: context,
-          initialTime: TimeOfDay.fromDateTime(model.logs[i].timeStamp),
+          initialTime: TimeOfDay.fromDateTime(c.logs[i].timeStamp),
         );
-        log('t ${t.toString()}');
         if (d != null && t != null) {
           var fd = DateTime(d.year, d.month, d.day, t.hour, t.minute);
           log('fd ${fd.toString()}');
@@ -160,25 +159,99 @@ class _ExcelViewState extends State<ExcelView> {
       }
       if (dateResult != null) {
         if (i == 0) {
-          model.logs[0].timeStamp = dateResult;
-          model.in1.timestamp = instance.formatPrettyDate(dateResult);
+          c.logs[0].timeStamp = dateResult;
+          c.in1.timestamp = instance.formatPrettyDate(dateResult);
         } else if (i == 1) {
-          model.logs[1].timeStamp = dateResult;
-          model.out1.timestamp = instance.formatPrettyDate(dateResult);
+          c.logs[1].timeStamp = dateResult;
+          c.out1.timestamp = instance.formatPrettyDate(dateResult);
         } else if (i == 2) {
-          model.logs[2].timeStamp = dateResult;
-          model.in2.timestamp = instance.formatPrettyDate(dateResult);
+          c.logs[2].timeStamp = dateResult;
+          c.in2.timestamp = instance.formatPrettyDate(dateResult);
         } else if (i == 3) {
-          model.logs[3].timeStamp = dateResult;
-          model.out2.timestamp = instance.formatPrettyDate(dateResult);
+          c.logs[3].timeStamp = dateResult;
+          c.out2.timestamp = instance.formatPrettyDate(dateResult);
         }
-        model = instance.reCalcNewTime(model: model);
+        c = instance.reCalcNewTime(model: c);
       }
-      debugPrint('${model.duration} ${model.lateIn} ${model.lateBreak}');
+      debugPrint('${c.duration} ${c.lateIn} ${c.lateBreak}');
     } catch (e) {
       debugPrint('$e showTimeDialog');
     }
-    return model;
+    return c;
+  }
+
+  Future<CleanExcelDataModel> addLog({
+    required CleanExcelDataModel c,
+    required int i,
+    required BuildContext context,
+  }) async {
+    DateTime? dateResult;
+    var instance = Provider.of<HomeData>(context, listen: false);
+    try {
+      if (i == 0 && c.currentSched.schedType.toLowerCase() == 'b') {
+        var dateString1 = c.logs[0].timeStamp.toString().substring(0, 10);
+        var dateWithTime1 = '$dateString1 ${c.currentSched.breakStart}';
+        dateResult = instance.dateFormat1.parse(dateWithTime1);
+      } else if (i == 0 && c.currentSched.schedType.toLowerCase() == 'a') {
+        var dateString1 = c.logs[0].timeStamp.toString().substring(0, 10);
+        var dateWithTime1 = '$dateString1 ${c.currentSched.schedOut}';
+        dateResult = instance.dateFormat1.parse(dateWithTime1);
+      } else if (i == 1) {
+        var dateString2 = c.logs[1].timeStamp.toString().substring(0, 10);
+        var dateWithTime2 = '$dateString2 ${c.currentSched.breakEnd}';
+        dateResult = instance.dateFormat1.parse(dateWithTime2);
+      } else if (i == 2) {
+        var dateString3 = c.logs[2].timeStamp.toString().substring(0, 10);
+        var dateWithTime3 = '$dateString3 ${c.currentSched.schedOut}';
+        dateResult = instance.dateFormat1.parse(dateWithTime3);
+      }
+
+      var d = await showDatePicker(
+        context: context,
+        initialDate: dateResult!,
+        firstDate: DateTime(2020, 1, 1),
+        lastDate: DateTime.now(),
+      );
+
+      if (mounted) {
+        var t = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(dateResult),
+        );
+        if (d != null && t != null) {
+          var fd = DateTime(d.year, d.month, d.day, t.hour, t.minute);
+          log('fd $fd');
+          dateResult = fd;
+        }
+      }
+      c.logs.add(Log(
+        timeStamp: dateResult,
+        logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
+        id: '',
+        isSelfie: '0',
+      ));
+      // ignore: prefer_is_empty
+      if (c.logs.length >= 1) {
+        c.logs[0].timeStamp = c.logs[0].timeStamp;
+        c.in1.timestamp = instance.formatPrettyDate(c.logs[0].timeStamp);
+      }
+      if (c.logs.length >= 2) {
+        c.logs[1].timeStamp = c.logs[1].timeStamp;
+        c.out1.timestamp = instance.formatPrettyDate(c.logs[1].timeStamp);
+      }
+      if (c.logs.length >= 3) {
+        c.logs[2].timeStamp = c.logs[2].timeStamp;
+        c.in2.timestamp = instance.formatPrettyDate(c.logs[2].timeStamp);
+      }
+      if (c.logs.length >= 4) {
+        c.logs[3].timeStamp = c.logs[3].timeStamp;
+        c.out2.timestamp = instance.formatPrettyDate(c.logs[3].timeStamp);
+      }
+      c = instance.reCalcNewTime(model: c);
+    } catch (e) {
+      debugPrint('$e addLog');
+    }
+    return c;
   }
 
   @override
@@ -299,153 +372,198 @@ class _ExcelViewState extends State<ExcelView> {
                 controller: scl,
                 itemCount: provider.cleanExcelData.length,
                 itemBuilder: (ctx, i) {
-                  return Container(
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(width: 1, color: Colors.grey),
+                  return InkWell(
+                    onLongPress: () {},
+                    onHover: (_) {},
+                    hoverColor: Colors.blueGrey[300],
+                    child: Ink(
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(width: 1, color: Colors.grey),
+                        ),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ExcelCell(
-                          w: rcw,
-                          c: Colors.orange,
-                          t: provider.cleanExcelData[i].rowCount,
-                        ),
-                        InkWell(
-                          hoverColor: Colors.grey[300],
-                          onTap: () async {
-                            dropdownValue = provider.scheduleList.singleWhere(
-                                (e) =>
-                                    e.schedId ==
-                                    provider.cleanExcelData[i].currentSched
-                                        .schedId);
-                            var result = await showChangeScheduleDialog(
-                              context: context,
-                              model: provider.cleanExcelData[i],
-                            );
-                            setState(() {
-                              provider.cleanExcelData[i] = result;
-                            });
-                          },
-                          child: ExcelCell(
-                            w: schedidw,
-                            c: Colors.green,
-                            t: provider.cleanExcelData[i].currentSched.schedId,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ExcelCell(
+                            w: rcw,
+                            c: Colors.orange,
+                            t: provider.cleanExcelData[i].rowCount,
                           ),
-                        ),
-                        ExcelCell(
-                          w: empidw,
-                          c: Colors.red,
-                          t: provider.cleanExcelData[i].employeeId,
-                        ),
-                        ExcelCell(
-                          w: namew,
-                          c: Colors.blue,
-                          t: provider.cleanExcelData[i].name,
-                        ),
-                        InkWell(
-                          hoverColor: Colors.grey[300],
-                          onTap: () async {
-                            var result = await showTimeDialog(
-                              context: context,
-                              model: provider.cleanExcelData[i],
-                              i: 0,
-                            );
-                            setState(() {
-                              provider.cleanExcelData[i] = result;
-                            });
-                          },
-                          child: TimelogWidget(
-                            tl: provider.cleanExcelData[i].in1,
-                            w: timelogw,
+                          InkWell(
+                            onTap: () async {
+                              try {
+                                dropdownValue = provider.scheduleList
+                                    .singleWhere((e) =>
+                                        e.schedId ==
+                                        provider.cleanExcelData[i].currentSched
+                                            .schedId);
+                                var result = await showChangeScheduleDialog(
+                                  context: context,
+                                  model: provider.cleanExcelData[i],
+                                );
+                                setState(() {
+                                  provider.cleanExcelData[i] = result;
+                                });
+                              } catch (e) {
+                                debugPrint('$e');
+                              }
+                            },
+                            child: ExcelCell(
+                              w: schedidw,
+                              c: Colors.green,
+                              t: provider
+                                  .cleanExcelData[i].currentSched.schedId,
+                            ),
                           ),
-                        ),
-                        InkWell(
-                          hoverColor: Colors.grey[300],
-                          onTap: () async {
-                            var result = await showTimeDialog(
-                              context: context,
-                              model: provider.cleanExcelData[i],
-                              i: 1,
-                            );
-                            setState(() {
-                              provider.cleanExcelData[i] = result;
-                            });
-                          },
-                          child: TimelogWidget(
-                            tl: provider.cleanExcelData[i].out1,
-                            w: timelogw,
+                          ExcelCell(
+                            w: empidw,
+                            c: Colors.red,
+                            t: provider.cleanExcelData[i].employeeId,
                           ),
-                        ),
-                        InkWell(
-                          hoverColor: Colors.grey[300],
-                          onTap: () async {
-                            var result = await showTimeDialog(
-                              context: context,
-                              model: provider.cleanExcelData[i],
-                              i: 2,
-                            );
-                            setState(() {
-                              provider.cleanExcelData[i] = result;
-                            });
-                          },
-                          child: TimelogWidget(
-                            tl: provider.cleanExcelData[i].in2,
-                            w: timelogw,
+                          ExcelCell(
+                            w: namew,
+                            c: Colors.blue,
+                            t: provider.cleanExcelData[i].name,
                           ),
-                        ),
-                        InkWell(
-                          hoverColor: Colors.grey[300],
-                          onTap: () async {
-                            var result = await showTimeDialog(
-                              context: context,
-                              model: provider.cleanExcelData[i],
-                              i: 3,
-                            );
-                            setState(() {
-                              provider.cleanExcelData[i] = result;
-                            });
-                          },
-                          child: TimelogWidget(
-                            tl: provider.cleanExcelData[i].out2,
-                            w: timelogw,
+                          InkWell(
+                            onTap: () async {
+                              var result = await showTimeDialog(
+                                context: context,
+                                c: provider.cleanExcelData[i],
+                                i: 0,
+                              );
+                              setState(() {
+                                provider.cleanExcelData[i] = result;
+                              });
+                            },
+                            child: TimelogWidget(
+                              tl: provider.cleanExcelData[i].in1,
+                              w: timelogw,
+                            ),
                           ),
-                        ),
-                        ExcelCell(
-                          w: durw,
-                          c: Colors.indigo,
-                          t: provider.cleanExcelData[i].duration,
-                        ),
-                        ExcelCell(
-                          w: tardyw,
-                          c: Colors.amber,
-                          t: provider.cleanExcelData[i].lateIn,
-                          tc: Colors.red,
-                        ),
-                        ExcelCell(
-                          w: tardybw,
-                          c: Colors.lightGreen,
-                          t: provider.cleanExcelData[i].lateBreak,
-                          tc: Colors.red,
-                        ),
-                        ExcelCell(
-                          w: otw,
-                          c: Colors.lime,
-                          t: provider.cleanExcelData[i].overtime,
-                        ),
-                        ExcelCell(
-                          w: udiw,
-                          c: Colors.teal,
-                          t: provider.cleanExcelData[i].undertimeIn,
-                        ),
-                        ExcelCell(
-                          w: udbw,
-                          c: Colors.yellow,
-                          t: provider.cleanExcelData[i].undertimeBreak,
-                        ),
-                      ],
+                          InkWell(
+                            onTap: () async {
+                              if (provider.cleanExcelData[i].logs.length == 1) {
+                                await addLog(
+                                  context: context,
+                                  c: provider.cleanExcelData[i],
+                                  i: 0,
+                                ).then((r) {
+                                  setState(() {
+                                    provider.cleanExcelData[i] = r;
+                                  });
+                                });
+                              } else {
+                                await showTimeDialog(
+                                  context: context,
+                                  c: provider.cleanExcelData[i],
+                                  i: 1,
+                                ).then((r) {
+                                  log('${r.logs.length} ${r.in2}');
+                                  setState(() {
+                                    provider.cleanExcelData[i] = r;
+                                  });
+                                });
+                              }
+                            },
+                            child: TimelogWidget(
+                              tl: provider.cleanExcelData[i].out1,
+                              w: timelogw,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              if (provider.cleanExcelData[i].logs.length == 2) {
+                                await addLog(
+                                  context: context,
+                                  c: provider.cleanExcelData[i],
+                                  i: 1,
+                                ).then((r) {
+                                  setState(() {
+                                    provider.cleanExcelData[i] = r;
+                                  });
+                                });
+                              } else {
+                                await showTimeDialog(
+                                  context: context,
+                                  c: provider.cleanExcelData[i],
+                                  i: 2,
+                                ).then((r) {
+                                  setState(() {
+                                    provider.cleanExcelData[i] = r;
+                                  });
+                                });
+                              }
+                            },
+                            child: TimelogWidget(
+                              tl: provider.cleanExcelData[i].in2,
+                              w: timelogw,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              if (provider.cleanExcelData[i].logs.length == 3) {
+                                await addLog(
+                                  context: context,
+                                  c: provider.cleanExcelData[i],
+                                  i: 2,
+                                ).then((r) {
+                                  setState(() {
+                                    provider.cleanExcelData[i] = r;
+                                  });
+                                });
+                              } else {
+                                await showTimeDialog(
+                                  context: context,
+                                  c: provider.cleanExcelData[i],
+                                  i: 3,
+                                ).then((r) {
+                                  setState(() {
+                                    provider.cleanExcelData[i] = r;
+                                  });
+                                });
+                              }
+                            },
+                            child: TimelogWidget(
+                              tl: provider.cleanExcelData[i].out2,
+                              w: timelogw,
+                            ),
+                          ),
+                          ExcelCell(
+                            w: durw,
+                            c: Colors.indigo,
+                            t: provider.cleanExcelData[i].duration,
+                          ),
+                          ExcelCell(
+                            w: tardyw,
+                            c: Colors.amber,
+                            t: provider.cleanExcelData[i].lateIn,
+                            tc: Colors.red,
+                          ),
+                          ExcelCell(
+                            w: tardybw,
+                            c: Colors.lightGreen,
+                            t: provider.cleanExcelData[i].lateBreak,
+                            tc: Colors.red,
+                          ),
+                          ExcelCell(
+                            w: otw,
+                            c: Colors.lime,
+                            t: provider.cleanExcelData[i].overtime,
+                          ),
+                          ExcelCell(
+                            w: udiw,
+                            c: Colors.teal,
+                            t: provider.cleanExcelData[i].undertimeIn,
+                          ),
+                          ExcelCell(
+                            w: udbw,
+                            c: Colors.yellow,
+                            t: provider.cleanExcelData[i].undertimeBreak,
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },

@@ -47,7 +47,9 @@ class HomeData with ChangeNotifier {
   ValueNotifier<bool> get is24HourFormat => _is24HourFormat;
 
   final _dateFormat1 = DateFormat('yyyy-MM-dd HH:mm');
+  DateFormat get dateFormat1 => _dateFormat1;
   final _dateFormat2 = DateFormat('yyyy-MM-dd hh:mm aa');
+  final _dateYmd = DateFormat('yyyy-MM-dd');
   DateFormat get dateFormat2 => _dateFormat2;
   final _dateFormatFileExcel = DateFormat().add_yMMMMd();
 
@@ -83,6 +85,122 @@ class HomeData with ChangeNotifier {
       return DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
     } else {
       return DateFormat('yyyy-MM-dd hh:mm aa').format(dateTime);
+    }
+  }
+
+  void exportRawLogsExcel() {
+    try {
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Sheet1'];
+      var cellStyle = CellStyle(
+        backgroundColorHex: '#dddddd',
+        fontFamily: getFontFamily(FontFamily.Calibri),
+        horizontalAlign: HorizontalAlign.Center,
+        fontSize: 9,
+      );
+      var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
+      column1
+        ..value = 'Emp ID'
+        ..cellStyle = cellStyle;
+
+      var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
+      column2
+        ..value = 'Name'
+        ..cellStyle = cellStyle;
+
+      var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
+      column3
+        ..value = 'Date'
+        ..cellStyle = cellStyle;
+
+      var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
+      column4
+        ..value = 'Time'
+        ..cellStyle = cellStyle;
+
+      var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
+      column5
+        ..value = 'Log type'
+        ..cellStyle = cellStyle;
+
+      var cellStyleData = CellStyle(
+        fontFamily: getFontFamily(FontFamily.Calibri),
+        horizontalAlign: HorizontalAlign.Center,
+        fontSize: 9,
+      );
+      var rC = 0;
+
+      var sortedRawHistory = <HistoryModel>[];
+      sortedRawHistory.addAll(_historyList);
+      sortedRawHistory.sort((a, b) {
+        var valueA = '${a.lastName.toLowerCase()} ${a.date}';
+        var valueB = '${b.lastName.toLowerCase()} ${b.date}';
+        return valueA.compareTo(valueB);
+      });
+
+      for (int i = 1; i < sortedRawHistory.length; i++) {
+        for (int j = 0; j < sortedRawHistory[i].logs.length; j++) {
+          rC = rC + 1;
+          List<dynamic> dataList = [
+            sortedRawHistory[i].employeeId,
+            fullNameHistory(sortedRawHistory[i]),
+            _dateYmd.format(sortedRawHistory[i].date),
+            dateFormat12or24Web(sortedRawHistory[i].logs[j].timeStamp),
+            sortedRawHistory[i].logs[j].logType,
+          ];
+          sheetObject.appendRow(dataList);
+          sheetObject.setColWidth(0, 7.0);
+          sheetObject.setColWidth(1, 22.0);
+          sheetObject.setColWidth(2, 10.0);
+          sheetObject.setColWidth(3, 10.1);
+          sheetObject.setColWidth(4, 8.1);
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 0,
+              rowIndex: rC,
+            ),
+            sortedRawHistory[i].employeeId,
+            cellStyle: cellStyleData,
+          );
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 1,
+              rowIndex: rC,
+            ),
+            fullNameHistory(sortedRawHistory[i]),
+            cellStyle: cellStyleData,
+          );
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 2,
+              rowIndex: rC,
+            ),
+            _dateYmd.format(sortedRawHistory[i].date),
+            cellStyle: cellStyleData,
+          );
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 3,
+              rowIndex: rC,
+            ),
+            dateFormat12or24Web(sortedRawHistory[i].logs[j].timeStamp),
+            cellStyle: cellStyleData,
+          );
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 4,
+              rowIndex: rC,
+            ),
+            sortedRawHistory[i].logs[j].logType,
+            cellStyle: cellStyleData,
+          );
+        }
+      }
+      excel.save(
+          fileName:
+              'DTR raw ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
+    } catch (e) {
+      debugPrint('$e exportRawLogsExcel');
     }
   }
 
@@ -135,6 +253,14 @@ class HomeData with ChangeNotifier {
       model.undertimeIn = duration.undertimeIn.toString();
       model.undertimeBreak = duration.undertimelateBreak.toString();
       model.currentSched = newSchedule;
+      if (model.duration == '0') model.duration = '';
+      if (model.lateIn == '0') model.lateIn = '';
+      if (model.lateBreak == '0') model.lateBreak = '';
+      if (model.overtime == '0') model.overtime = '';
+      if (model.undertimeIn == '0') model.undertimeIn = '';
+      if (model.undertimeBreak == '0') model.undertimeBreak = '';
+      if (model.undertimeIn == '0') model.undertimeIn = '';
+      if (model.undertimeBreak == '0') model.undertimeBreak = '';
     } catch (e) {
       debugPrint('$e reCalcLate');
       errorString.value = e.toString();
@@ -486,6 +612,12 @@ class HomeData with ChangeNotifier {
               logs.add(c[i].logs[k]);
             }
           }
+        } else if (c[i].logs.length == 3 &&
+            c[i].logs.first.logType == 'IN' &&
+            c[i].logs.last.logType == 'IN') {
+          logs.addAll(c[i].logs);
+        } else {
+          logs.addAll(c[i].logs);
         }
 
         if (!isSoloOut) {
@@ -695,9 +827,16 @@ class HomeData with ChangeNotifier {
             logs.add(c[i + 1].logs.first);
           } else if (c[i + 1].logs.length == 3 &&
               c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'OUT') {
-            logs.addAll(c[i + 1].logs);
-          } else {
+              c[i + 1].logs.last.logType == 'OUT' &&
+              c[i].logs.length == 1) {
+            logs.add(c[i + 1].logs.first);
+          }
+          // else if (c[i + 1].logs.length == 3 &&
+          //     c[i + 1].logs.first.logType == 'OUT' &&
+          //     c[i + 1].logs.last.logType == 'OUT' ) {
+          //   logs.addAll(c[i + 1].logs);
+          // }
+          else {
             logs.add(c[i + 1].logs.first);
           }
         } else if (c[i].logs.length == 1 && c[i].logs.last.logType == 'IN') {
@@ -706,6 +845,10 @@ class HomeData with ChangeNotifier {
               c[i + 1].logs.first.logType == 'OUT' &&
               c[i + 1].logs.last.logType == 'IN') {
             logs.addAll(c[i + 1].logs.sublist(0, 3));
+          } else if (c[i + 1].logs.length == 2 &&
+              c[i + 1].logs.first.logType == 'OUT' &&
+              c[i + 1].logs.last.logType == 'IN') {
+            logs.add(c[i + 1].logs.first);
           } else if (c[i + 1].logs.length < 4 &&
               c[i + 1].logs.first.logType == 'OUT') {
             // logs.add(c[i + 1].logs.first);
@@ -950,8 +1093,12 @@ class HomeData with ChangeNotifier {
     return false;
   }
 
-  String fullName(CleanDataModel cleanDataModel) {
-    return '${cleanDataModel.lastName}, ${cleanDataModel.firstName} ${cleanDataModel.middleName}';
+  String fullName(CleanDataModel c) {
+    return '${c.lastName}, ${c.firstName} ${c.middleName}';
+  }
+
+  String fullNameHistory(HistoryModel h) {
+    return '${h.lastName}, ${h.firstName} ${h.middleName}';
   }
 
   String selectDay({required String day, required HistoryModel model}) {
