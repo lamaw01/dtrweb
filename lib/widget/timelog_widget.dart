@@ -3,34 +3,32 @@ import 'package:flutter/material.dart';
 import '../model/log_model.dart';
 
 class TimelogWidget extends StatelessWidget {
-  const TimelogWidget({super.key, required this.tl});
+  const TimelogWidget({
+    super.key,
+    required this.tl,
+    required this.w,
+  });
   final TimeLog tl;
+  final double w;
 
   @override
   Widget build(BuildContext context) {
-    Color colorIsSelfie(String selfie) {
-      if (selfie == '1') {
-        return Colors.blue;
-      }
-      return Colors.black;
-    }
-
     return Container(
-      width: 160.0,
+      width: w,
       decoration: const BoxDecoration(
+        // color: Colors.blueGrey,
         border: Border(
-          right: BorderSide(width: 1, color: Colors.grey),
+          // right: BorderSide(width: 1, color: Colors.grey),
+          left: BorderSide(width: 1, color: Colors.grey),
         ),
       ),
-      child: Center(
-        child: Text(
-          tl.timestamp,
-          maxLines: 1,
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: colorIsSelfie(tl.isSelfie),
-          ),
+      child: Text(
+        tl.timestamp,
+        maxLines: 1,
+        textAlign: TextAlign.center,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: tl.isSelfie == '1' ? Colors.blue : Colors.black,
         ),
       ),
     );

@@ -127,7 +127,7 @@ class HomeData with ChangeNotifier {
         name: model.name,
         sched: newSchedule,
       );
-      var finalOtString = calcOvertimeHour(duration.overtime);
+      var finalOtString = calcOvertimeHour(duration.overtime, model.name);
       model.duration = duration.hour.toString();
       model.lateIn = duration.lateIn.toString();
       model.lateBreak = duration.lateBreak.toString();
@@ -149,13 +149,21 @@ class HomeData with ChangeNotifier {
         name: model.name,
         sched: model.currentSched,
       );
-      var finalOtString = calcOvertimeHour(duration.overtime);
+      var finalOtString = calcOvertimeHour(duration.overtime, model.name);
       model.duration = duration.hour.toString();
       model.lateIn = duration.lateIn.toString();
       model.lateBreak = duration.lateBreak.toString();
       model.overtime = finalOtString;
       model.undertimeIn = duration.undertimeIn.toString();
       model.undertimeBreak = duration.undertimelateBreak.toString();
+      if (model.duration == '0') model.duration = '';
+      if (model.lateIn == '0') model.lateIn = '';
+      if (model.lateBreak == '0') model.lateBreak = '';
+      if (model.overtime == '0') model.overtime = '';
+      if (model.undertimeIn == '0') model.undertimeIn = '';
+      if (model.undertimeBreak == '0') model.undertimeBreak = '';
+      if (model.undertimeIn == '0') model.undertimeIn = '';
+      if (model.undertimeBreak == '0') model.undertimeBreak = '';
     } catch (e) {
       debugPrint('$e reCalcLate');
       errorString.value = e.toString();
@@ -269,7 +277,7 @@ class HomeData with ChangeNotifier {
         sheetObject.setColWidth(4, 15.73);
         sheetObject.setColWidth(5, 3.50);
         sheetObject.setColWidth(6, 3.51);
-        sheetObject.setColWidth(7, 3.52);
+        sheetObject.setColWidth(7, 4.10);
         sheetObject.setColWidth(8, 3.53);
         sheetObject.setColWidth(9, 3.54);
         sheetObject.setColWidth(10, 3.55);
@@ -508,6 +516,11 @@ class HomeData with ChangeNotifier {
                 c[i].logs.first.logType == 'IN') {
               // logs.add(c[i].logs[0]);
               logs.add(c[i].logs[1]);
+            } else if (c[i + 1].logs.length == 1 &&
+                c[i + 1].logs.first.logType == 'OUT') {
+            } else if (c[i].logs.length == 1 &&
+                c[i].logs.first.logType == 'IN' &&
+                c[i + 1].logs.first.logType == 'IN') {
             } else {
               // logs.add(c[i].logs.last);
               logs.add(c[i + 1].logs.first);
@@ -641,6 +654,11 @@ class HomeData with ChangeNotifier {
           logs.addAll(c[i].logs.sublist(1));
         } else if (c[i].logs.length < 4 && c[i].logs.last.logType == 'OUT') {
           isSoloOut = true;
+        } else if (c[i].logs.length == 3 &&
+            c[i].logs.first.logType == 'OUT' &&
+            c[i].logs.last.logType == 'OUT') {
+          logs.addAll(c[i].logs);
+          // isSoloOut = true;
         } else {
           logs.addAll(c[i].logs);
         }
@@ -675,6 +693,10 @@ class HomeData with ChangeNotifier {
           } else if (c[i + 1].logs.length == 1 &&
               c[i + 1].logs.first.logType == 'OUT') {
             logs.add(c[i + 1].logs.first);
+          } else if (c[i + 1].logs.length == 3 &&
+              c[i + 1].logs.first.logType == 'OUT' &&
+              c[i + 1].logs.last.logType == 'OUT') {
+            logs.addAll(c[i + 1].logs);
           } else {
             logs.add(c[i + 1].logs.first);
           }
@@ -696,10 +718,25 @@ class HomeData with ChangeNotifier {
             c[i + 1].logs.first.logType == 'OUT') {
           logs.addAll(c[i].logs.sublist(1));
           logs.add(c[i + 1].logs.first);
+          if (i + 1 == c.length - 1 &&
+              c[i + 1].logs.first.logType == 'OUT' &&
+              c[i + 1].logs.last.logType == 'OUT' &&
+              c[i + 1].logs.length == 3) {
+            logs.addAll(c[i + 1].logs);
+          }
         } else if (c[i].logs.length < 4 &&
             c[i].logs.last.logType == 'OUT' &&
             fullName(c[i]) != fullName(c[i + 1])) {
           isSoloOut = true;
+        } else if (c[i].logs.length == 3 &&
+            c[i].logs.first.logType == 'OUT' &&
+            c[i].logs.last.logType == 'OUT') {
+          isSoloOut = true;
+        } else if (c[i].logs.length == 3 &&
+            c[i].logs.first.logType == 'IN' &&
+            c[i].logs.last.logType == 'IN') {
+          logs.addAll(c[i].logs);
+          logs.add(c[i + 1].logs.first);
         } else {
           logs.addAll(c[i].logs);
         }
@@ -752,7 +789,9 @@ class HomeData with ChangeNotifier {
           name: c[i].firstName,
           sched: c[i].currentSched,
         );
-        var finalOtString = calcOvertimeHour(duration.overtime);
+
+        var finalOtString =
+            calcOvertimeHour(duration.overtime, c[i].firstName, dt: c[i].date);
         c[i].duration = duration.hour.toString();
         c[i].lateIn = duration.lateIn.toString();
         c[i].lateBreak = duration.lateBreak.toString();
@@ -770,34 +809,6 @@ class HomeData with ChangeNotifier {
   void finalizeData(List<CleanDataModel> c) {
     _cleanExcelData.clear();
     var count = 0;
-    // _cleanExcelData.add(
-    //   CleanExcelDataModel(
-    //     employeeId: 'Emp ID',
-    //     name: 'Name',
-    //     currentSched: ScheduleModel(
-    //       schedId: 'Sched ID',
-    //       schedType: '',
-    //       schedIn: '',
-    //       breakStart: '',
-    //       breakEnd: '',
-    //       schedOut: '',
-    //       description: '',
-    //     ),
-    //     date: DateTime.now(),
-    //     logs: <Log>[],
-    //     duration: 'D(h)',
-    //     lateIn: 'T(m)',
-    //     lateBreak: 'LB(m)',
-    //     overtime: 'OT',
-    //     undertimeIn: 'UDI(m)',
-    //     undertimeBreak: 'UDB(m)',
-    //     rowCount: '',
-    //     in1: TimeLog(timestamp: 'In'),
-    //     out1: TimeLog(timestamp: 'Out'),
-    //     in2: TimeLog(timestamp: 'In'),
-    //     out2: TimeLog(timestamp: 'Out'),
-    //   ),
-    // );
     try {
       for (int i = 0; i < c.length; i++) {
         count = count + 1;
@@ -875,6 +886,14 @@ class HomeData with ChangeNotifier {
           cxd.out2.isSelfie = cxd.logs[3].isSelfie;
           cxd.out2.id = cxd.logs[3].id;
         }
+        if (cxd.duration == '0') cxd.duration = '';
+        if (cxd.lateIn == '0') cxd.lateIn = '';
+        if (cxd.lateBreak == '0') cxd.lateBreak = '';
+        if (cxd.overtime == '0') cxd.overtime = '';
+        if (cxd.undertimeIn == '0') cxd.undertimeIn = '';
+        if (cxd.undertimeBreak == '0') cxd.undertimeBreak = '';
+        if (cxd.undertimeIn == '0') cxd.undertimeIn = '';
+        if (cxd.undertimeBreak == '0') cxd.undertimeBreak = '';
       }
     } catch (e) {
       debugPrint('$e finalizeData');
@@ -913,7 +932,9 @@ class HomeData with ChangeNotifier {
   bool isInCloseEvening(CleanDataModel c) {
     var differenceForgotOut = 0;
     try {
-      if (c.logs[1].logType == 'IN' && c.logs[2].logType == 'OUT') {
+      if (c.logs.length > 2 &&
+          c.logs[1].logType == 'IN' &&
+          c.logs[2].logType == 'OUT') {
         differenceForgotOut =
             c.logs[2].timeStamp.difference(c.logs[1].timeStamp).inMinutes;
         // dont calc if out and in if less than 30 minutes gap
@@ -952,22 +973,34 @@ class HomeData with ChangeNotifier {
     }
   }
 
-  String calcOvertimeHour(int overtime) {
+  String calcOvertimeHour(int overtime, String name, {DateTime? dt}) {
     var finalOtString = '';
     try {
       var overtimeDouble = overtime / 60;
       var overtimeDoubleString = overtimeDouble.toStringAsFixed(1);
       var rounderDigit = overtimeDouble.toStringAsFixed(1).substring(2, 3);
-      if (int.parse(rounderDigit) >= 5) {
-        finalOtString = overtimeDoubleString.replaceRange(2, 3, '5');
+      var rd = overtimeDouble.toStringAsFixed(1).substring(0, 1);
+
+      if (double.tryParse(rounderDigit) == null) {
+        rounderDigit = rd;
+        if (double.parse(rounderDigit) >= 5) {
+          finalOtString = overtimeDoubleString.replaceRange(3, 4, '5');
+        } else {
+          finalOtString = overtimeDoubleString.replaceRange(3, 4, '0');
+        }
       } else {
-        finalOtString = overtimeDoubleString.replaceRange(2, 3, '0');
+        if (double.parse(rounderDigit) >= 5) {
+          finalOtString = overtimeDoubleString.replaceRange(2, 3, '5');
+        } else {
+          finalOtString = overtimeDoubleString.replaceRange(2, 3, '0');
+        }
       }
+
       if (overtimeDouble < 0.5) {
         finalOtString = '0';
       }
     } catch (e) {
-      debugPrint('$e calcOvertimeHour');
+      debugPrint('$e calcOvertimeHour $overtime $name $dt');
       errorString.value = e.toString();
     }
     return finalOtString;

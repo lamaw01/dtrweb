@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -57,87 +56,29 @@ class _HomeViewState extends State<HomeView> {
 
   Future<DateTime> showDateFromDialog({required BuildContext context}) async {
     var instance = Provider.of<HomeData>(context, listen: false);
-    await showDialog<void>(
+    var dateFrom = await showDatePicker(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pick Date from'),
-          content: SizedBox(
-            height: 180.0,
-            width: 300.0,
-            child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.date,
-              initialDateTime: instance.selectedFrom,
-              onDateTimeChanged: (DateTime newDateTime) {
-                instance.selectedFrom = newDateTime;
-              },
-              use24hFormat: false,
-              minuteInterval: 1,
-              maximumYear: DateTime.now().year,
-              minimumYear: 1999,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text(
-                'Ok',
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+      initialDate: instance.selectedFrom,
+      firstDate: DateTime(2020, 1, 1),
+      lastDate: DateTime.now(),
     );
+    if (dateFrom != null) {
+      instance.selectedFrom = dateFrom;
+    }
     return instance.selectedFrom;
   }
 
   Future<DateTime> showDateToDialog({required BuildContext context}) async {
     var instance = Provider.of<HomeData>(context, listen: false);
-    await showDialog<void>(
+    var dateTo = await showDatePicker(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pick Date to'),
-          content: SizedBox(
-            height: 180.0,
-            width: 300.0,
-            child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.date,
-              initialDateTime: instance.selectedTo,
-              onDateTimeChanged: (DateTime newDateTime) {
-                instance.selectedTo = newDateTime;
-              },
-              use24hFormat: false,
-              minuteInterval: 1,
-              maximumYear: DateTime.now().year,
-              minimumYear: 1999,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text(
-                'Ok',
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+      initialDate: instance.selectedTo,
+      firstDate: DateTime(2020, 1, 1),
+      lastDate: DateTime.now(),
     );
+    if (dateTo != null) {
+      instance.selectedTo = dateTo;
+    }
     return instance.selectedTo;
   }
 
