@@ -222,14 +222,15 @@ class _ExcelViewState extends State<ExcelView> {
           var fd = DateTime(d.year, d.month, d.day, t.hour, t.minute);
           log('fd $fd');
           dateResult = fd;
+          c.logs.add(Log(
+            timeStamp: dateResult,
+            logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
+            id: '',
+            isSelfie: '0',
+          ));
         }
       }
-      c.logs.add(Log(
-        timeStamp: dateResult,
-        logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
-        id: '',
-        isSelfie: '0',
-      ));
+
       // ignore: prefer_is_empty
       if (c.logs.length >= 1) {
         c.logs[0].timeStamp = c.logs[0].timeStamp;
