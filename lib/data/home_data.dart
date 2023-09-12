@@ -138,7 +138,7 @@ class HomeData with ChangeNotifier {
         return valueA.compareTo(valueB);
       });
 
-      for (int i = 1; i < sortedRawHistory.length; i++) {
+      for (int i = 0; i < sortedRawHistory.length; i++) {
         for (int j = 0; j < sortedRawHistory[i].logs.length; j++) {
           rC = rC + 1;
           List<dynamic> dataList = [
