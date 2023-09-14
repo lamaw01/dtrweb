@@ -9,8 +9,8 @@ $input = json_decode($inputJSON, TRUE);
 // if not put id die
 if($_SERVER['REQUEST_METHOD'] == 'GET'){
 
-    $sql_get_schedule = "SELECT tbl_schedule.sched_id, tbl_schedule.sched_type, tbl_schedule.sched_in, tbl_schedule.break_start, tbl_schedule.break_end, tbl_schedule.sched_out 
-    FROM tbl_schedule";
+    $sql_get_schedule = "SELECT tbl_schedule.sched_id, tbl_schedule.sched_type, tbl_schedule.sched_in, tbl_schedule.break_start, tbl_schedule.break_end, tbl_schedule.sched_out, tbl_schedule.description
+    FROM tbl_schedule ORDER BY tbl_schedule.sched_id";
 
     try {
         $get_schedule= $conn->prepare($sql_get_schedule);
