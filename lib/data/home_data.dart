@@ -233,12 +233,13 @@ class HomeData with ChangeNotifier {
     required ScheduleModel newSchedule,
   }) {
     var duration = LateModel(
-        hour: 0,
-        lateIn: 0,
-        lateBreak: 0,
-        overtime: 0,
-        undertimeIn: 0,
-        undertimelateBreak: 0);
+      hour: 0,
+      lateIn: 0,
+      lateBreak: 0,
+      overtime: 0,
+      // undertimeIn: 0,
+      // undertimelateBreak: 0
+    );
     try {
       duration = calcDurationInOutSameDay(
         logs: model.logs,
@@ -250,17 +251,15 @@ class HomeData with ChangeNotifier {
       model.lateIn = duration.lateIn.toString();
       model.lateBreak = duration.lateBreak.toString();
       model.overtime = finalOtString;
-      model.undertimeIn = duration.undertimeIn.toString();
-      model.undertimeBreak = duration.undertimelateBreak.toString();
+      // model.undertimeIn = duration.undertimeIn.toString();
+      // model.undertimeBreak = duration.undertimelateBreak.toString();
       model.currentSched = newSchedule;
       if (model.duration == '0') model.duration = '';
       if (model.lateIn == '0') model.lateIn = '';
       if (model.lateBreak == '0') model.lateBreak = '';
       if (model.overtime == '0') model.overtime = '';
-      if (model.undertimeIn == '0') model.undertimeIn = '';
-      if (model.undertimeBreak == '0') model.undertimeBreak = '';
-      if (model.undertimeIn == '0') model.undertimeIn = '';
-      if (model.undertimeBreak == '0') model.undertimeBreak = '';
+      // if (model.undertimeIn == '0') model.undertimeIn = '';
+      // if (model.undertimeBreak == '0') model.undertimeBreak = '';
     } catch (e) {
       debugPrint('$e reCalcLate');
       errorString.value = e.toString();
@@ -280,16 +279,14 @@ class HomeData with ChangeNotifier {
       model.lateIn = duration.lateIn.toString();
       model.lateBreak = duration.lateBreak.toString();
       model.overtime = finalOtString;
-      model.undertimeIn = duration.undertimeIn.toString();
-      model.undertimeBreak = duration.undertimelateBreak.toString();
+      // model.undertimeIn = duration.undertimeIn.toString();
+      // model.undertimeBreak = duration.undertimelateBreak.toString();
       if (model.duration == '0') model.duration = '';
       if (model.lateIn == '0') model.lateIn = '';
       if (model.lateBreak == '0') model.lateBreak = '';
       if (model.overtime == '0') model.overtime = '';
-      if (model.undertimeIn == '0') model.undertimeIn = '';
-      if (model.undertimeBreak == '0') model.undertimeBreak = '';
-      if (model.undertimeIn == '0') model.undertimeIn = '';
-      if (model.undertimeBreak == '0') model.undertimeBreak = '';
+      // if (model.undertimeIn == '0') model.undertimeIn = '';
+      // if (model.undertimeBreak == '0') model.undertimeBreak = '';
     } catch (e) {
       debugPrint('$e reCalcLate');
       errorString.value = e.toString();
@@ -354,13 +351,13 @@ class HomeData with ChangeNotifier {
 
       var column10 = sheetObject.cell(CellIndex.indexByString('J1'));
       column10
-        ..value = 'ut1'
+        ..value = 'ut'
         ..cellStyle = cellStyle;
 
-      var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
-      column11
-        ..value = 'ut2'
-        ..cellStyle = cellStyle;
+      // var column11 = sheetObject.cell(CellIndex.indexByString('K1'));
+      // column11
+      //   ..value = 'ut2'
+      //   ..cellStyle = cellStyle;
 
       var cellStyleData = CellStyle(
         fontFamily: getFontFamily(FontFamily.Calibri),
@@ -379,8 +376,8 @@ class HomeData with ChangeNotifier {
         var lateIn = int.tryParse(_cleanExcelData[i].lateIn);
         var lateBreak = int.tryParse(_cleanExcelData[i].lateBreak);
         var overtime = _cleanExcelData[i].overtime;
-        var undertimeIn = int.tryParse(_cleanExcelData[i].undertimeIn);
-        var undertimeBreak = int.tryParse(_cleanExcelData[i].undertimeBreak);
+        // var undertimeIn = int.tryParse(_cleanExcelData[i].undertimeIn);
+        // var undertimeBreak = int.tryParse(_cleanExcelData[i].undertimeBreak);
 
         List<dynamic> dataList = [
           idName,
@@ -392,8 +389,9 @@ class HomeData with ChangeNotifier {
           lateIn,
           lateBreak,
           overtime,
-          undertimeIn,
-          undertimeBreak,
+          '',
+          // undertimeIn,
+          // undertimeBreak,
         ];
         sheetObject.appendRow(dataList);
         sheetObject.setColWidth(0, 25.70);
@@ -406,7 +404,7 @@ class HomeData with ChangeNotifier {
         sheetObject.setColWidth(7, 4.10);
         sheetObject.setColWidth(8, 3.53);
         sheetObject.setColWidth(9, 3.54);
-        sheetObject.setColWidth(10, 3.55);
+        // sheetObject.setColWidth(10, 3.55);
 
         sheetObject.updateCell(
           CellIndex.indexByColumnRow(
@@ -485,17 +483,17 @@ class HomeData with ChangeNotifier {
             columnIndex: 9,
             rowIndex: i,
           ),
-          undertimeIn,
+          '',
           cellStyle: cellStyleData,
         );
-        sheetObject.updateCell(
-          CellIndex.indexByColumnRow(
-            columnIndex: 10,
-            rowIndex: i,
-          ),
-          undertimeBreak,
-          cellStyle: cellStyleData,
-        );
+        // sheetObject.updateCell(
+        //   CellIndex.indexByColumnRow(
+        //     columnIndex: 10,
+        //     rowIndex: i,
+        //   ),
+        //   undertimeBreak,
+        //   cellStyle: cellStyleData,
+        // );
       }
       excel.save(
           fileName:
@@ -640,7 +638,7 @@ class HomeData with ChangeNotifier {
       try {
         if (c[i].logs.last.logType == 'IN') {
           var logs = <Log>[];
-          logs.add(c[i].logs.first);
+          logs.add(c[i].logs.last);
           if (fullName(c[i]) == fullName(c[i + 1])) {
             if (isForgotOut(c[i + 1])) {
             } else if (c[i].logs.length < 4 &&
@@ -695,6 +693,8 @@ class HomeData with ChangeNotifier {
                 logs.add(c[i].logs[k]);
               }
             }
+          } else {
+            logs.addAll(c[i].logs);
           }
 
           if (!isSoloOut) {
@@ -732,6 +732,7 @@ class HomeData with ChangeNotifier {
         //     logs.add(c[i].logs[k]);
         //   }
         // } else
+
         if (c[i].logs.first.logType == 'IN' && c[i].logs.length == 1) {
           logs.add(c[i].logs.first);
           logs.add(c[i + 1].logs.first);
@@ -754,11 +755,21 @@ class HomeData with ChangeNotifier {
           }
         } else if (c[i].logs.first.logType == 'OUT' && c[i].logs.length == 1) {
           isSoloOut = true;
+        } else if (c[i].logs.first.logType == 'OUT' &&
+            c[i].logs.last.logType == 'IN' &&
+            c[i].logs.length == 2) {
+          logs.add(c[i].logs.last);
+          if (c[i + 1].logs.length >= 3 &&
+              c[i + 1].logs[0].logType == 'OUT' &&
+              c[i + 1].logs[2].logType == 'OUT') {
+            logs.addAll(
+              c[i + 1].logs.getRange(0, 3),
+            );
+          }
+        } else {
+          // logs.addAll(c[i].logs);
+          logs.add(c[i].logs.last);
         }
-        //  else {
-        //   // logs.addAll(c[i].logs);
-        //   logs.add(c[i].logs.last);
-        // }
         if (!isSoloOut) {
           dayCleanData.add(
             CleanDataModel(
@@ -779,18 +790,27 @@ class HomeData with ChangeNotifier {
       try {
         var logs = <Log>[];
         bool isSoloOut = false;
+
         if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
           logs.add(c[i].logs.first);
           isSoloOut = true;
-        } else if (c[i].logs.length > 3 && c[i].logs.first.logType == 'OUT') {
-          logs.addAll(c[i].logs.sublist(1));
-        } else if (c[i].logs.length < 4 && c[i].logs.last.logType == 'OUT') {
+        }
+        // else if (c[i].logs.length > 3 && c[i].logs.first.logType == 'OUT') {
+        // logs.addAll(c[i].logs.sublist(1));
+        // }
+        else if (c[i].logs.length < 4 && c[i].logs.last.logType == 'OUT') {
           isSoloOut = true;
         } else if (c[i].logs.length == 3 &&
             c[i].logs.first.logType == 'OUT' &&
             c[i].logs.last.logType == 'OUT') {
           logs.addAll(c[i].logs);
           // isSoloOut = true;
+        } else if (c[i].logs.length == 2 && c[i].logs.first.logType == 'OUT') {
+          logs.add(c[i].logs.last);
+        } else if (c[i].logs.length == 4 &&
+            c[i].logs.first.logType == 'OUT' &&
+            c[i].logs.last.logType == 'IN') {
+          logs.add(c[i].logs.last);
         } else {
           logs.addAll(c[i].logs);
         }
@@ -814,6 +834,7 @@ class HomeData with ChangeNotifier {
       try {
         var logs = <Log>[];
         bool isSoloOut = false;
+
         if (c[i].logs.first.logType == 'OUT' &&
             c[i].logs.last.logType == 'IN' &&
             c[i].logs.length > 3) {
@@ -830,14 +851,10 @@ class HomeData with ChangeNotifier {
               c[i + 1].logs.last.logType == 'OUT' &&
               c[i].logs.length == 1) {
             logs.add(c[i + 1].logs.first);
-          }
-          // else if (c[i + 1].logs.length == 3 &&
-          //     c[i + 1].logs.first.logType == 'OUT' &&
-          //     c[i + 1].logs.last.logType == 'OUT' ) {
-          //   logs.addAll(c[i + 1].logs);
-          // }
-          else {
-            logs.add(c[i + 1].logs.first);
+          } else {
+            if (fullName(c[i]) == fullName(c[i + 1])) {
+              logs.add(c[i + 1].logs.first);
+            }
           }
         } else if (c[i].logs.length == 1 && c[i].logs.last.logType == 'IN') {
           logs.add(c[i].logs.last);
@@ -853,6 +870,17 @@ class HomeData with ChangeNotifier {
               c[i + 1].logs.first.logType == 'OUT') {
             // logs.add(c[i + 1].logs.first);
             logs.addAll(c[i + 1].logs);
+          }
+        } else if (c[i].logs.first.logType == 'OUT' &&
+            c[i].logs.last.logType == 'IN' &&
+            c[i].logs.length == 2) {
+          logs.add(c[i].logs.last);
+          if (c[i + 1].logs.length >= 3 &&
+              c[i + 1].logs[0].logType == 'OUT' &&
+              c[i + 1].logs[2].logType == 'OUT') {
+            logs.addAll(
+              c[i + 1].logs.getRange(0, 3),
+            );
           }
         } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
           isSoloOut = true;
@@ -939,8 +967,8 @@ class HomeData with ChangeNotifier {
         c[i].lateIn = duration.lateIn.toString();
         c[i].lateBreak = duration.lateBreak.toString();
         c[i].overtime = finalOtString;
-        c[i].undertimeIn = duration.undertimeIn.toString();
-        c[i].undertimeBreak = duration.undertimelateBreak.toString();
+        // c[i].undertimeIn = duration.undertimeIn.toString();
+        // c[i].undertimeBreak = duration.undertimelateBreak.toString();
       }
       _cleanData = c;
     } catch (e) {
@@ -975,8 +1003,8 @@ class HomeData with ChangeNotifier {
               lateIn: '',
               lateBreak: '',
               overtime: '',
-              undertimeIn: '',
-              undertimeBreak: '',
+              // undertimeIn: '',
+              // undertimeBreak: '',
               rowCount: '',
               in1: TimeLog(),
               out1: TimeLog(),
@@ -997,8 +1025,8 @@ class HomeData with ChangeNotifier {
             lateIn: c[i].lateIn!,
             lateBreak: c[i].lateBreak!,
             overtime: c[i].overtime!,
-            undertimeIn: c[i].undertimeIn!,
-            undertimeBreak: c[i].undertimeBreak!,
+            // undertimeIn: c[i].undertimeIn!,
+            // undertimeBreak: c[i].undertimeBreak!,
             rowCount: '$count',
             in1: TimeLog(),
             out1: TimeLog(),
@@ -1033,10 +1061,8 @@ class HomeData with ChangeNotifier {
         if (cxd.lateIn == '0') cxd.lateIn = '';
         if (cxd.lateBreak == '0') cxd.lateBreak = '';
         if (cxd.overtime == '0') cxd.overtime = '';
-        if (cxd.undertimeIn == '0') cxd.undertimeIn = '';
-        if (cxd.undertimeBreak == '0') cxd.undertimeBreak = '';
-        if (cxd.undertimeIn == '0') cxd.undertimeIn = '';
-        if (cxd.undertimeBreak == '0') cxd.undertimeBreak = '';
+        // if (cxd.undertimeIn == '0') cxd.undertimeIn = '';
+        // if (cxd.undertimeBreak == '0') cxd.undertimeBreak = '';
       }
     } catch (e) {
       debugPrint('$e finalizeData');
@@ -1252,18 +1278,18 @@ class HomeData with ChangeNotifier {
     var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
     var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;
     var overtime = Duration(seconds: latePenalty.overtimeSeconds).inMinutes;
-    var undertimeIn =
-        Duration(seconds: latePenalty.undertimeInMinutes).inMinutes;
-    var undertimeBreak =
-        Duration(seconds: latePenalty.undertimeBreakMinutes).inMinutes;
+    // var undertimeIn =
+    //     Duration(seconds: latePenalty.undertimeInMinutes).inMinutes;
+    // var undertimeBreak =
+    //     Duration(seconds: latePenalty.undertimeBreakMinutes).inMinutes;
 
     return LateModel(
       hour: hours,
       lateIn: lateIn,
       lateBreak: lateBreak,
       overtime: overtime,
-      undertimeIn: undertimeIn,
-      undertimelateBreak: undertimeBreak,
+      // undertimeIn: undertimeIn,
+      // undertimelateBreak: undertimeBreak,
     );
   }
 
@@ -1273,18 +1299,18 @@ class HomeData with ChangeNotifier {
     required ScheduleModel sched,
   }) {
     var sIn = sched.schedIn;
-    var bS = sched.breakStart;
+    // var bS = sched.breakStart;
     var bEnd = sched.breakEnd;
     var sOut = sched.schedOut;
     var schedIn = ''; //0
-    var breakStart = ''; //1
+    // var breakStart = ''; //1
     var breakEnd = ''; //2
     var schedOut = ''; //3
     var latePenaltyIn = 0;
     var latePenaltyBreak = 0;
     var overtime = 0;
-    var undertimeIn = 0;
-    var undertimeBreak = 0;
+    // var undertimeIn = 0;
+    // var undertimeBreak = 0;
     var calcOvertimebreak = true;
     try {
       if (sched.schedType.toLowerCase() != 'c') {
@@ -1338,31 +1364,31 @@ class HomeData with ChangeNotifier {
           }
           if (overtime < 0) overtime = 0;
 
-          if (logs.length == 2) {
-            schedOut =
-                '${logs[1].timeStamp.toString().substring(0, 10)} $sOut'; //1
-            undertimeBreak = _dateFormat1
-                .parse(schedOut)
-                .difference(logs[1].timeStamp)
-                .inSeconds;
-            if (undertimeBreak < 0) undertimeBreak = 0;
-          } else if (logs.length == 4) {
-            breakStart =
-                '${logs[1].timeStamp.toString().substring(0, 10)} $bS'; //2
-            undertimeIn = _dateFormat1
-                .parse(breakStart)
-                .difference(logs[1].timeStamp)
-                .inSeconds;
+          // if (logs.length == 2) {
+          //   schedOut =
+          //       '${logs[1].timeStamp.toString().substring(0, 10)} $sOut'; //1
+          //   undertimeBreak = _dateFormat1
+          //       .parse(schedOut)
+          //       .difference(logs[1].timeStamp)
+          //       .inSeconds;
+          //   if (undertimeBreak < 0) undertimeBreak = 0;
+          // } else if (logs.length == 4) {
+          //   breakStart =
+          //       '${logs[1].timeStamp.toString().substring(0, 10)} $bS'; //2
+          //   undertimeIn = _dateFormat1
+          //       .parse(breakStart)
+          //       .difference(logs[1].timeStamp)
+          //       .inSeconds;
 
-            schedOut =
-                '${logs[3].timeStamp.toString().substring(0, 10)} $sOut'; //3
-            undertimeBreak = _dateFormat1
-                .parse(schedOut)
-                .difference(logs[3].timeStamp)
-                .inSeconds;
-            if (undertimeIn < 0) undertimeIn = 0;
-            if (undertimeBreak < 0) undertimeBreak = 0;
-          }
+          //   schedOut =
+          //       '${logs[3].timeStamp.toString().substring(0, 10)} $sOut'; //3
+          //   undertimeBreak = _dateFormat1
+          //       .parse(schedOut)
+          //       .difference(logs[3].timeStamp)
+          //       .inSeconds;
+          //   if (undertimeIn < 0) undertimeIn = 0;
+          //   if (undertimeBreak < 0) undertimeBreak = 0;
+          // }
         }
       }
     } catch (e) {
@@ -1373,8 +1399,8 @@ class HomeData with ChangeNotifier {
       lateInMinutes: latePenaltyIn,
       lateBreakMinutes: latePenaltyBreak,
       overtimeSeconds: overtime,
-      undertimeInMinutes: undertimeIn,
-      undertimeBreakMinutes: undertimeBreak,
+      // undertimeInMinutes: undertimeIn,
+      // undertimeBreakMinutes: undertimeBreak,
     );
   }
 

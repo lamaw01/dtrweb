@@ -146,16 +146,21 @@ class _ExcelViewState extends State<ExcelView> {
         firstDate: DateTime(2020, 1, 1),
         lastDate: DateTime.now(),
       );
+      if (d == null) {
+        return c;
+      }
       if (mounted) {
         var t = await showTimePicker(
           context: context,
           initialTime: TimeOfDay.fromDateTime(c.logs[i].timeStamp),
         );
-        if (d != null && t != null) {
-          var fd = DateTime(d.year, d.month, d.day, t.hour, t.minute);
-          log('fd ${fd.toString()}');
-          dateResult = fd;
+        if (t == null) {
+          return c;
         }
+
+        var fd = DateTime(d.year, d.month, d.day, t.hour, t.minute);
+        log('fd ${fd.toString()}');
+        dateResult = fd;
       }
       if (dateResult != null) {
         if (i == 0) {
@@ -188,49 +193,60 @@ class _ExcelViewState extends State<ExcelView> {
     DateTime? dateResult;
     var instance = Provider.of<HomeData>(context, listen: false);
     try {
-      if (i == 0 && c.currentSched.schedType.toLowerCase() == 'b') {
-        var dateString1 = c.logs[0].timeStamp.toString().substring(0, 10);
-        var dateWithTime1 = '$dateString1 ${c.currentSched.breakStart}';
-        dateResult = instance.dateFormat1.parse(dateWithTime1);
-      } else if (i == 0 && c.currentSched.schedType.toLowerCase() == 'a') {
-        var dateString1 = c.logs[0].timeStamp.toString().substring(0, 10);
-        var dateWithTime1 = '$dateString1 ${c.currentSched.schedOut}';
-        dateResult = instance.dateFormat1.parse(dateWithTime1);
-      } else if (i == 1) {
-        var dateString2 = c.logs[1].timeStamp.toString().substring(0, 10);
-        var dateWithTime2 = '$dateString2 ${c.currentSched.breakEnd}';
-        dateResult = instance.dateFormat1.parse(dateWithTime2);
-      } else if (i == 2) {
-        var dateString3 = c.logs[2].timeStamp.toString().substring(0, 10);
-        var dateWithTime3 = '$dateString3 ${c.currentSched.schedOut}';
-        dateResult = instance.dateFormat1.parse(dateWithTime3);
+      try {
+        if (i == 0 && c.currentSched.schedType.toUpperCase() == 'B') {
+          var dateString1 = c.logs[0].timeStamp.toString().substring(0, 10);
+          var dateWithTime1 = '$dateString1 ${c.currentSched.breakStart}';
+          dateResult = instance.dateFormat1.parse(dateWithTime1);
+        } else if (i == 0 && c.currentSched.schedType.toUpperCase() == 'A') {
+          var dateString1 = c.logs[0].timeStamp.toString().substring(0, 10);
+          var dateWithTime1 = '$dateString1 ${c.currentSched.schedOut}';
+          dateResult = instance.dateFormat1.parse(dateWithTime1);
+        } else if (i == 1) {
+          var dateString2 = c.logs[1].timeStamp.toString().substring(0, 10);
+          var dateWithTime2 = '$dateString2 ${c.currentSched.breakEnd}';
+          dateResult = instance.dateFormat1.parse(dateWithTime2);
+        } else if (i == 2) {
+          var dateString3 = c.logs[2].timeStamp.toString().substring(0, 10);
+          var dateWithTime3 = '$dateString3 ${c.currentSched.schedOut}';
+          dateResult = instance.dateFormat1.parse(dateWithTime3);
+        }
+      } catch (e) {
+        debugPrint('$e addLog pref dates');
       }
+
+      dateResult ??= DateTime.now();
 
       var d = await showDatePicker(
         context: context,
-        initialDate: dateResult!,
+        initialDate: dateResult,
         firstDate: DateTime(2020, 1, 1),
         lastDate: DateTime.now(),
       );
+      if (d == null) {
+        return c;
+      }
 
       if (mounted) {
         var t = await showTimePicker(
           context: context,
           initialTime: TimeOfDay.fromDateTime(dateResult),
         );
-        if (d != null && t != null) {
-          var fd = DateTime(d.year, d.month, d.day, t.hour, t.minute);
-          log('fd $fd');
-          dateResult = fd;
-          c.logs.add(Log(
-            timeStamp: dateResult,
-            logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
-            id: '',
-            isSelfie: '0',
-          ));
-        }
-      }
 
+        if (t == null) {
+          return c;
+        }
+
+        var fd = DateTime(d.year, d.month, d.day, t.hour, t.minute);
+        log('fd $fd');
+        dateResult = fd;
+        c.logs.add(Log(
+          timeStamp: dateResult,
+          logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
+          id: '0',
+          isSelfie: '0',
+        ));
+      }
       // ignore: prefer_is_empty
       if (c.logs.length >= 1) {
         c.logs[0].timeStamp = c.logs[0].timeStamp;
@@ -248,9 +264,111 @@ class _ExcelViewState extends State<ExcelView> {
         c.logs[3].timeStamp = c.logs[3].timeStamp;
         c.out2.timestamp = instance.formatPrettyDate(c.logs[3].timeStamp);
       }
+      for (var logz in c.logs) {
+        log('${logz.timeStamp} ${logz.logType}');
+      }
       c = instance.reCalcNewTime(model: c);
     } catch (e) {
       debugPrint('$e addLog');
+    }
+    log(c.logs.length.toString());
+    return c;
+  }
+
+  Future<CleanExcelDataModel> addLogSkip({
+    required CleanExcelDataModel c,
+    required int i,
+    required BuildContext context,
+    required int slotIndex,
+  }) async {
+    var dateResult = DateTime.now();
+    var instance = Provider.of<HomeData>(context, listen: false);
+    try {
+      var d = await showDatePicker(
+        context: context,
+        initialDate: dateResult,
+        firstDate: DateTime(2020, 1, 1),
+        lastDate: DateTime.now(),
+      );
+
+      if (d == null) {
+        return c;
+      }
+
+      if (mounted) {
+        var t = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(dateResult),
+        );
+
+        if (t == null) {
+          return c;
+        }
+
+        var fd = DateTime(d.year, d.month, d.day, t.hour, t.minute);
+        log('fd $fd');
+        dateResult = fd;
+      }
+      var tempDate = DateTime(
+        c.logs[0].timeStamp.year,
+        c.logs[0].timeStamp.month,
+        c.logs[0].timeStamp.day,
+        1,
+        0,
+        0,
+      );
+      if (slotIndex == 3) {
+        if (c.logs.length == 1) {
+          c.logs.add(Log(
+            timeStamp: tempDate,
+            logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
+            id: '0',
+            isSelfie: '0',
+          ));
+          c.out1.timestamp = instance.formatPrettyDate(tempDate);
+        }
+        if (c.logs.length == 2) {
+          c.logs.add(Log(
+            timeStamp: dateResult,
+            logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
+            id: '0',
+            isSelfie: '0',
+          ));
+          c.in2.timestamp = instance.formatPrettyDate(dateResult);
+        }
+      } else if (slotIndex == 4) {
+        if (c.logs.length == 1) {
+          c.logs.add(Log(
+            timeStamp: tempDate,
+            logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
+            id: '0',
+            isSelfie: '0',
+          ));
+          c.out1.timestamp = instance.formatPrettyDate(tempDate);
+        }
+        if (c.logs.length == 2) {
+          c.logs.add(Log(
+            timeStamp: tempDate,
+            logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
+            id: '0',
+            isSelfie: '0',
+          ));
+          c.in2.timestamp = instance.formatPrettyDate(tempDate);
+        }
+        if (c.logs.length == 3) {
+          c.logs.add(Log(
+            timeStamp: dateResult,
+            logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
+            id: '0',
+            isSelfie: '0',
+          ));
+          c.out2.timestamp = instance.formatPrettyDate(dateResult);
+        }
+      }
+      log(c.logs.length.toString());
+      c = instance.reCalcNewTime(model: c);
+    } catch (e) {
+      debugPrint('$e addLogSkip');
     }
     return c;
   }
@@ -270,7 +388,7 @@ class _ExcelViewState extends State<ExcelView> {
     var tardybw = 120.0;
     var otw = 100.0;
     var udiw = 110.0;
-    var udbw = 110.0;
+    // var udbw = 110.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -313,8 +431,8 @@ class _ExcelViewState extends State<ExcelView> {
                   ExcelCell(
                       w: tardybw, c: Colors.lightGreen, t: 'Tardy Break(mns)'),
                   ExcelCell(w: otw, c: Colors.lime, t: 'OT(hrs)'),
-                  ExcelCell(w: udiw, c: Colors.teal, t: 'UD In(mns)'),
-                  ExcelCell(w: udbw, c: Colors.yellow, t: 'UD Break(mns)'),
+                  ExcelCell(w: udiw, c: Colors.teal, t: 'UD(mns)'),
+                  // ExcelCell(w: udbw, c: Colors.yellow, t: 'UD Break(mns)'),
                 ],
               ),
             ),
@@ -446,6 +564,7 @@ class _ExcelViewState extends State<ExcelView> {
                           InkWell(
                             onTap: () async {
                               if (provider.cleanExcelData[i].logs.length == 1) {
+                                log('addLog 1');
                                 await addLog(
                                   context: context,
                                   c: provider.cleanExcelData[i],
@@ -455,13 +574,15 @@ class _ExcelViewState extends State<ExcelView> {
                                     provider.cleanExcelData[i] = r;
                                   });
                                 });
-                              } else {
+                              } else if (provider
+                                      .cleanExcelData[i].logs.length >=
+                                  2) {
+                                log('showTimeDialog 1');
                                 await showTimeDialog(
                                   context: context,
                                   c: provider.cleanExcelData[i],
                                   i: 1,
                                 ).then((r) {
-                                  log('${r.logs.length} ${r.in2}');
                                   setState(() {
                                     provider.cleanExcelData[i] = r;
                                   });
@@ -476,6 +597,7 @@ class _ExcelViewState extends State<ExcelView> {
                           InkWell(
                             onTap: () async {
                               if (provider.cleanExcelData[i].logs.length == 2) {
+                                log('addLog 2');
                                 await addLog(
                                   context: context,
                                   c: provider.cleanExcelData[i],
@@ -485,11 +607,25 @@ class _ExcelViewState extends State<ExcelView> {
                                     provider.cleanExcelData[i] = r;
                                   });
                                 });
-                              } else {
+                              } else if (provider
+                                      .cleanExcelData[i].logs.length >=
+                                  3) {
+                                log('showTimeDialog 2');
                                 await showTimeDialog(
                                   context: context,
                                   c: provider.cleanExcelData[i],
                                   i: 2,
+                                ).then((r) {
+                                  setState(() {
+                                    provider.cleanExcelData[i] = r;
+                                  });
+                                });
+                              } else {
+                                addLogSkip(
+                                  context: context,
+                                  c: provider.cleanExcelData[i],
+                                  i: 2,
+                                  slotIndex: 3,
                                 ).then((r) {
                                   setState(() {
                                     provider.cleanExcelData[i] = r;
@@ -505,6 +641,7 @@ class _ExcelViewState extends State<ExcelView> {
                           InkWell(
                             onTap: () async {
                               if (provider.cleanExcelData[i].logs.length == 3) {
+                                log('addLog 3');
                                 await addLog(
                                   context: context,
                                   c: provider.cleanExcelData[i],
@@ -514,11 +651,25 @@ class _ExcelViewState extends State<ExcelView> {
                                     provider.cleanExcelData[i] = r;
                                   });
                                 });
-                              } else {
+                              } else if (provider
+                                      .cleanExcelData[i].logs.length >=
+                                  4) {
+                                log('showTimeDialog 3');
                                 await showTimeDialog(
                                   context: context,
                                   c: provider.cleanExcelData[i],
                                   i: 3,
+                                ).then((r) {
+                                  setState(() {
+                                    provider.cleanExcelData[i] = r;
+                                  });
+                                });
+                              } else {
+                                addLogSkip(
+                                  context: context,
+                                  c: provider.cleanExcelData[i],
+                                  i: 3,
+                                  slotIndex: 4,
                                 ).then((r) {
                                   setState(() {
                                     provider.cleanExcelData[i] = r;
@@ -556,13 +707,13 @@ class _ExcelViewState extends State<ExcelView> {
                           ExcelCell(
                             w: udiw,
                             c: Colors.teal,
-                            t: provider.cleanExcelData[i].undertimeIn,
+                            t: '',
                           ),
-                          ExcelCell(
-                            w: udbw,
-                            c: Colors.yellow,
-                            t: provider.cleanExcelData[i].undertimeBreak,
-                          ),
+                          // ExcelCell(
+                          //   w: udbw,
+                          //   c: Colors.yellow,
+                          //   t: provider.cleanExcelData[i].undertimeBreak,
+                          // ),
                         ],
                       ),
                     ),
