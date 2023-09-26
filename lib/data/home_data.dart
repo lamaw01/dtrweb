@@ -638,21 +638,28 @@ class HomeData with ChangeNotifier {
       try {
         if (c[i].logs.last.logType == 'IN') {
           var logs = <Log>[];
-          logs.add(c[i].logs.last);
           if (fullName(c[i]) == fullName(c[i + 1])) {
             if (isForgotOut(c[i + 1])) {
+              logs.add(c[i].logs.last);
             } else if (c[i].logs.length < 4 &&
                 c[i].logs.length > 1 &&
                 c[i].logs.first.logType == 'IN') {
               // logs.add(c[i].logs[0]);
+              logs.add(c[i].logs.last);
               logs.add(c[i].logs[1]);
             } else if (c[i + 1].logs.length == 1 &&
                 c[i + 1].logs.first.logType == 'OUT') {
+              logs.add(c[i].logs.last);
             } else if (c[i].logs.length == 1 &&
                 c[i].logs.first.logType == 'IN' &&
                 c[i + 1].logs.first.logType == 'IN') {
+              logs.add(c[i].logs.last);
+            } else if (c[i].logs.length >= 4 &&
+                c[i].logs.first.logType == 'OUT') {
+              logs.addAll(c[i].logs.skip(1));
             } else {
               // logs.add(c[i].logs.last);
+              logs.add(c[i].logs.last);
               logs.add(c[i + 1].logs.first);
             }
           }
