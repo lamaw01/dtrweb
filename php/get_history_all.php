@@ -20,20 +20,22 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
     $sql_get_history_all = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name,
     tbl_employee.week_sched_id, tbl_week_schedule.monday, tbl_week_schedule.tuesday, tbl_week_schedule.wednesday, tbl_week_schedule.thursday, tbl_week_schedule.friday, tbl_week_schedule.saturday, tbl_week_schedule.sunday,
-    DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp FROM tbl_logs 
+    DATE_FORMAT((case is_selfie when 0 then time_stamp when 1 then selfie_timestamp end), '%Y-%m-%d') time_stamp FROM tbl_logs 
     LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     LEFT JOIN tbl_week_schedule ON tbl_employee.week_sched_id = tbl_week_schedule.week_sched_id 
-    WHERE tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee.last_name IS NOT NULL
-    GROUP BY tbl_logs.employee_id, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
+    WHERE (case tbl_logs.is_selfie when 0 then tbl_logs.time_stamp when 1 then tbl_logs.selfie_timestamp end) BETWEEN :date_from AND :date_to AND tbl_employee.last_name IS NOT NULL
+    GROUP BY tbl_logs.employee_id, DATE_FORMAT((case tbl_logs.is_selfie when 0 then tbl_logs.time_stamp when 1 then tbl_logs.selfie_timestamp end), '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
+
+    //AND tbl_employee.last_name IS NOT NULL
 
     $sql_get_history_all_with_department = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, 
     tbl_employee.week_sched_id, tbl_week_schedule.monday, tbl_week_schedule.tuesday, tbl_week_schedule.wednesday, tbl_week_schedule.thursday, tbl_week_schedule.friday, tbl_week_schedule.saturday, tbl_week_schedule.sunday,
-    DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') time_stamp FROM tbl_logs 
+    DATE_FORMAT((case is_selfie when 0 then time_stamp when 1 then selfie_timestamp end), '%Y-%m-%d') time_stamp FROM tbl_logs 
     LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     LEFT JOIN tbl_employee_department ON tbl_employee.employee_id = tbl_employee_department.employee_id 
     LEFT JOIN tbl_week_schedule ON tbl_employee.week_sched_id = tbl_week_schedule.week_sched_id 
-    WHERE tbl_logs.time_stamp BETWEEN :date_from AND :date_to AND tbl_employee_department.department_id = :department AND tbl_employee.last_name IS NOT NULL
-    GROUP BY tbl_logs.employee_id, DATE_FORMAT(tbl_logs.time_stamp, '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
+    WHERE (case tbl_logs.is_selfie when 0 then tbl_logs.time_stamp when 1 then tbl_logs.selfie_timestamp end) BETWEEN :date_from AND :date_to AND tbl_employee_department.department_id = :department AND tbl_employee.last_name IS NOT NULL
+    GROUP BY tbl_logs.employee_id, DATE_FORMAT((case tbl_logs.is_selfie when 0 then tbl_logs.time_stamp when 1 then tbl_logs.selfie_timestamp end), '%Y-%m-%d') ORDER BY tbl_logs.id ASC;";
 
     try {
         $set=$conn->prepare("SET SQL_MODE=''");
@@ -56,13 +58,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $time_head = $result['time_stamp'];
             $time_tail = $result['time_stamp'];
             // get logs
-            $get_logs_within=$conn->prepare("SELECT case is_selfie when '0' then time_stamp when '1' then selfie_timestamp end time_stamp,
+            $get_logs_within= $conn->prepare("SELECT case is_selfie when 0 then time_stamp when 1 then selfie_timestamp end time_stamp,
             log_type, id, is_selfie FROM tbl_logs
-            WHERE employee_id = :id AND time_stamp BETWEEN '$time_head 00:00:00' AND '$time_tail 23:59:59' LIMIT 6;");
+            WHERE employee_id = :id AND (case is_selfie when 0 then time_stamp when 1 then selfie_timestamp end) BETWEEN '$time_head 00:00:00' AND '$time_tail 23:59:59' LIMIT 6;");
             $get_logs_within->bindParam(':id', $id, PDO::PARAM_STR);
             $get_logs_within->execute();
             $result_get_logs_within = $get_logs_within->fetchAll(PDO::FETCH_ASSOC);
-            $my_array = array('employee_id'=>$result['employee_id'],'first_name'=>$result['first_name'],'last_name'=>$result['last_name'],'middle_name'=>$result['middle_name'],'date'=>$result['time_stamp'],'logs'=>$result_get_logs_within,'week_sched_id'=>$result['week_sched_id'],'monday'=>$result['monday'],'tuesday'=>$result['tuesday'],'wednesday'=>$result['wednesday'],'thursday'=>$result['thursday'],'friday'=>$result['friday'],'saturday'=>$result['saturday'],'sunday'=>$result['sunday']);
+            $my_array = array('employee_id'=>$result['employee_id'],'first_name'=>$result['first_name'] ?? 'NA','last_name'=>$result['last_name'] ?? 'NA','middle_name'=>$result['middle_name'] ?? 'NA','date'=>$result['time_stamp'],'logs'=>$result_get_logs_within,'week_sched_id'=>$result['week_sched_id'] ?? 'NA','monday'=>$result['monday'] ?? 'NA','tuesday'=>$result['tuesday'] ?? 'NA','wednesday'=>$result['wednesday'] ?? 'NA','thursday'=>$result['thursday'] ?? 'NA','friday'=>$result['friday']?? 'NA','saturday'=>$result['saturday'] ?? 'NA','sunday'=>$result['sunday'] ?? 'NA');
             array_push($result_array,$my_array);
         }
         echo json_encode($result_array);
