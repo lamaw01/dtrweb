@@ -1,3 +1,6 @@
+// ignore: unused_import
+import 'dart:developer';
+
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -541,10 +544,10 @@ class HomeData with ChangeNotifier {
     required List<CleanDataModel> c,
   }) {
     final dayCleanData = <CleanDataModel>[];
+    bool isSoloOut = false;
     if (i == 0) {
       try {
         var logs = <Log>[];
-        bool isSoloOut = false;
         if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 1) {
           for (int k = 1; k < c[i].logs.length; k++) {
             if (c[i].logs[k].logType != c[i].logs[k - 1].logType) {
@@ -554,7 +557,7 @@ class HomeData with ChangeNotifier {
           }
         } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'IN') {
           logs.add(c[i].logs.first);
-        } else if (c[i].logs.first.logType == 'OUT' && c[i].logs.length == 1) {
+        } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
           isSoloOut = true;
         } else {
           logs.addAll(c[i].logs);
@@ -579,7 +582,7 @@ class HomeData with ChangeNotifier {
     } else if (i == c.length - 1) {
       try {
         var logs = <Log>[];
-        bool isSoloOut = false;
+
         if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 3) {
           for (int k = 1; k < c[i].logs.length; k++) {
             if (c[i].logs[k].logType != c[i].logs[k - 1].logType) {
@@ -662,22 +665,32 @@ class HomeData with ChangeNotifier {
               logs.add(c[i].logs.last);
               logs.add(c[i + 1].logs.first);
             }
+          } else if (c[i].logs.length == 1 &&
+              c[i].logs.first.logType == 'IN' &&
+              fullName(c[i]) == fullName(c[i - 1])) {
+            logs.add(c[i].logs.last);
+          } else if (c[i].logs.length == 2 &&
+              c[i].logs.first.logType == 'OUT') {
+            logs.add(c[i].logs.last);
+          } else {
+            logs.add(c[i].logs.last);
           }
 
-          dayCleanData.add(
-            CleanDataModel(
-              employeeId: c[i].employeeId,
-              firstName: c[i].firstName,
-              lastName: c[i].lastName,
-              middleName: c[i].middleName,
-              date: c[i].date,
-              logs: logs,
-              currentSched: c[i].currentSched,
-            ),
-          );
+          if (logs.isNotEmpty) {
+            dayCleanData.add(
+              CleanDataModel(
+                employeeId: c[i].employeeId,
+                firstName: c[i].firstName,
+                lastName: c[i].lastName,
+                middleName: c[i].middleName,
+                date: c[i].date,
+                logs: logs,
+                currentSched: c[i].currentSched,
+              ),
+            );
+          }
         } else {
           var logs = <Log>[];
-          bool isSoloOut = false;
           if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 2) {
             for (int k = 1; k < c[i].logs.length; k++) {
               if (c[i].logs[k].logType != c[i].logs[k - 1].logType) {
@@ -848,16 +861,24 @@ class HomeData with ChangeNotifier {
           logs.add(c[i].logs.last);
           if (c[i + 1].logs.length > 3 &&
               c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'IN') {
+              c[i + 1].logs.last.logType == 'IN' &&
+              fullName(c[i]) == fullName(c[i + 1])) {
             logs.addAll(c[i + 1].logs.sublist(0, 3));
           } else if (c[i + 1].logs.length == 1 &&
-              c[i + 1].logs.first.logType == 'OUT') {
+              c[i + 1].logs.first.logType == 'OUT' &&
+              fullName(c[i]) == fullName(c[i + 1])) {
             logs.add(c[i + 1].logs.first);
           } else if (c[i + 1].logs.length == 3 &&
               c[i + 1].logs.first.logType == 'OUT' &&
               c[i + 1].logs.last.logType == 'OUT' &&
-              c[i].logs.length == 1) {
+              c[i].logs.length == 1 &&
+              fullName(c[i]) == fullName(c[i + 1])) {
             logs.add(c[i + 1].logs.first);
+          } else if (c[i + 1].logs.length == 3 &&
+              c[i + 1].logs.first.logType == 'OUT' &&
+              c[i + 1].logs.last.logType == 'OUT' &&
+              fullName(c[i]) == fullName(c[i + 1])) {
+            logs.addAll(c[i + 1].logs);
           } else {
             if (fullName(c[i]) == fullName(c[i + 1])) {
               logs.add(c[i + 1].logs.first);
@@ -867,14 +888,17 @@ class HomeData with ChangeNotifier {
           logs.add(c[i].logs.last);
           if (c[i + 1].logs.length > 3 &&
               c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'IN') {
+              c[i + 1].logs.last.logType == 'IN' &&
+              fullName(c[i]) == fullName(c[i + 1])) {
             logs.addAll(c[i + 1].logs.sublist(0, 3));
           } else if (c[i + 1].logs.length == 2 &&
               c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'IN') {
+              c[i + 1].logs.last.logType == 'IN' &&
+              fullName(c[i]) == fullName(c[i + 1])) {
             logs.add(c[i + 1].logs.first);
           } else if (c[i + 1].logs.length < 4 &&
-              c[i + 1].logs.first.logType == 'OUT') {
+              c[i + 1].logs.first.logType == 'OUT' &&
+              fullName(c[i]) == fullName(c[i + 1])) {
             // logs.add(c[i + 1].logs.first);
             logs.addAll(c[i + 1].logs);
           }
@@ -884,22 +908,27 @@ class HomeData with ChangeNotifier {
           logs.add(c[i].logs.last);
           if (c[i + 1].logs.length >= 3 &&
               c[i + 1].logs[0].logType == 'OUT' &&
-              c[i + 1].logs[2].logType == 'OUT') {
+              c[i + 1].logs[2].logType == 'OUT' &&
+              fullName(c[i]) == fullName(c[i + 1])) {
             logs.addAll(
               c[i + 1].logs.getRange(0, 3),
             );
           }
         } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
           isSoloOut = true;
+        } else if (c[i].logs.length < 4 && c[i].logs.last.logType == 'OUT') {
+          isSoloOut = true;
         } else if (c[i].logs.length < 4 &&
             c[i].logs.first.logType == 'OUT' &&
             c[i + 1].logs.first.logType == 'OUT') {
+          log('dire2');
           logs.addAll(c[i].logs.sublist(1));
           logs.add(c[i + 1].logs.first);
           if (i + 1 == c.length - 1 &&
               c[i + 1].logs.first.logType == 'OUT' &&
               c[i + 1].logs.last.logType == 'OUT' &&
-              c[i + 1].logs.length == 3) {
+              c[i + 1].logs.length == 3 &&
+              fullName(c[i]) == fullName(c[i + 1])) {
             logs.addAll(c[i + 1].logs);
           }
         } else if (c[i].logs.length < 4 &&
