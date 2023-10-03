@@ -672,8 +672,10 @@ class HomeData with ChangeNotifier {
           } else if (c[i].logs.length == 2 &&
               c[i].logs.first.logType == 'OUT') {
             logs.add(c[i].logs.last);
-          } else {
-            logs.add(c[i].logs.last);
+          } else if (c[i].logs.length == 3 &&
+              c[i].logs.first.logType == 'IN' &&
+              c[i].logs.last.logType == 'IN') {
+            logs.addAll(c[i].logs);
           }
 
           if (logs.isNotEmpty) {
