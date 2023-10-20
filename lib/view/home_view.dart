@@ -190,387 +190,853 @@ class _HomeViewState extends State<HomeView> {
                   },
                 ),
                 const SizedBox(height: 10.0),
-                SizedBox(
-                  height: 315.0,
-                  width: 800.0,
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const Text(
-                                'From :',
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
+                if (MediaQuery.of(context).size.width > 600) ...[
+                  SizedBox(
+                    height: 315.0,
+                    width: 800.0,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'From :',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(
-                                width: 300.0,
-                                child: TextField(
-                                  style: const TextStyle(fontSize: 18.0),
-                                  readOnly: true,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Colors.grey,
-                                        width: 1.0,
+                                SizedBox(
+                                  width: 300.0,
+                                  child: TextField(
+                                    style: const TextStyle(fontSize: 18.0),
+                                    readOnly: true,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
                                       ),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 12.0),
                                     ),
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.fromLTRB(
-                                        12.0, 12.0, 12.0, 12.0),
+                                    controller: fromController,
+                                    onTap: () async {
+                                      instance.selectedFrom =
+                                          await showDateFromDialog(
+                                              context: context);
+                                      setState(() {
+                                        fromController.text = DateFormat.yMEd()
+                                            .format(instance.selectedFrom);
+                                      });
+                                    },
                                   ),
-                                  controller: fromController,
-                                  onTap: () async {
-                                    instance.selectedFrom =
-                                        await showDateFromDialog(
-                                            context: context);
-                                    setState(() {
-                                      fromController.text = DateFormat.yMEd()
-                                          .format(instance.selectedFrom);
-                                    });
-                                  },
                                 ),
-                              ),
-                              const Text(
-                                'To :',
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
+                                const Text(
+                                  'To :',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(
-                                width: 300.0,
-                                child: TextField(
-                                  style: const TextStyle(fontSize: 18.0),
-                                  readOnly: true,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Colors.grey,
-                                        width: 1.0,
+                                SizedBox(
+                                  width: 300.0,
+                                  child: TextField(
+                                    style: const TextStyle(fontSize: 18.0),
+                                    readOnly: true,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
                                       ),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 12.0),
                                     ),
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.fromLTRB(
-                                        12.0, 12.0, 12.0, 12.0),
-                                  ),
-                                  controller: toController,
-                                  onTap: () async {
-                                    instance.selectedTo =
-                                        await showDateToDialog(
-                                            context: context);
-                                    setState(() {
-                                      toController.text = DateFormat.yMEd()
-                                          .format(instance.selectedTo);
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10.0),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const Text(
-                                'Department: ',
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Container(
-                                height: 40.0,
-                                width: 640.0,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                    color: Colors.grey,
-                                    style: BorderStyle.solid,
-                                    width: 1.0,
+                                    controller: toController,
+                                    onTap: () async {
+                                      instance.selectedTo =
+                                          await showDateToDialog(
+                                              context: context);
+                                      setState(() {
+                                        toController.text = DateFormat.yMEd()
+                                            .format(instance.selectedTo);
+                                      });
+                                    },
                                   ),
                                 ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<DepartmentModel>(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10.0),
+                              ],
+                            ),
+                            const SizedBox(height: 10.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Department: ',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Container(
+                                  height: 40.0,
+                                  width: 640.0,
+                                  decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5),
-                                    value: dropdownValue,
-                                    onChanged: (DepartmentModel? value) async {
-                                      if (value != null) {
-                                        setState(() {
-                                          dropdownValue = value;
-                                        });
-                                      }
-                                    },
-                                    items: instance.departmentList
-                                        .map<DropdownMenuItem<DepartmentModel>>(
-                                            (DepartmentModel value) {
-                                      return DropdownMenuItem<DepartmentModel>(
-                                        value: value,
-                                        child: Text(value.departmentName),
-                                      );
-                                    }).toList(),
+                                    border: Border.all(
+                                      color: Colors.grey,
+                                      style: BorderStyle.solid,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<DepartmentModel>(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10.0),
+                                      borderRadius: BorderRadius.circular(5),
+                                      value: dropdownValue,
+                                      onChanged:
+                                          (DepartmentModel? value) async {
+                                        if (value != null) {
+                                          setState(() {
+                                            dropdownValue = value;
+                                          });
+                                        }
+                                      },
+                                      items: instance.departmentList.map<
+                                              DropdownMenuItem<
+                                                  DepartmentModel>>(
+                                          (DepartmentModel value) {
+                                        return DropdownMenuItem<
+                                            DepartmentModel>(
+                                          value: value,
+                                          child: Text(value.departmentName),
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10.0),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  style: const TextStyle(fontSize: 18.0),
-                                  decoration: const InputDecoration(
-                                    label: Text('ID no. or Name'),
-                                    border: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Colors.grey,
-                                        width: 1.0,
+                              ],
+                            ),
+                            const SizedBox(height: 10.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    style: const TextStyle(fontSize: 18.0),
+                                    decoration: const InputDecoration(
+                                      label: Text('ID no. or Name'),
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
                                       ),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 12.0),
                                     ),
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.fromLTRB(
-                                        12.0, 12.0, 12.0, 12.0),
+                                    controller: idController,
+                                    onSubmitted: (data) async {
+                                      instance.changeLoadingState(true);
+                                      await Future.delayed(
+                                          const Duration(seconds: 1));
+                                      if (idController.text.isEmpty) {
+                                        // get records all
+                                        await instance.getRecordsAll(
+                                            department: dropdownValue);
+                                      } else {
+                                        // get records with id or name
+                                        await instance.getRecords(
+                                            // employeeId: idController.text.trim(),
+                                            employeeId:
+                                                idController.text.trim(),
+                                            department: dropdownValue);
+                                      }
+                                      instance.changeLoadingState(false);
+                                    },
                                   ),
-                                  controller: idController,
-                                  onSubmitted: (data) async {
-                                    instance.changeLoadingState(true);
-                                    await Future.delayed(
-                                        const Duration(seconds: 1));
-                                    if (idController.text.isEmpty) {
-                                      // get records all
-                                      await instance.getRecordsAll(
-                                          department: dropdownValue);
-                                    } else {
-                                      // get records with id or name
-                                      await instance.getRecords(
-                                          // employeeId: idController.text.trim(),
-                                          employeeId: idController.text.trim(),
-                                          department: dropdownValue);
-                                    }
-                                    instance.changeLoadingState(false);
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 5.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  '24 Hour format: ',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                ValueListenableBuilder(
+                                  valueListenable: instance.is24HourFormat,
+                                  builder: (_, value, __) {
+                                    return Checkbox(
+                                      value: instance.is24HourFormat.value,
+                                      onChanged: (newCheckboxState) {
+                                        instance.is24HourFormat.value =
+                                            newCheckboxState!;
+                                      },
+                                    );
                                   },
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5.0),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text(
-                                '24 Hour format: ',
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              ValueListenableBuilder(
-                                valueListenable: instance.is24HourFormat,
-                                builder: (_, value, __) {
-                                  return Checkbox(
-                                    value: instance.is24HourFormat.value,
-                                    onChanged: (newCheckboxState) {
-                                      instance.is24HourFormat.value =
-                                          newCheckboxState!;
-                                    },
-                                  );
+                              ],
+                            ),
+                            if (instance.historyList.isNotEmpty) ...[
+                              const SizedBox(height: 5.0),
+                              InkWell(
+                                onTap: () {
+                                  instance.exportRawLogsExcel();
                                 },
-                              ),
-                            ],
-                          ),
-                          if (instance.historyList.isNotEmpty) ...[
-                            const SizedBox(height: 5.0),
-                            InkWell(
-                              onTap: () {
-                                instance.exportRawLogsExcel();
-                              },
-                              child: Ink(
-                                height: 30.0,
-                                width: 160.0,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                  color: Colors.orange[300],
-                                ),
-                                padding: const EdgeInsets.all(5.0),
-                                child: const Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.download,
-                                      color: Colors.white,
-                                    ),
-                                    Text(
-                                      'Export Raw Log excel',
-                                      style: TextStyle(
-                                        fontSize: 12.0,
+                                child: Ink(
+                                  height: 30.0,
+                                  width: 160.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                    color: Colors.orange[300],
+                                  ),
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.download,
                                         color: Colors.white,
                                       ),
-                                    ),
-                                  ],
+                                      Text(
+                                        'Export Raw Log excel',
+                                        style: TextStyle(
+                                          fontSize: 12.0,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 10.0),
+                            Container(
+                              color: Colors.green[300],
+                              width: double.infinity,
+                              height: 50.0,
+                              child: TextButton(
+                                onPressed: () async {
+                                  instance.changeLoadingState(true);
+                                  await Future.delayed(
+                                      const Duration(seconds: 1));
+                                  if (idController.text.isEmpty) {
+                                    // get records all
+                                    await instance.getRecordsAll(
+                                        department: dropdownValue);
+                                  } else {
+                                    // get records with id or name
+                                    await instance.getRecords(
+                                        employeeId: idController.text.trim(),
+                                        department: dropdownValue);
+                                  }
+                                  instance.changeLoadingState(false);
+                                },
+                                child: const Text(
+                                  'View',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
                           ],
-                          const SizedBox(height: 10.0),
-                          Container(
-                            color: Colors.green[300],
-                            width: double.infinity,
-                            height: 50.0,
-                            child: TextButton(
-                              onPressed: () async {
-                                instance.changeLoadingState(true);
-                                await Future.delayed(
-                                    const Duration(seconds: 1));
-                                if (idController.text.isEmpty) {
-                                  // get records all
-                                  await instance.getRecordsAll(
-                                      department: dropdownValue);
-                                } else {
-                                  // get records with id or name
-                                  await instance.getRecords(
-                                      employeeId: idController.text.trim(),
-                                      department: dropdownValue);
-                                }
-                                instance.changeLoadingState(false);
-                              },
-                              child: const Text(
-                                'View',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (instance.historyList.isNotEmpty) ...[
-                  DataTable(
-                    showCheckboxColumn: false,
-                    dataRowColor:
-                        MaterialStateProperty.resolveWith(getDataRowColor),
-                    columns: const <DataColumn>[
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'ID No.',
-                            textAlign: TextAlign.center,
+                  if (instance.historyList.isNotEmpty) ...[
+                    DataTable(
+                      showCheckboxColumn: false,
+                      dataRowColor:
+                          MaterialStateProperty.resolveWith(getDataRowColor),
+                      columns: const <DataColumn>[
+                        DataColumn(
+                          label: Expanded(
+                            child: Text(
+                              'ID No.',
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'Name',
-                            textAlign: TextAlign.center,
+                        DataColumn(
+                          label: Expanded(
+                            child: Text(
+                              'Name',
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'DATE',
-                            textAlign: TextAlign.center,
+                        DataColumn(
+                          label: Expanded(
+                            child: Text(
+                              'DATE',
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'TIME',
-                            textAlign: TextAlign.center,
+                        DataColumn(
+                          label: Expanded(
+                            child: Text(
+                              'TIME',
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                    rows: <DataRow>[
-                      for (int i = 0; i < instance.uiList.length; i++) ...[
-                        DataRow(
-                          // onSelectChanged: (value) {},
-                          selected: i % 2 == 0 ? true : false,
-                          cells: <DataCell>[
-                            DataCell(
-                                SelectableText(instance.uiList[i].employeeId)),
-                            DataCell(SelectableText(
-                                '${instance.uiList[i].lastName}, ${instance.uiList[i].firstName} ${instance.uiList[i].middleName}')),
-                            DataCell(SelectableText(DateFormat.yMMMEd()
-                                .format(instance.uiList[i].date))),
-                            DataCell(LogsWidget(logs: instance.uiList[i].logs)),
-                          ],
                         ),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 25.0),
-                  if (instance.uiList.length < instance.historyList.length) ...[
-                    SizedBox(
-                      height: 50.0,
-                      width: 180.0,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.green[300],
-                        ),
-                        onPressed: () {
-                          if (instance.uiList.length <
-                              instance.historyList.length) {
-                            instance.loadMore();
-                          }
-                        },
-                        child: const Text(
-                          'Load more..',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600,
+                      rows: <DataRow>[
+                        for (int i = 0; i < instance.uiList.length; i++) ...[
+                          DataRow(
+                            // onSelectChanged: (value) {},
+                            selected: i % 2 == 0 ? true : false,
+                            cells: <DataCell>[
+                              DataCell(SelectableText(
+                                  instance.uiList[i].employeeId)),
+                              DataCell(SelectableText(
+                                  '${instance.uiList[i].lastName}, ${instance.uiList[i].firstName} ${instance.uiList[i].middleName}')),
+                              DataCell(SelectableText(DateFormat.yMMMEd()
+                                  .format(instance.uiList[i].date))),
+                              DataCell(
+                                  LogsWidget(logs: instance.uiList[i].logs)),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 25.0),
+                    if (instance.uiList.length <
+                        instance.historyList.length) ...[
+                      SizedBox(
+                        height: 50.0,
+                        width: 180.0,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.green[300],
+                          ),
+                          onPressed: () {
+                            if (instance.uiList.length <
+                                instance.historyList.length) {
+                              instance.loadMore();
+                            }
+                          },
+                          child: const Text(
+                            'Load more..',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 15.0),
+                    ],
+                    Text(
+                      'Showing ${instance.uiList.length} out of ${instance.historyList.length} results.',
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                      ),
                     ),
-                    const SizedBox(height: 15.0),
-                  ],
-                  Text(
-                    'Showing ${instance.uiList.length} out of ${instance.historyList.length} results.',
-                    style: const TextStyle(
-                      fontSize: 16.0,
+                    const SizedBox(height: 50.0),
+                  ] else if (instance.historyList.isEmpty) ...[
+                    const SizedBox(height: 25.0),
+                    if (instance.selectedFrom.isAfter(instance.selectedTo)) ...[
+                      const Text(
+                        'Date From is advance than Date To.',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ] else ...[
+                      const Text(
+                        'No data found.',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ]
+                  ]
+                ] else ...[
+                  SizedBox(
+                    height: 345.0,
+                    width: 500.0,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'From :',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 350.0,
+                                  child: TextField(
+                                    style: const TextStyle(fontSize: 18.0),
+                                    readOnly: true,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 12.0),
+                                    ),
+                                    controller: fromController,
+                                    onTap: () async {
+                                      instance.selectedFrom =
+                                          await showDateFromDialog(
+                                              context: context);
+                                      setState(() {
+                                        fromController.text = DateFormat.yMEd()
+                                            .format(instance.selectedFrom);
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'To :',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 350.0,
+                                  child: TextField(
+                                    style: const TextStyle(fontSize: 18.0),
+                                    readOnly: true,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 12.0),
+                                    ),
+                                    controller: toController,
+                                    onTap: () async {
+                                      instance.selectedTo =
+                                          await showDateToDialog(
+                                              context: context);
+                                      setState(() {
+                                        toController.text = DateFormat.yMEd()
+                                            .format(instance.selectedTo);
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Department: ',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Container(
+                                  height: 40.0,
+                                  width: 350.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    border: Border.all(
+                                      color: Colors.grey,
+                                      style: BorderStyle.solid,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<DepartmentModel>(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10.0),
+                                      borderRadius: BorderRadius.circular(5),
+                                      value: dropdownValue,
+                                      onChanged:
+                                          (DepartmentModel? value) async {
+                                        if (value != null) {
+                                          setState(() {
+                                            dropdownValue = value;
+                                          });
+                                        }
+                                      },
+                                      items: instance.departmentList.map<
+                                              DropdownMenuItem<
+                                                  DepartmentModel>>(
+                                          (DepartmentModel value) {
+                                        return DropdownMenuItem<
+                                            DepartmentModel>(
+                                          value: value,
+                                          child: Text(value.departmentName),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    style: const TextStyle(fontSize: 18.0),
+                                    decoration: const InputDecoration(
+                                      label: Text('ID no. or Name'),
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                          12.0, 12.0, 12.0, 12.0),
+                                    ),
+                                    controller: idController,
+                                    onSubmitted: (data) async {
+                                      instance.changeLoadingState(true);
+                                      await Future.delayed(
+                                          const Duration(seconds: 1));
+                                      if (idController.text.isEmpty) {
+                                        // get records all
+                                        await instance.getRecordsAll(
+                                            department: dropdownValue);
+                                      } else {
+                                        // get records with id or name
+                                        await instance.getRecords(
+                                            // employeeId: idController.text.trim(),
+                                            employeeId:
+                                                idController.text.trim(),
+                                            department: dropdownValue);
+                                      }
+                                      instance.changeLoadingState(false);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 5.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  '24 Hour format: ',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                ValueListenableBuilder(
+                                  valueListenable: instance.is24HourFormat,
+                                  builder: (_, value, __) {
+                                    return Checkbox(
+                                      value: instance.is24HourFormat.value,
+                                      onChanged: (newCheckboxState) {
+                                        instance.is24HourFormat.value =
+                                            newCheckboxState!;
+                                      },
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            if (instance.historyList.isNotEmpty) ...[
+                              const SizedBox(height: 5.0),
+                              InkWell(
+                                onTap: () {
+                                  instance.exportRawLogsExcel();
+                                },
+                                child: Ink(
+                                  height: 30.0,
+                                  width: 160.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                    color: Colors.orange[300],
+                                  ),
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.download,
+                                        color: Colors.white,
+                                      ),
+                                      Text(
+                                        'Export Raw Log excel',
+                                        style: TextStyle(
+                                          fontSize: 12.0,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 10.0),
+                            Container(
+                              color: Colors.green[300],
+                              width: double.infinity,
+                              height: 50.0,
+                              child: TextButton(
+                                onPressed: () async {
+                                  instance.changeLoadingState(true);
+                                  await Future.delayed(
+                                      const Duration(seconds: 1));
+                                  if (idController.text.isEmpty) {
+                                    // get records all
+                                    await instance.getRecordsAll(
+                                        department: dropdownValue);
+                                  } else {
+                                    // get records with id or name
+                                    await instance.getRecords(
+                                        employeeId: idController.text.trim(),
+                                        department: dropdownValue);
+                                  }
+                                  instance.changeLoadingState(false);
+                                },
+                                child: const Text(
+                                  'View',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 50.0),
-                ] else if (instance.historyList.isEmpty) ...[
-                  const SizedBox(height: 25.0),
-                  if (instance.selectedFrom.isAfter(instance.selectedTo)) ...[
-                    const Text(
-                      'Date From is advance than Date To.',
-                      style: TextStyle(
-                        fontSize: 16.0,
+                  if (instance.historyList.isNotEmpty) ...[
+                    for (int i = 0; i < instance.uiList.length; i++) ...[
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Container(
+                          height: 80.0,
+                          color: i % 2 == 0 ? null : Colors.grey[300],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  SizedBox(
+                                    width: 150.0,
+                                    // color: Colors.green,
+                                    child: Row(
+                                      children: [
+                                        const Text('Date: '),
+                                        Text(
+                                          DateFormat.yMMMEd()
+                                              .format(instance.uiList[i].date),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 100.0,
+                                    // color: Colors.blue,
+                                    child: Row(
+                                      children: [
+                                        const Text('Id No: '),
+                                        Text(instance.uiList[i].employeeId),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 200.0,
+                                    // color: Colors.red,
+                                    child: Row(
+                                      children: [
+                                        const Text('Name: '),
+                                        Expanded(
+                                          child: Text(
+                                            '${instance.uiList[i].lastName}, ${instance.uiList[i].firstName} ${instance.uiList[i].middleName}',
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // const SizedBox(height: 5.0),
+                              const Divider(),
+                              LogsWidget(logs: instance.uiList[i].logs)
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ] else ...[
-                    const Text(
-                      'No data found.',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                      ),
-                    ),
+                    ],
+
+                    // DataTable(
+                    //   showCheckboxColumn: false,
+                    //   dataRowColor:
+                    //       MaterialStateProperty.resolveWith(getDataRowColor),
+                    //   columns: const <DataColumn>[
+                    //     DataColumn(
+                    //       label: Expanded(
+                    //         child: Text(
+                    //           'ID No2.',
+                    //           textAlign: TextAlign.center,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     DataColumn(
+                    //       label: Expanded(
+                    //         child: Text(
+                    //           'Name',
+                    //           textAlign: TextAlign.center,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     DataColumn(
+                    //       label: Expanded(
+                    //         child: Text(
+                    //           'DATE',
+                    //           textAlign: TextAlign.center,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     DataColumn(
+                    //       label: Expanded(
+                    //         child: Text(
+                    //           'TIME',
+                    //           textAlign: TextAlign.center,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    //   rows: <DataRow>[
+                    //     for (int i = 0; i < instance.uiList.length; i++) ...[
+                    //       DataRow(
+                    //         // onSelectChanged: (value) {},
+                    //         selected: i % 2 == 0 ? true : false,
+                    //         cells: <DataCell>[
+                    //           DataCell(SelectableText(
+                    //               instance.uiList[i].employeeId)),
+                    //           DataCell(SelectableText(
+                    //               '${instance.uiList[i].lastName}, ${instance.uiList[i].firstName} ${instance.uiList[i].middleName}')),
+                    //           DataCell(SelectableText(DateFormat.yMMMEd()
+                    //               .format(instance.uiList[i].date))),
+                    //           DataCell(
+                    //               LogsWidget(logs: instance.uiList[i].logs)),
+                    //         ],
+                    //       ),
+                    //     ],
+                    //   ],
+                    // ),
+                    // const SizedBox(height: 25.0),
+                    //   if (instance.uiList.length <
+                    //       instance.historyList.length) ...[
+                    //     SizedBox(
+                    //       height: 50.0,
+                    //       width: 180.0,
+                    //       child: TextButton(
+                    //         style: TextButton.styleFrom(
+                    //           backgroundColor: Colors.green[300],
+                    //         ),
+                    //         onPressed: () {
+                    //           if (instance.uiList.length <
+                    //               instance.historyList.length) {
+                    //             instance.loadMore();
+                    //           }
+                    //         },
+                    //         child: const Text(
+                    //           'Load more..',
+                    //           style: TextStyle(
+                    //             color: Colors.black,
+                    //             fontSize: 16.0,
+                    //             fontWeight: FontWeight.w600,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     const SizedBox(height: 15.0),
+                    //   ],
+                    //   Text(
+                    //     'Showing ${instance.uiList.length} out of ${instance.historyList.length} results.',
+                    //     style: const TextStyle(
+                    //       fontSize: 16.0,
+                    //     ),
+                    //   ),
+                    //   const SizedBox(height: 50.0),
+                    // ] else if (instance.historyList.isEmpty) ...[
+                    //   const SizedBox(height: 25.0),
+                    //   if (instance.selectedFrom.isAfter(instance.selectedTo)) ...[
+                    //     const Text(
+                    //       'Date From is advance than Date To.',
+                    //       style: TextStyle(
+                    //         fontSize: 16.0,
+                    //       ),
+                    //     ),
+                    //   ] else ...[
+                    //     const Text(
+                    //       'No data found.',
+                    //       style: TextStyle(
+                    //         fontSize: 16.0,
+                    //       ),
+                    //     ),
+                    //   ]
                   ]
-                ]
+                ],
               ],
             ),
           ),
