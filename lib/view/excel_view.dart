@@ -1,48 +1,54 @@
 import 'dart:developer';
 
+import 'package:dtrweb/data/excel_provider.dart';
 import 'package:dtrweb/model/log_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../data/home_data.dart';
+import '../data/schedule_provider.dart';
+import '../data/version_provider.dart';
 import '../model/clean_excel_model.dart';
 import '../model/department_model.dart';
+import '../model/history_model.dart';
 import '../model/schedule_model.dart';
 import '../widget/timelog_widget.dart';
 
 class ExcelView extends StatefulWidget {
   const ExcelView({
     super.key,
-    required this.idController,
-    required this.dropdownValue,
+    required this.scheduleDropdownValue,
+    required this.historyList,
   });
-  final TextEditingController idController;
-  final DepartmentModel dropdownValue;
+  final DepartmentModel scheduleDropdownValue;
+  final List<HistoryModel> historyList;
 
   @override
   State<ExcelView> createState() => _ExcelViewState();
 }
 
 class _ExcelViewState extends State<ExcelView> {
-  late ScheduleModel dropdownValue;
+  late ScheduleModel scheduleDropdownValue;
   final scl = ScrollController();
   final sc1 = ScrollController();
   final sc2 = ScrollController();
 
-  SnackBar showError(String e) {
-    var snackBar = SnackBar(
-      content: Text(e),
-      duration: const Duration(seconds: 3),
-    );
-    return snackBar;
-  }
+  // SnackBar showError(String e) {
+  //   var snackBar = SnackBar(
+  //     content: Text(e),
+  //     duration: const Duration(seconds: 3),
+  //   );
+  //   return snackBar;
+  // }
 
   @override
   void initState() {
     super.initState();
-    var instance = Provider.of<HomeData>(context, listen: false);
-    if (instance.scheduleList.isNotEmpty) {
-      dropdownValue = instance.scheduleList[0];
+    final schedule = Provider.of<ScheduleProvider>(context, listen: false);
+    final excel = Provider.of<ExcelProvider>(context, listen: false);
+    excel.sortData(
+        scheduleList: schedule.scheduleList, historyList: widget.historyList);
+    if (schedule.scheduleList.isNotEmpty) {
+      scheduleDropdownValue = schedule.scheduleList[0];
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       sc2.addListener(() {
@@ -55,7 +61,8 @@ class _ExcelViewState extends State<ExcelView> {
     required BuildContext context,
     required CleanExcelDataModel model,
   }) async {
-    var instance = Provider.of<HomeData>(context, listen: false);
+    final excel = Provider.of<ExcelProvider>(context, listen: false);
+    final schedule = Provider.of<ScheduleProvider>(context, listen: false);
     try {
       await showDialog<void>(
         context: context,
@@ -69,15 +76,15 @@ class _ExcelViewState extends State<ExcelView> {
                 child: DropdownButton<ScheduleModel>(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   borderRadius: BorderRadius.circular(5),
-                  value: dropdownValue,
+                  value: scheduleDropdownValue,
                   onChanged: (ScheduleModel? value) async {
                     if (value != null) {
                       setState(() {
-                        dropdownValue = value;
+                        scheduleDropdownValue = value;
                       });
                     }
                   },
-                  items: instance.scheduleList
+                  items: schedule.scheduleList
                       .map<DropdownMenuItem<ScheduleModel>>(
                           (ScheduleModel value) {
                     return DropdownMenuItem<ScheduleModel>(
@@ -102,8 +109,8 @@ class _ExcelViewState extends State<ExcelView> {
                   ),
                 ),
                 onPressed: () {
-                  model = instance.reCalcLateModel(
-                      model: model, newSchedule: dropdownValue);
+                  model = excel.reCalcLateModel(
+                      model: model, newSchedule: scheduleDropdownValue);
                   Navigator.of(context).pop();
                 },
               ),
@@ -136,7 +143,7 @@ class _ExcelViewState extends State<ExcelView> {
     required CleanExcelDataModel c,
     required int i,
   }) async {
-    var instance = Provider.of<HomeData>(context, listen: false);
+    var excel = Provider.of<ExcelProvider>(context, listen: false);
     DateTime? dateResult;
 
     try {
@@ -165,18 +172,18 @@ class _ExcelViewState extends State<ExcelView> {
       if (dateResult != null) {
         if (i == 0) {
           c.logs[0].timeStamp = dateResult;
-          c.in1.timestamp = instance.formatPrettyDate(dateResult);
+          c.in1.timestamp = excel.formatPrettyDate(dateResult);
         } else if (i == 1) {
           c.logs[1].timeStamp = dateResult;
-          c.out1.timestamp = instance.formatPrettyDate(dateResult);
+          c.out1.timestamp = excel.formatPrettyDate(dateResult);
         } else if (i == 2) {
           c.logs[2].timeStamp = dateResult;
-          c.in2.timestamp = instance.formatPrettyDate(dateResult);
+          c.in2.timestamp = excel.formatPrettyDate(dateResult);
         } else if (i == 3) {
           c.logs[3].timeStamp = dateResult;
-          c.out2.timestamp = instance.formatPrettyDate(dateResult);
+          c.out2.timestamp = excel.formatPrettyDate(dateResult);
         }
-        c = instance.reCalcNewTime(model: c);
+        c = excel.reCalcNewTime(model: c);
       }
       debugPrint('${c.duration} ${c.lateIn} ${c.lateBreak}');
     } catch (e) {
@@ -191,25 +198,25 @@ class _ExcelViewState extends State<ExcelView> {
     required BuildContext context,
   }) async {
     DateTime? dateResult;
-    var instance = Provider.of<HomeData>(context, listen: false);
+    var excel = Provider.of<ExcelProvider>(context, listen: false);
     try {
       try {
         if (i == 0 && c.currentSched.schedType.toUpperCase() == 'B') {
           var dateString1 = c.logs[0].timeStamp.toString().substring(0, 10);
           var dateWithTime1 = '$dateString1 ${c.currentSched.breakStart}';
-          dateResult = instance.dateFormat1.parse(dateWithTime1);
+          dateResult = excel.dateFormat1.parse(dateWithTime1);
         } else if (i == 0 && c.currentSched.schedType.toUpperCase() == 'A') {
           var dateString1 = c.logs[0].timeStamp.toString().substring(0, 10);
           var dateWithTime1 = '$dateString1 ${c.currentSched.schedOut}';
-          dateResult = instance.dateFormat1.parse(dateWithTime1);
+          dateResult = excel.dateFormat1.parse(dateWithTime1);
         } else if (i == 1) {
           var dateString2 = c.logs[1].timeStamp.toString().substring(0, 10);
           var dateWithTime2 = '$dateString2 ${c.currentSched.breakEnd}';
-          dateResult = instance.dateFormat1.parse(dateWithTime2);
+          dateResult = excel.dateFormat1.parse(dateWithTime2);
         } else if (i == 2) {
           var dateString3 = c.logs[2].timeStamp.toString().substring(0, 10);
           var dateWithTime3 = '$dateString3 ${c.currentSched.schedOut}';
-          dateResult = instance.dateFormat1.parse(dateWithTime3);
+          dateResult = excel.dateFormat1.parse(dateWithTime3);
         }
       } catch (e) {
         debugPrint('$e addLog pref dates');
@@ -250,24 +257,24 @@ class _ExcelViewState extends State<ExcelView> {
       // ignore: prefer_is_empty
       if (c.logs.length >= 1) {
         c.logs[0].timeStamp = c.logs[0].timeStamp;
-        c.in1.timestamp = instance.formatPrettyDate(c.logs[0].timeStamp);
+        c.in1.timestamp = excel.formatPrettyDate(c.logs[0].timeStamp);
       }
       if (c.logs.length >= 2) {
         c.logs[1].timeStamp = c.logs[1].timeStamp;
-        c.out1.timestamp = instance.formatPrettyDate(c.logs[1].timeStamp);
+        c.out1.timestamp = excel.formatPrettyDate(c.logs[1].timeStamp);
       }
       if (c.logs.length >= 3) {
         c.logs[2].timeStamp = c.logs[2].timeStamp;
-        c.in2.timestamp = instance.formatPrettyDate(c.logs[2].timeStamp);
+        c.in2.timestamp = excel.formatPrettyDate(c.logs[2].timeStamp);
       }
       if (c.logs.length >= 4) {
         c.logs[3].timeStamp = c.logs[3].timeStamp;
-        c.out2.timestamp = instance.formatPrettyDate(c.logs[3].timeStamp);
+        c.out2.timestamp = excel.formatPrettyDate(c.logs[3].timeStamp);
       }
       for (var logz in c.logs) {
         log('${logz.timeStamp} ${logz.logType}');
       }
-      c = instance.reCalcNewTime(model: c);
+      c = excel.reCalcNewTime(model: c);
     } catch (e) {
       debugPrint('$e addLog');
     }
@@ -282,7 +289,7 @@ class _ExcelViewState extends State<ExcelView> {
     required int slotIndex,
   }) async {
     var dateResult = DateTime.now();
-    var instance = Provider.of<HomeData>(context, listen: false);
+    var excel = Provider.of<ExcelProvider>(context, listen: false);
     try {
       var d = await showDatePicker(
         context: context,
@@ -325,7 +332,7 @@ class _ExcelViewState extends State<ExcelView> {
             id: '0',
             isSelfie: '0',
           ));
-          c.out1.timestamp = instance.formatPrettyDate(tempDate);
+          c.out1.timestamp = excel.formatPrettyDate(tempDate);
         }
         if (c.logs.length == 2) {
           c.logs.add(Log(
@@ -334,7 +341,7 @@ class _ExcelViewState extends State<ExcelView> {
             id: '0',
             isSelfie: '0',
           ));
-          c.in2.timestamp = instance.formatPrettyDate(dateResult);
+          c.in2.timestamp = excel.formatPrettyDate(dateResult);
         }
       } else if (slotIndex == 4) {
         if (c.logs.length == 1) {
@@ -344,7 +351,7 @@ class _ExcelViewState extends State<ExcelView> {
             id: '0',
             isSelfie: '0',
           ));
-          c.out1.timestamp = instance.formatPrettyDate(tempDate);
+          c.out1.timestamp = excel.formatPrettyDate(tempDate);
         }
         if (c.logs.length == 2) {
           c.logs.add(Log(
@@ -353,7 +360,7 @@ class _ExcelViewState extends State<ExcelView> {
             id: '0',
             isSelfie: '0',
           ));
-          c.in2.timestamp = instance.formatPrettyDate(tempDate);
+          c.in2.timestamp = excel.formatPrettyDate(tempDate);
         }
         if (c.logs.length == 3) {
           c.logs.add(Log(
@@ -362,11 +369,11 @@ class _ExcelViewState extends State<ExcelView> {
             id: '0',
             isSelfie: '0',
           ));
-          c.out2.timestamp = instance.formatPrettyDate(dateResult);
+          c.out2.timestamp = excel.formatPrettyDate(dateResult);
         }
       }
       log(c.logs.length.toString());
-      c = instance.reCalcNewTime(model: c);
+      c = excel.reCalcNewTime(model: c);
     } catch (e) {
       debugPrint('$e addLogSkip');
     }
@@ -375,9 +382,9 @@ class _ExcelViewState extends State<ExcelView> {
 
   @override
   Widget build(BuildContext context) {
-    var instance = Provider.of<HomeData>(context, listen: false);
+    var excel = Provider.of<ExcelProvider>(context, listen: false);
     const String title = 'UC-1 DTR History';
-    var version = 'v${instance.appVersion}';
+    final version = Provider.of<VersionProvider>(context, listen: false);
     var rcw = 50.0;
     var schedidw = 80.0;
     var empidw = 80.0;
@@ -389,6 +396,7 @@ class _ExcelViewState extends State<ExcelView> {
     var otw = 100.0;
     var udiw = 110.0;
     // var udbw = 110.0;
+    final schedule = Provider.of<ScheduleProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -399,7 +407,7 @@ class _ExcelViewState extends State<ExcelView> {
               width: 2.5,
             ),
             Text(
-              version,
+              "v${version.version}",
               style: const TextStyle(fontSize: 12),
             ),
           ],
@@ -441,7 +449,7 @@ class _ExcelViewState extends State<ExcelView> {
         actions: [
           InkWell(
             onTap: () {
-              instance.exportExcel();
+              excel.exportExcel();
             },
             child: Ink(
               height: 50.0,
@@ -479,7 +487,7 @@ class _ExcelViewState extends State<ExcelView> {
           controller: sc2,
           scrollDirection: Axis.horizontal,
           // primary: false,
-          child: Consumer<HomeData>(builder: (ctx, provider, widget) {
+          child: Consumer<ExcelProvider>(builder: (ctx, provider, widget) {
             var w = MediaQuery.of(context).size.width;
             var h = MediaQuery.of(context).size.height;
             debugPrint('w $w h $h');
@@ -512,7 +520,7 @@ class _ExcelViewState extends State<ExcelView> {
                           InkWell(
                             onTap: () async {
                               try {
-                                dropdownValue = provider.scheduleList
+                                scheduleDropdownValue = schedule.scheduleList
                                     .singleWhere((e) =>
                                         e.schedId ==
                                         provider.cleanExcelData[i].currentSched

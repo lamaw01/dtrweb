@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
 
+import 'data/department_provider.dart';
+import 'data/excel_provider.dart';
+import 'data/history_provider.dart';
 import 'data/home_data.dart';
+import 'data/schedule_provider.dart';
+import 'data/version_provider.dart';
 import 'view/home_view.dart';
 
 Future<void> main() async {
@@ -14,6 +19,21 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider<HomeData>(
           create: (_) => HomeData(),
+        ),
+        ChangeNotifierProvider<DepartmentProvider>(
+          create: (_) => DepartmentProvider(),
+        ),
+        ChangeNotifierProvider<ScheduleProvider>(
+          create: (_) => ScheduleProvider(),
+        ),
+        ChangeNotifierProvider<HistoryProvider>(
+          create: (_) => HistoryProvider(),
+        ),
+        ChangeNotifierProvider<VersionProvider>(
+          create: (_) => VersionProvider(),
+        ),
+        ChangeNotifierProvider<ExcelProvider>(
+          create: (_) => ExcelProvider(),
         ),
       ],
       child: const MyApp(),
@@ -41,6 +61,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'UC-1 DTR History',
       theme: ThemeData(
+        useMaterial3: false,
         primarySwatch: Colors.blue,
       ),
       home: const HomeView(),

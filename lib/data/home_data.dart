@@ -1,50 +1,25 @@
-// ignore: unused_import
-import 'dart:developer';
-
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../model/clean_data_model.dart';
 import '../model/clean_excel_model.dart';
-import '../model/department_model.dart';
+
 import '../model/late_model.dart';
 import '../model/log_model.dart';
 import '../model/schedule_model.dart';
 import '../model/history_model.dart';
-import '../services/http_service.dart';
 
 class HomeData with ChangeNotifier {
-  var _historyList = <HistoryModel>[];
-  List<HistoryModel> get historyList => _historyList;
-
-  var _uiList = <HistoryModel>[];
-  List<HistoryModel> get uiList => _uiList;
-
-  final _departmentList = <DepartmentModel>[];
-  List<DepartmentModel> get departmentList => _departmentList;
-
-  final _scheduleList = <ScheduleModel>[];
-  List<ScheduleModel> get scheduleList => _scheduleList;
-
   var _cleanData = <CleanDataModel>[];
   List<CleanDataModel> get cleanData => _cleanData;
 
   final _cleanExcelData = <CleanExcelDataModel>[];
   List<CleanExcelDataModel> get cleanExcelData => _cleanExcelData;
 
-  var _appVersion = "";
-  String get appVersion => _appVersion;
-
-  final errorString = ValueNotifier<String>("");
-
-  DateTime selectedFrom = DateTime.now();
-  DateTime selectedTo = DateTime.now();
-
-  final _isLogging = ValueNotifier(false);
-  ValueNotifier<bool> get isLogging => _isLogging;
+  // final _isLogging = ValueNotifier(false);
+  // ValueNotifier<bool> get isLogging => _isLogging;
 
   final _is24HourFormat = ValueNotifier(false);
   ValueNotifier<bool> get is24HourFormat => _is24HourFormat;
@@ -54,11 +29,24 @@ class HomeData with ChangeNotifier {
   final _dateFormat2 = DateFormat('yyyy-MM-dd hh:mm aa');
   final _dateYmd = DateFormat('yyyy-MM-dd');
   DateFormat get dateFormat2 => _dateFormat2;
-  final _dateFormatFileExcel = DateFormat().add_yMMMMd();
+  // final _dateFormatFileExcel = DateFormat().add_yMMMMd();
 
-  void changeLoadingState(bool state) {
-    _isLogging.value = state;
-  }
+  // bool isSoloUser() {
+  //   if (_uiList.isEmpty) {
+  //     return false;
+  //   }
+  //   HistoryModel firstIndexUser = _uiList.first;
+  //   for (HistoryModel data in _uiList) {
+  //     if (firstIndexUser.employeeId != data.employeeId) {
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // }
+
+  // void changeLoadingState(bool state) {
+  //   _isLogging.value = state;
+  // }
 
   DateFormat dateFormat12or24() {
     if (_is24HourFormat.value) {
@@ -134,7 +122,7 @@ class HomeData with ChangeNotifier {
       var rC = 0;
 
       var sortedRawHistory = <HistoryModel>[];
-      sortedRawHistory.addAll(_historyList);
+      // sortedRawHistory.addAll(_historyList);
       sortedRawHistory.sort((a, b) {
         var valueA = '${a.lastName.toLowerCase()} ${a.date}';
         var valueB = '${b.lastName.toLowerCase()} ${b.date}';
@@ -199,9 +187,7 @@ class HomeData with ChangeNotifier {
           );
         }
       }
-      excel.save(
-          fileName:
-              'DTR raw ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
+      excel.save(fileName: 'DTR-raw.xlsx');
     } catch (e) {
       debugPrint('$e exportRawLogsExcel');
     }
@@ -265,7 +251,7 @@ class HomeData with ChangeNotifier {
       // if (model.undertimeBreak == '0') model.undertimeBreak = '';
     } catch (e) {
       debugPrint('$e reCalcLate');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
     return model;
   }
@@ -292,7 +278,7 @@ class HomeData with ChangeNotifier {
       // if (model.undertimeBreak == '0') model.undertimeBreak = '';
     } catch (e) {
       debugPrint('$e reCalcLate');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
     return model;
   }
@@ -498,46 +484,44 @@ class HomeData with ChangeNotifier {
         //   cellStyle: cellStyleData,
         // );
       }
-      excel.save(
-          fileName:
-              'DTR ${_dateFormatFileExcel.format(selectedFrom)} - ${_dateFormatFileExcel.format(selectedTo)}.xlsx');
+      excel.save(fileName: 'DTR-excel.xlsx');
     } catch (e) {
       debugPrint('exportExcel $e');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
   }
 
-  void sortData() {
-    final cd = <CleanDataModel>[];
-    var dayOfWeek = DateFormat('EEEE').format(DateTime.now()).toLowerCase();
+  // void sortData(List<ScheduleModel> scheduleList) {
+  //   final cd = <CleanDataModel>[];
+  //   var dayOfWeek = DateFormat('EEEE').format(DateTime.now()).toLowerCase();
 
-    for (int i = 0; i < _historyList.length; i++) {
-      var todaySched = scheduleList.singleWhere(
-        (element) =>
-            element.schedId ==
-            selectDay(day: dayOfWeek, model: _historyList[i]),
-      );
-      cd.add(
-        CleanDataModel(
-          employeeId: _historyList[i].employeeId,
-          firstName: _historyList[i].firstName,
-          lastName: _historyList[i].lastName,
-          middleName: _historyList[i].middleName,
-          currentSched: todaySched,
-          date: _historyList[i].date,
-          logs: _historyList[i].logs,
-        ),
-      );
-    }
+  //   for (int i = 0; i < _historyList.length; i++) {
+  //     var todaySched = scheduleList.singleWhere(
+  //       (element) =>
+  //           element.schedId ==
+  //           selectDay(day: dayOfWeek, model: _historyList[i]),
+  //     );
+  //     cd.add(
+  //       CleanDataModel(
+  //         employeeId: _historyList[i].employeeId,
+  //         firstName: _historyList[i].firstName,
+  //         lastName: _historyList[i].lastName,
+  //         middleName: _historyList[i].middleName,
+  //         currentSched: todaySched,
+  //         date: _historyList[i].date,
+  //         logs: _historyList[i].logs,
+  //       ),
+  //     );
+  //   }
 
-    cd.sort((a, b) {
-      var valueA = '${a.lastName.toLowerCase()} ${a.date}';
-      var valueB = '${b.lastName.toLowerCase()} ${b.date}';
-      return valueA.compareTo(valueB);
-    });
+  //   cd.sort((a, b) {
+  //     var valueA = '${a.lastName.toLowerCase()} ${a.date}';
+  //     var valueB = '${b.lastName.toLowerCase()} ${b.date}';
+  //     return valueA.compareTo(valueB);
+  //   });
 
-    cleanseData(cd);
-  }
+  //   cleanseData(cd);
+  // }
 
   List<CleanDataModel> dayCleanData({
     required int i,
@@ -788,8 +772,12 @@ class HomeData with ChangeNotifier {
               c[i + 1].logs.getRange(0, 3),
             );
           }
-        } else {
-          // logs.addAll(c[i].logs);
+        }
+        //  else {
+        // logs.addAll(c[i].logs);
+        // logs.add(c[i].logs.last);
+        // }
+        else if (c[i].logs.length == 4) {
           logs.add(c[i].logs.last);
         }
         if (!isSoloOut) {
@@ -923,7 +911,6 @@ class HomeData with ChangeNotifier {
         } else if (c[i].logs.length < 4 &&
             c[i].logs.first.logType == 'OUT' &&
             c[i + 1].logs.first.logType == 'OUT') {
-          log('dire2');
           logs.addAll(c[i].logs.sublist(1));
           logs.add(c[i + 1].logs.first);
           if (i + 1 == c.length - 1 &&
@@ -986,7 +973,7 @@ class HomeData with ChangeNotifier {
       finalizeData(_cleanData);
     } catch (e) {
       debugPrint('$e cleanseData');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
   }
 
@@ -1011,7 +998,7 @@ class HomeData with ChangeNotifier {
       _cleanData = c;
     } catch (e) {
       debugPrint('$e calcLogs');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
   }
 
@@ -1104,7 +1091,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e finalizeData');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
   }
 
@@ -1131,7 +1118,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e isForgotOut');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
     return false;
   }
@@ -1152,7 +1139,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e isInCloseEvening');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
     return false;
   }
@@ -1212,7 +1199,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e calcOvertimeHour $overtime $name $dt');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
     return finalOtString;
   }
@@ -1304,7 +1291,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('same day error $e');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
     var latePenalty = calcLate(
       logs: logs,
@@ -1431,7 +1418,7 @@ class HomeData with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e calcLate');
-      errorString.value = e.toString();
+      // errorString.value = e.toString();
     }
     return LateMinutesModel(
       lateInMinutes: latePenaltyIn,
@@ -1442,98 +1429,62 @@ class HomeData with ChangeNotifier {
     );
   }
 
-  // get initial data for history and put 30 it ui
-  void setData(List<HistoryModel> data) {
-    _historyList = data;
-    if (_historyList.length > 30) {
-      _uiList = _historyList.getRange(0, 30).toList();
-    } else {
-      _uiList = _historyList;
-    }
-    notifyListeners();
-  }
+  // // get initial data for history and put 30 it ui
+  // void setData(List<HistoryModel> data) {
+  //   _historyList = data;
+  //   if (_historyList.length > 30) {
+  //     _uiList = _historyList.getRange(0, 30).toList();
+  //   } else {
+  //     _uiList = _historyList;
+  //   }
+  //   notifyListeners();
+  // }
 
-  void loadMore() {
-    if (_historyList.length - _uiList.length < 30) {
-      _uiList.addAll(
-          _historyList.getRange(_uiList.length, _historyList.length).toList());
-    } else {
-      _uiList.addAll(
-          _historyList.getRange(_uiList.length, _uiList.length + 30).toList());
-    }
-    notifyListeners();
-  }
+  // void loadMore() {
+  //   if (_historyList.length - _uiList.length < 30) {
+  //     _uiList.addAll(
+  //         _historyList.getRange(_uiList.length, _historyList.length).toList());
+  //   } else {
+  //     _uiList.addAll(
+  //         _historyList.getRange(_uiList.length, _uiList.length + 30).toList());
+  //   }
+  //   notifyListeners();
+  // }
 
-  // get device version
-  Future<void> getPackageInfo() async {
-    try {
-      await PackageInfo.fromPlatform().then((result) {
-        _appVersion = result.version;
-        debugPrint('_appVersion $_appVersion');
-      });
-    } catch (e) {
-      debugPrint('getPackageInfo $e');
-      errorString.value = e.toString();
-      notifyListeners();
-    }
-  }
+  // Future<void> getRecords({
+  //   required String employeeId,
+  //   required DepartmentModel department,
+  // }) async {
+  //   var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
+  //   var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
+  //   try {
+  //     var result = await HttpService.getRecords(
+  //       employeeId: employeeId,
+  //       dateFrom: _dateFormat1.format(newselectedFrom),
+  //       dateTo: _dateFormat1.format(newselectedTo),
+  //       department: department,
+  //     );
+  //     setData(result);
+  //   } catch (e) {
+  //     debugPrint('$e getRecords');
+  //     // errorString.value = e.toString();
+  //   }
+  // }
 
-  Future<void> getRecords({
-    required String employeeId,
-    required DepartmentModel department,
-  }) async {
-    var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
-    var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
-    try {
-      var result = await HttpService.getRecords(
-        employeeId: employeeId,
-        dateFrom: _dateFormat1.format(newselectedFrom),
-        dateTo: _dateFormat1.format(newselectedTo),
-        department: department,
-      );
-      setData(result);
-    } catch (e) {
-      debugPrint('$e getRecords');
-      errorString.value = e.toString();
-    }
-  }
+  // Future<void> getRecordsAll({required DepartmentModel department}) async {
+  //   var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
+  //   var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
 
-  Future<void> getRecordsAll({required DepartmentModel department}) async {
-    var newselectedFrom = selectedFrom.copyWith(hour: 0, minute: 0, second: 0);
-    var newselectedTo = selectedTo.copyWith(hour: 23, minute: 59, second: 59);
-
-    try {
-      var result = await HttpService.getRecordsAll(
-        dateFrom: _dateFormat1.format(newselectedFrom),
-        dateTo: _dateFormat1.format(newselectedTo),
-        department: department,
-      );
-      setData(result);
-    } catch (e) {
-      debugPrint('$e getRecordsAll');
-      errorString.value = e.toString();
-    }
-  }
-
-  Future<void> getDepartment() async {
-    try {
-      final result = await HttpService.getDepartment();
-      _departmentList.addAll(result);
-      notifyListeners();
-    } catch (e) {
-      debugPrint('$e getDepartment');
-      errorString.value = e.toString();
-    }
-  }
-
-  Future<void> getSchedule() async {
-    try {
-      final result = await HttpService.geSchedule();
-      _scheduleList.addAll(result);
-      notifyListeners();
-    } catch (e) {
-      debugPrint('$e getSchedule');
-      errorString.value = e.toString();
-    }
-  }
+  //   try {
+  //     var result = await HttpService.getRecordsAll(
+  //       dateFrom: _dateFormat1.format(newselectedFrom),
+  //       dateTo: _dateFormat1.format(newselectedTo),
+  //       department: department,
+  //     );
+  //     setData(result);
+  //   } catch (e) {
+  //     debugPrint('$e getRecordsAll');
+  //     // errorString.value = e.toString();
+  //   }
+  // }
 }
