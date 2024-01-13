@@ -27,14 +27,6 @@ class _HomeViewState extends State<HomeView> {
   var dropdownValue =
       DepartmentModel(departmentId: '000', departmentName: 'All');
 
-  // SnackBar showError(String e) {
-  //   var snackBar = SnackBar(
-  //     content: Text(e),
-  //     duration: const Duration(seconds: 3),
-  //   );
-  //   return snackBar;
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -46,8 +38,6 @@ class _HomeViewState extends State<HomeView> {
       await version.getPackageInfo();
       await department.getDepartment();
       await schedule.getSchedule();
-      // provider.errorString.addListener(() => ScaffoldMessenger.of(context)
-      //     .showSnackBar(showError(provider.errorString.value)));
     });
   }
 
@@ -128,23 +118,12 @@ class _HomeViewState extends State<HomeView> {
                 onTap: () async {
                   history.changeLoadingState(true);
                   await Future.delayed(const Duration(seconds: 1));
-                  // if (idController.text.isEmpty) {
-                  //   // get records all
-                  //   await history.getRecordsAll(department: dropdownValue);
-                  // } else {
-                  //   // get records with id or name
-                  //   await history.getRecords(
-                  //       employeeId: idController.text.trim(),
-                  //       department: dropdownValue);
-                  // }
                   history.changeLoadingState(false);
-                  // history.sortData(schedule.scheduleList);
 
                   if (mounted) {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => ExcelView(
-                          scheduleDropdownValue: dropdownValue,
                           historyList: history.historyList,
                         ),
                       ),
@@ -169,49 +148,6 @@ class _HomeViewState extends State<HomeView> {
             }
             return const SizedBox();
           }),
-          // if (provider.historyList.isNotEmpty && provider.isSoloUser()) ...[
-          //   InkWell(
-          //     onTap: () async {
-          //       provider.changeLoadingState(true);
-          //       await Future.delayed(const Duration(seconds: 1));
-          //       if (idController.text.isEmpty) {
-          //         // get records all
-          //         await provider.getRecordsAll(department: dropdownValue);
-          //       } else {
-          //         // get records with id or name
-          //         await provider.getRecords(
-          //             employeeId: idController.text.trim(),
-          //             department: dropdownValue);
-          //       }
-          //       provider.changeLoadingState(false);
-          //       provider.sortData(schedule.scheduleList);
-
-          //       if (mounted) {
-          //         Navigator.of(context).push(
-          //           MaterialPageRoute(
-          //             builder: (context) => ExcelView(
-          //               scheduleDropdownValue: dropdownValue,
-          //             ),
-          //           ),
-          //         );
-          //       }
-          //     },
-          //     child: Ink(
-          //       padding: const EdgeInsets.all(5.0),
-          //       child: const Row(
-          //         children: [
-          //           Text(
-          //             'Advanced Mode',
-          //             style: TextStyle(
-          //               fontSize: 18.0,
-          //             ),
-          //           ),
-          //           Icon(Icons.arrow_forward),
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-          // ],
         ],
       ),
       body: Consumer<HistoryProvider>(builder: (ctx, history, widget) {

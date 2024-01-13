@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import '../data/schedule_provider.dart';
 import '../data/version_provider.dart';
 import '../model/clean_excel_model.dart';
-import '../model/department_model.dart';
 import '../model/history_model.dart';
 import '../model/schedule_model.dart';
 import '../widget/timelog_widget.dart';
@@ -16,10 +15,8 @@ import '../widget/timelog_widget.dart';
 class ExcelView extends StatefulWidget {
   const ExcelView({
     super.key,
-    required this.scheduleDropdownValue,
     required this.historyList,
   });
-  final DepartmentModel scheduleDropdownValue;
   final List<HistoryModel> historyList;
 
   @override
@@ -31,14 +28,6 @@ class _ExcelViewState extends State<ExcelView> {
   final scl = ScrollController();
   final sc1 = ScrollController();
   final sc2 = ScrollController();
-
-  // SnackBar showError(String e) {
-  //   var snackBar = SnackBar(
-  //     content: Text(e),
-  //     duration: const Duration(seconds: 3),
-  //   );
-  //   return snackBar;
-  // }
 
   @override
   void initState() {
@@ -150,7 +139,7 @@ class _ExcelViewState extends State<ExcelView> {
       var d = await showDatePicker(
         context: context,
         initialDate: c.logs[i].timeStamp,
-        firstDate: DateTime(2020, 1, 1),
+        firstDate: DateTime(2023, 1, 1),
         lastDate: DateTime.now(),
       );
       if (d == null) {
@@ -227,7 +216,7 @@ class _ExcelViewState extends State<ExcelView> {
       var d = await showDatePicker(
         context: context,
         initialDate: dateResult,
-        firstDate: DateTime(2020, 1, 1),
+        firstDate: DateTime(2023, 1, 1),
         lastDate: DateTime.now(),
       );
       if (d == null) {
@@ -294,7 +283,7 @@ class _ExcelViewState extends State<ExcelView> {
       var d = await showDatePicker(
         context: context,
         initialDate: dateResult,
-        firstDate: DateTime(2020, 1, 1),
+        firstDate: DateTime(2023, 1, 1),
         lastDate: DateTime.now(),
       );
 

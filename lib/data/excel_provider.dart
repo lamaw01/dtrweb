@@ -1,7 +1,3 @@
-// ignore_for_file: unused_import
-
-import 'dart:developer';
-
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +10,7 @@ import '../model/log_model.dart';
 import '../model/schedule_model.dart';
 
 class ExcelProvider with ChangeNotifier {
-  var _cleanData = <CleanDataModel>[];
+  final _cleanData = <CleanDataModel>[];
   List<CleanDataModel> get cleanData => _cleanData;
 
   final _cleanExcelData = <CleanExcelDataModel>[];
@@ -23,6 +19,7 @@ class ExcelProvider with ChangeNotifier {
   final _is24HourFormat = ValueNotifier(false);
   final _dateFormat1 = DateFormat('yyyy-MM-dd HH:mm');
   DateFormat get dateFormat1 => _dateFormat1;
+  final _dateYmd = DateFormat('yyyy-MM-dd');
 
   String selectDay({required String day, required HistoryModel model}) {
     switch (day) {
@@ -65,16 +62,24 @@ class ExcelProvider with ChangeNotifier {
     return dateFormat12or24Excel(d);
   }
 
+  String dateFormat12or24Web(DateTime dateTime) {
+    if (_is24HourFormat.value) {
+      return DateFormat('HH:mm').format(dateTime);
+    } else {
+      return DateFormat('hh:mm aa').format(dateTime);
+    }
+  }
+
   //assign historylist to cleandata
   void sortData({
     required List<ScheduleModel> scheduleList,
     required List<HistoryModel> historyList,
   }) {
-    var dayOfWeek = DateFormat('EEEE').format(DateTime.now()).toLowerCase();
-
     _cleanData.clear();
 
     for (int i = 0; i < historyList.length; i++) {
+      var dayOfWeek =
+          DateFormat('EEEE').format(historyList[i].date).toLowerCase();
       var todaySched = scheduleList.singleWhere((element) =>
           element.schedId == selectDay(day: dayOfWeek, model: historyList[i]));
 
@@ -97,87 +102,70 @@ class ExcelProvider with ChangeNotifier {
   //clean data
   void cleanseData() {
     try {
-      if (isEvening(_cleanData.first)) {
-        arrangeDataEvening();
+      for (int i = 0; i < _cleanData.length; i++) {
+        if (isEvening(_cleanData[i])) {
+          arrangeDataEvening(i);
+        }
       }
-      // for (int i = 0; i < _cleanData.length; i++) {
-      //   if (isEvening(_cleanData[i])) {
-      //     var resultdayClean = eveningCleanData(i: i, c: _cleanData);
-      //     _cleanData.addAll(resultdayClean);
-      //   } else {
-      //     var resultdayClean = dayCleanData(i: i, c: _cleanData);
-      //     _cleanData.addAll(resultdayClean);
-      //   }
-      // }
-      calcLogs(_cleanData);
-      finalizeData(_cleanData);
+      _cleanData.removeWhere((e) => e.logs.isEmpty);
+      calcLogs();
+      finalizeData();
     } catch (e) {
-      debugPrint('$e cleanseData1');
+      debugPrint('$e cleanseData');
     }
   }
 
-  void arrangeDataEvening() {
-    if (_cleanData.length == 1) {
-      _cleanData.clear();
-      return;
-    }
-
-    for (int i = 0; i < _cleanData.length; i++) {
-      if (i == 0) {
-        var logs = <Log>[];
-        try {
-          if (_cleanData[i].logs.last.logType == 'IN') {
-            logs.add(_cleanData[i].logs.last);
-            if (_cleanData[i + 1].logs.length >= 4) {
-              final removedLastLogIndex =
-                  _cleanData[i + 1].logs.reversed.skip(1);
-              var logsTemp = <Log>[];
-              logsTemp.addAll(removedLastLogIndex);
-              logs.addAll(logsTemp.reversed);
-            } else {
-              logs.addAll(_cleanData[i + 1].logs);
-            }
+  void arrangeDataEvening(int i) {
+    if (i == 0) {
+      var logs = <Log>[];
+      try {
+        if (_cleanData[i].logs.last.logType == 'IN') {
+          logs.add(_cleanData[i].logs.last);
+          if (_cleanData[i + 1].logs.length >= 4) {
+            final removedLastLogIndex = _cleanData[i + 1].logs.reversed.skip(1);
+            var logsTemp = <Log>[];
+            logsTemp.addAll(removedLastLogIndex);
+            logs.addAll(logsTemp.reversed);
+          } else {
+            logs.addAll(_cleanData[i + 1].logs);
           }
-        } catch (e) {
-          debugPrint('$e if');
         }
-        _cleanData[i].logs = logs;
-      } else if (i == _cleanData.length - 1) {
-        try {
-          _cleanData.removeLast();
-        } catch (e) {
-          debugPrint('$e else if');
-        }
-      } else {
-        var logs = <Log>[];
-        try {
-          if (_cleanData[i].logs.last.logType == 'IN') {
-            logs.add(_cleanData[i].logs.last);
-            if (_cleanData[i + 1].logs.length >= 4) {
-              final removedLastLogIndex =
-                  _cleanData[i + 1].logs.reversed.skip(1);
-              var logsTemp = <Log>[];
-              logsTemp.addAll(removedLastLogIndex);
-              logs.addAll(logsTemp.reversed);
-            } else {
-              logs.addAll(_cleanData[i + 1].logs);
-            }
+      } catch (e) {
+        debugPrint('$e if');
+      }
+      _cleanData[i].logs = logs;
+    } else if (i == _cleanData.length - 1) {
+      try {
+        _cleanData.removeLast();
+      } catch (e) {
+        debugPrint('$e else if');
+      }
+    } else {
+      var logs = <Log>[];
+      try {
+        if (_cleanData[i].logs.last.logType == 'IN') {
+          logs.add(_cleanData[i].logs.last);
+          if (_cleanData[i + 1].logs.length >= 4) {
+            final removedLastLogIndex = _cleanData[i + 1].logs.reversed.skip(1);
+            var logsTemp = <Log>[];
+            logsTemp.addAll(removedLastLogIndex);
+            logs.addAll(logsTemp.reversed);
+          } else {
+            logs.addAll(_cleanData[i + 1].logs);
           }
-        } catch (e) {
-          debugPrint('$e else');
         }
-        _cleanData[i].logs = logs;
+      } catch (e) {
+        debugPrint('$e else');
       }
+      _cleanData[i].logs = logs;
     }
 
-    for (int i = 0; i < _cleanData.length; i++) {
-      for (int j = 0; j < _cleanData[i].logs.length; j++) {
-        log("${_cleanData[i].logs[j].logType} ${_cleanData[i].logs[j].timeStamp}");
-      }
-      log('--------');
-    }
-
-    _cleanData.removeWhere((e) => e.logs.isEmpty);
+    // for (int i = 0; i < _cleanData.length; i++) {
+    //   for (int j = 0; j < _cleanData[i].logs.length; j++) {
+    //     log("${_cleanData[i].logs[j].logType} ${_cleanData[i].logs[j].timeStamp}");
+    //   }
+    //   log('--------');
+    // }
   }
 
   LateMinutesModel calcLate({
@@ -280,7 +268,6 @@ class ExcelProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e calcLate');
-      // errorString.value = e.toString();
     }
     return LateMinutesModel(
       lateInMinutes: latePenaltyIn,
@@ -292,7 +279,7 @@ class ExcelProvider with ChangeNotifier {
   }
 
   // calculate duration in hours if in and out same day
-  LateModel calcDurationInOutSameDay({
+  LateModel calcDurationInOut({
     required List<Log> logs,
     required String name,
     required ScheduleModel sched,
@@ -309,7 +296,6 @@ class ExcelProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('same day error $e');
-      // errorString.value = e.toString();
     }
     var latePenalty = calcLate(
       logs: logs,
@@ -364,84 +350,51 @@ class ExcelProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e calcOvertimeHour $overtime $name $dt');
-      // errorString.value = e.toString();
     }
     return finalOtString;
   }
 
-  void calcLogs(List<CleanDataModel> c) {
+  void calcLogs() {
     try {
-      for (int i = 0; i < c.length; i++) {
-        var duration = calcDurationInOutSameDay(
-          logs: c[i].logs,
-          name: c[i].firstName,
-          sched: c[i].currentSched,
+      for (int i = 0; i < _cleanData.length; i++) {
+        var duration = calcDurationInOut(
+          logs: _cleanData[i].logs,
+          name: _cleanData[i].firstName,
+          sched: _cleanData[i].currentSched,
         );
 
-        var finalOtString =
-            calcOvertimeHour(duration.overtime, c[i].firstName, dt: c[i].date);
-        c[i].duration = duration.hour.toString();
-        c[i].lateIn = duration.lateIn.toString();
-        c[i].lateBreak = duration.lateBreak.toString();
-        c[i].overtime = finalOtString;
+        var finalOtString = calcOvertimeHour(
+            duration.overtime, _cleanData[i].firstName,
+            dt: _cleanData[i].date);
+        _cleanData[i].duration = duration.hour.toString();
+        _cleanData[i].lateIn = duration.lateIn.toString();
+        _cleanData[i].lateBreak = duration.lateBreak.toString();
+        _cleanData[i].overtime = finalOtString;
         // c[i].undertimeIn = duration.undertimeIn.toString();
         // c[i].undertimeBreak = duration.undertimelateBreak.toString();
       }
-      _cleanData = c;
     } catch (e) {
       debugPrint('$e calcLogs');
-      // errorString.value = e.toString();
     }
   }
 
-  void finalizeData(List<CleanDataModel> c) {
+  void finalizeData() {
     _cleanExcelData.clear();
     var count = 0;
     try {
-      for (int i = 0; i < c.length; i++) {
+      for (int i = 0; i < _cleanData.length; i++) {
         count = count + 1;
-        if (i > 0 && c[i].employeeId != c[i - 1].employeeId) {
-          _cleanExcelData.add(
-            CleanExcelDataModel(
-              employeeId: '',
-              name: '',
-              currentSched: ScheduleModel(
-                schedId: '',
-                schedType: '',
-                schedIn: '',
-                breakStart: '',
-                breakEnd: '',
-                schedOut: '',
-                description: '',
-              ),
-              date: DateTime.now(),
-              logs: <Log>[],
-              duration: '',
-              lateIn: '',
-              lateBreak: '',
-              overtime: '',
-              // undertimeIn: '',
-              // undertimeBreak: '',
-              rowCount: '',
-              in1: TimeLog(),
-              out1: TimeLog(),
-              in2: TimeLog(),
-              out2: TimeLog(),
-            ),
-          );
-          count = 1;
-        }
         _cleanExcelData.add(
           CleanExcelDataModel(
-            employeeId: c[i].employeeId,
-            name: fullName(c[i]),
-            currentSched: c[i].currentSched,
-            date: c[i].date,
-            logs: c[i].logs,
-            duration: c[i].duration!,
-            lateIn: c[i].lateIn!,
-            lateBreak: c[i].lateBreak!,
-            overtime: c[i].overtime!,
+            employeeId: _cleanData[i].employeeId,
+            name: fullName(_cleanData[i]),
+            currentSched: _cleanData[i].currentSched,
+            date: _cleanData[i].date,
+            logs: _cleanData[i].logs,
+            duration: _cleanData[i].duration!,
+            lateIn: _cleanData[i].lateIn!,
+            lateBreak: _cleanData[i].lateBreak!,
+            overtime: _cleanData[i].overtime!,
             // undertimeIn: c[i].undertimeIn!,
             // undertimeBreak: c[i].undertimeBreak!,
             rowCount: '$count',
@@ -483,54 +436,15 @@ class ExcelProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('$e finalizeData');
-      // errorString.value = e.toString();
     }
-  }
-
-  bool isInCloseEvening(CleanDataModel c) {
-    var differenceForgotOut = 0;
-    try {
-      if (c.logs.length > 2 &&
-          c.logs[1].logType == 'IN' &&
-          c.logs[2].logType == 'OUT') {
-        differenceForgotOut =
-            c.logs[2].timeStamp.difference(c.logs[1].timeStamp).inMinutes;
-        // dont calc if out and in if less than 30 minutes gap
-        // means user forgot to out
-        if (differenceForgotOut < 30) {
-          return true;
-        }
-      }
-    } catch (e) {
-      debugPrint('$e isInCloseEvening');
-      // errorString.value = e.toString();
-    }
-    return false;
-  }
-
-  bool isForgotOut(CleanDataModel c) {
-    var differenceForgotOut = 0;
-    try {
-      if (c.logs.length > 1 &&
-          c.logs[0].logType == 'OUT' &&
-          c.logs[1].logType == 'IN') {
-        differenceForgotOut =
-            c.logs[1].timeStamp.difference(c.logs[0].timeStamp).inMinutes;
-        // dont calc if out and in if less than 30 minutes gap
-        // means user forgot to out
-        if (differenceForgotOut < 30) {
-          return true;
-        }
-      }
-    } catch (e) {
-      debugPrint('$e isForgotOut');
-      // errorString.value = e.toString();
-    }
-    return false;
   }
 
   String fullName(CleanDataModel c) {
     return '${c.lastName}, ${c.firstName} ${c.middleName}';
+  }
+
+  String fullNameHistory(HistoryModel h) {
+    return '${h.lastName}, ${h.firstName} ${h.middleName}';
   }
 
   CleanExcelDataModel reCalcLateModel({
@@ -546,7 +460,7 @@ class ExcelProvider with ChangeNotifier {
       // undertimelateBreak: 0
     );
     try {
-      duration = calcDurationInOutSameDay(
+      duration = calcDurationInOut(
         logs: model.logs,
         name: model.name,
         sched: newSchedule,
@@ -567,14 +481,13 @@ class ExcelProvider with ChangeNotifier {
       // if (model.undertimeBreak == '0') model.undertimeBreak = '';
     } catch (e) {
       debugPrint('$e reCalcLate');
-      // errorString.value = e.toString();
     }
     return model;
   }
 
   CleanExcelDataModel reCalcNewTime({required CleanExcelDataModel model}) {
     try {
-      var duration = calcDurationInOutSameDay(
+      var duration = calcDurationInOut(
         logs: model.logs,
         name: model.name,
         sched: model.currentSched,
@@ -594,443 +507,8 @@ class ExcelProvider with ChangeNotifier {
       // if (model.undertimeBreak == '0') model.undertimeBreak = '';
     } catch (e) {
       debugPrint('$e reCalcLate');
-      // errorString.value = e.toString();
     }
     return model;
-  }
-
-  List<CleanDataModel> dayCleanData({
-    required int i,
-    required List<CleanDataModel> c,
-  }) {
-    final dayCleanData = <CleanDataModel>[];
-    bool isSoloOut = false;
-    if (i == 0) {
-      try {
-        var logs = <Log>[];
-        if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 1) {
-          for (int k = 1; k < c[i].logs.length; k++) {
-            if (c[i].logs[k].logType != c[i].logs[k - 1].logType) {
-              logs.add(c[i].logs[k]);
-            }
-            // logs.add(c[i].logs[k]);
-          }
-        } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'IN') {
-          logs.add(c[i].logs.first);
-        } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
-          isSoloOut = true;
-        } else {
-          logs.addAll(c[i].logs);
-        }
-
-        if (!isSoloOut) {
-          dayCleanData.add(
-            CleanDataModel(
-              employeeId: c[i].employeeId,
-              firstName: c[i].firstName,
-              lastName: c[i].lastName,
-              middleName: c[i].middleName,
-              date: c[i].date,
-              logs: logs,
-              currentSched: c[i].currentSched,
-            ),
-          );
-        }
-      } catch (e) {
-        debugPrint('if m $e');
-      }
-    } else if (i == c.length - 1) {
-      try {
-        var logs = <Log>[];
-
-        if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 3) {
-          for (int k = 1; k < c[i].logs.length; k++) {
-            if (c[i].logs[k].logType != c[i].logs[k - 1].logType) {
-              logs.add(c[i].logs[k]);
-            }
-          }
-        } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
-          isSoloOut = true;
-        } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'IN') {
-          logs.add(c[i].logs.first);
-        } else if (c[i].logs.length == 2 &&
-            c[i].logs.first.logType == 'IN' &&
-            c[i].logs.last.logType == 'OUT') {
-          logs.addAll(c[i].logs);
-        } else if (c[i].logs.length < 4 && c[i].logs.first.logType == 'OUT') {
-          logs.addAll(c[i].logs.sublist(1));
-        } else if (c[i].logs.length > 3 && c[i].logs.first.logType == 'IN') {
-          // logs.addAll(c[i].logs);
-          // for (int k = 0; k < c[i].logs.length; k++) {
-          //   if (k > 0 && c[i].logs[k].logType != c[i].logs[k - 1].logType) {
-          //     logs.add(c[i].logs[k]);
-          //   }
-          // }
-          for (int k = 0; k < c[i].logs.length; k++) {
-            if (k > 0 && c[i].logs[k].logType != c[i].logs[k - 1].logType) {
-              logs.add(c[i].logs[k]);
-            } else if (k == 0) {
-              logs.add(c[i].logs[k]);
-            }
-          }
-        } else if (c[i].logs.length == 3 &&
-            c[i].logs.first.logType == 'IN' &&
-            c[i].logs.last.logType == 'IN') {
-          logs.addAll(c[i].logs);
-        } else {
-          logs.addAll(c[i].logs);
-        }
-
-        if (!isSoloOut) {
-          dayCleanData.add(
-            CleanDataModel(
-              employeeId: c[i].employeeId,
-              firstName: c[i].firstName,
-              lastName: c[i].lastName,
-              middleName: c[i].middleName,
-              date: c[i].date,
-              logs: logs,
-              currentSched: c[i].currentSched,
-            ),
-          );
-        }
-      } catch (e) {
-        debugPrint('else if m $e');
-      }
-    } else {
-      try {
-        if (c[i].logs.last.logType == 'IN') {
-          var logs = <Log>[];
-          if (fullName(c[i]) == fullName(c[i + 1])) {
-            if (isForgotOut(c[i + 1])) {
-              logs.add(c[i].logs.last);
-            } else if (c[i].logs.length < 4 &&
-                c[i].logs.length > 1 &&
-                c[i].logs.first.logType == 'IN') {
-              // logs.add(c[i].logs[0]);
-              logs.add(c[i].logs.last);
-              logs.add(c[i].logs[1]);
-            } else if (c[i + 1].logs.length == 1 &&
-                c[i + 1].logs.first.logType == 'OUT') {
-              logs.add(c[i].logs.last);
-            } else if (c[i].logs.length == 1 &&
-                c[i].logs.first.logType == 'IN' &&
-                c[i + 1].logs.first.logType == 'IN') {
-              logs.add(c[i].logs.last);
-            } else if (c[i].logs.length >= 4 &&
-                c[i].logs.first.logType == 'OUT') {
-              logs.addAll(c[i].logs.skip(1));
-            } else {
-              // logs.add(c[i].logs.last);
-              logs.add(c[i].logs.last);
-              logs.add(c[i + 1].logs.first);
-            }
-          } else if (c[i].logs.length == 1 &&
-              c[i].logs.first.logType == 'IN' &&
-              fullName(c[i]) == fullName(c[i - 1])) {
-            logs.add(c[i].logs.last);
-          } else if (c[i].logs.length == 2 &&
-              c[i].logs.first.logType == 'OUT') {
-            logs.add(c[i].logs.last);
-          } else if (c[i].logs.length == 3 &&
-              c[i].logs.first.logType == 'IN' &&
-              c[i].logs.last.logType == 'IN') {
-            logs.addAll(c[i].logs);
-          }
-
-          if (logs.isNotEmpty) {
-            dayCleanData.add(
-              CleanDataModel(
-                employeeId: c[i].employeeId,
-                firstName: c[i].firstName,
-                lastName: c[i].lastName,
-                middleName: c[i].middleName,
-                date: c[i].date,
-                logs: logs,
-                currentSched: c[i].currentSched,
-              ),
-            );
-          }
-        } else {
-          var logs = <Log>[];
-          if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 2) {
-            for (int k = 1; k < c[i].logs.length; k++) {
-              if (c[i].logs[k].logType != c[i].logs[k - 1].logType) {
-                logs.add(c[i].logs[k]);
-              }
-            }
-          } else if (c[i].logs.length == 1 &&
-              c[i].logs.first.logType == 'OUT') {
-            isSoloOut = true;
-          } else if (c[i].logs.length == 2 &&
-              c[i].logs.first.logType == 'IN' &&
-              c[i].logs.last.logType == 'OUT') {
-            logs.addAll(c[i].logs);
-          } else if (c[i].logs.length > 3) {
-            // logs.addAll(c[i].logs);
-            for (int k = 0; k < c[i].logs.length; k++) {
-              if (k > 0 && c[i].logs[k].logType != c[i].logs[k - 1].logType) {
-                logs.add(c[i].logs[k]);
-              } else if (k == 0) {
-                logs.add(c[i].logs[k]);
-              }
-            }
-          } else {
-            logs.addAll(c[i].logs);
-          }
-
-          if (!isSoloOut) {
-            dayCleanData.add(
-              CleanDataModel(
-                employeeId: c[i].employeeId,
-                firstName: c[i].firstName,
-                lastName: c[i].lastName,
-                middleName: c[i].middleName,
-                date: c[i].date,
-                logs: logs,
-                currentSched: c[i].currentSched,
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        debugPrint('else m $e');
-      }
-    }
-    return dayCleanData;
-  }
-
-  List<CleanDataModel> eveningCleanData({
-    required int i,
-    required List<CleanDataModel> c,
-  }) {
-    final dayCleanData = <CleanDataModel>[];
-    if (i == 0) {
-      try {
-        var logs = <Log>[];
-        bool isSoloOut = false;
-        // if (c[i].logs.first.logType == 'OUT' && c[i].logs.length > 1) {
-        //   for (int k = 0; k < c[i].logs.length; k++) {
-        //     logs.add(c[i].logs[k]);
-        //   }
-        // } else
-
-        if (c[i].logs.first.logType == 'IN' && c[i].logs.length == 1) {
-          logs.add(c[i].logs.first);
-          logs.add(c[i + 1].logs.first);
-          if (isInCloseEvening(c[i + 1])) {
-            logs.add(c[i + 1].logs[1]);
-            logs.add(c[i + 1].logs[2]);
-          }
-        } else if (c[i].logs.length >= 3 &&
-            c[i].logs.first.logType == 'OUT' &&
-            c[i].logs.last.logType == 'IN') {
-          logs.add(c[i].logs.last);
-
-          if (c[i + 1].logs.length == 1) {
-            logs.add(c[i + 1].logs.last);
-          } else if (c[i + 1].logs.length > 3 &&
-              c[i].logs.last.logType == 'IN') {
-            logs.addAll(c[i + 1].logs.sublist(0, 3));
-          } else {
-            logs.addAll(c[i + 1].logs);
-          }
-        } else if (c[i].logs.first.logType == 'OUT' && c[i].logs.length == 1) {
-          isSoloOut = true;
-        } else if (c[i].logs.first.logType == 'OUT' &&
-            c[i].logs.last.logType == 'IN' &&
-            c[i].logs.length == 2) {
-          logs.add(c[i].logs.last);
-          if (c[i + 1].logs.length >= 3 &&
-              c[i + 1].logs[0].logType == 'OUT' &&
-              c[i + 1].logs[2].logType == 'OUT') {
-            logs.addAll(
-              c[i + 1].logs.getRange(0, 3),
-            );
-          }
-        }
-        //  else {
-        // logs.addAll(c[i].logs);
-        // logs.add(c[i].logs.last);
-        // }
-        else if (c[i].logs.length == 4) {
-          logs.add(c[i].logs.last);
-        }
-        if (!isSoloOut) {
-          dayCleanData.add(
-            CleanDataModel(
-              employeeId: c[i].employeeId,
-              firstName: c[i].firstName,
-              lastName: c[i].lastName,
-              middleName: c[i].middleName,
-              date: c[i].date,
-              logs: logs,
-              currentSched: c[i].currentSched,
-            ),
-          );
-        }
-      } catch (e) {
-        debugPrint('if e $e');
-      }
-    } else if (i == c.length - 1) {
-      try {
-        var logs = <Log>[];
-        bool isSoloOut = false;
-
-        if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
-          logs.add(c[i].logs.first);
-          isSoloOut = true;
-        }
-        // else if (c[i].logs.length > 3 && c[i].logs.first.logType == 'OUT') {
-        // logs.addAll(c[i].logs.sublist(1));
-        // }
-        else if (c[i].logs.length < 4 && c[i].logs.last.logType == 'OUT') {
-          isSoloOut = true;
-        } else if (c[i].logs.length == 3 &&
-            c[i].logs.first.logType == 'OUT' &&
-            c[i].logs.last.logType == 'OUT') {
-          logs.addAll(c[i].logs);
-          // isSoloOut = true;
-        } else if (c[i].logs.length == 2 && c[i].logs.first.logType == 'OUT') {
-          logs.add(c[i].logs.last);
-        } else if (c[i].logs.length == 4 &&
-            c[i].logs.first.logType == 'OUT' &&
-            c[i].logs.last.logType == 'IN') {
-          logs.add(c[i].logs.last);
-        } else {
-          logs.addAll(c[i].logs);
-        }
-        if (!isSoloOut) {
-          dayCleanData.add(
-            CleanDataModel(
-              employeeId: c[i].employeeId,
-              firstName: c[i].firstName,
-              lastName: c[i].lastName,
-              middleName: c[i].middleName,
-              date: c[i].date,
-              logs: logs,
-              currentSched: c[i].currentSched,
-            ),
-          );
-        }
-      } catch (e) {
-        debugPrint('else if e $e');
-      }
-    } else {
-      try {
-        var logs = <Log>[];
-        bool isSoloOut = false;
-
-        if (c[i].logs.first.logType == 'OUT' &&
-            c[i].logs.last.logType == 'IN' &&
-            c[i].logs.length > 3) {
-          logs.add(c[i].logs.last);
-          if (c[i + 1].logs.length > 3 &&
-              c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'IN' &&
-              fullName(c[i]) == fullName(c[i + 1])) {
-            logs.addAll(c[i + 1].logs.sublist(0, 3));
-          } else if (c[i + 1].logs.length == 1 &&
-              c[i + 1].logs.first.logType == 'OUT' &&
-              fullName(c[i]) == fullName(c[i + 1])) {
-            logs.add(c[i + 1].logs.first);
-          } else if (c[i + 1].logs.length == 3 &&
-              c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'OUT' &&
-              c[i].logs.length == 1 &&
-              fullName(c[i]) == fullName(c[i + 1])) {
-            logs.add(c[i + 1].logs.first);
-          } else if (c[i + 1].logs.length == 3 &&
-              c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'OUT' &&
-              fullName(c[i]) == fullName(c[i + 1])) {
-            logs.addAll(c[i + 1].logs);
-          } else {
-            if (fullName(c[i]) == fullName(c[i + 1])) {
-              logs.add(c[i + 1].logs.first);
-            }
-          }
-        } else if (c[i].logs.length == 1 && c[i].logs.last.logType == 'IN') {
-          logs.add(c[i].logs.last);
-          if (c[i + 1].logs.length > 3 &&
-              c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'IN' &&
-              fullName(c[i]) == fullName(c[i + 1])) {
-            logs.addAll(c[i + 1].logs.sublist(0, 3));
-          } else if (c[i + 1].logs.length == 2 &&
-              c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'IN' &&
-              fullName(c[i]) == fullName(c[i + 1])) {
-            logs.add(c[i + 1].logs.first);
-          } else if (c[i + 1].logs.length < 4 &&
-              c[i + 1].logs.first.logType == 'OUT' &&
-              fullName(c[i]) == fullName(c[i + 1])) {
-            // logs.add(c[i + 1].logs.first);
-            logs.addAll(c[i + 1].logs);
-          }
-        } else if (c[i].logs.first.logType == 'OUT' &&
-            c[i].logs.last.logType == 'IN' &&
-            c[i].logs.length == 2) {
-          logs.add(c[i].logs.last);
-          if (c[i + 1].logs.length >= 3 &&
-              c[i + 1].logs[0].logType == 'OUT' &&
-              c[i + 1].logs[2].logType == 'OUT' &&
-              fullName(c[i]) == fullName(c[i + 1])) {
-            logs.addAll(
-              c[i + 1].logs.getRange(0, 3),
-            );
-          }
-        } else if (c[i].logs.length == 1 && c[i].logs.first.logType == 'OUT') {
-          isSoloOut = true;
-        } else if (c[i].logs.length < 4 && c[i].logs.last.logType == 'OUT') {
-          isSoloOut = true;
-        } else if (c[i].logs.length < 4 &&
-            c[i].logs.first.logType == 'OUT' &&
-            c[i + 1].logs.first.logType == 'OUT') {
-          logs.addAll(c[i].logs.sublist(1));
-          logs.add(c[i + 1].logs.first);
-          if (i + 1 == c.length - 1 &&
-              c[i + 1].logs.first.logType == 'OUT' &&
-              c[i + 1].logs.last.logType == 'OUT' &&
-              c[i + 1].logs.length == 3 &&
-              fullName(c[i]) == fullName(c[i + 1])) {
-            logs.addAll(c[i + 1].logs);
-          }
-        } else if (c[i].logs.length < 4 &&
-            c[i].logs.last.logType == 'OUT' &&
-            fullName(c[i]) != fullName(c[i + 1])) {
-          isSoloOut = true;
-        } else if (c[i].logs.length == 3 &&
-            c[i].logs.first.logType == 'OUT' &&
-            c[i].logs.last.logType == 'OUT') {
-          isSoloOut = true;
-        } else if (c[i].logs.length == 3 &&
-            c[i].logs.first.logType == 'IN' &&
-            c[i].logs.last.logType == 'IN') {
-          logs.addAll(c[i].logs);
-          logs.add(c[i + 1].logs.first);
-        } else {
-          logs.addAll(c[i].logs);
-        }
-
-        if (!isSoloOut) {
-          dayCleanData.add(
-            CleanDataModel(
-              employeeId: c[i].employeeId,
-              firstName: c[i].firstName,
-              lastName: c[i].lastName,
-              middleName: c[i].middleName,
-              date: c[i].date,
-              logs: logs,
-              currentSched: c[i].currentSched,
-            ),
-          );
-        }
-      } catch (e) {
-        debugPrint('else e $e');
-      }
-    }
-    return dayCleanData;
   }
 
   void exportExcel() {
@@ -1237,7 +715,120 @@ class ExcelProvider with ChangeNotifier {
       excel.save(fileName: 'DTR-excel.xlsx');
     } catch (e) {
       debugPrint('exportExcel $e');
-      // errorString.value = e.toString();
+    }
+  }
+
+  void exportRawLogsExcel() {
+    try {
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Sheet1'];
+      var cellStyle = CellStyle(
+        backgroundColorHex: '#dddddd',
+        fontFamily: getFontFamily(FontFamily.Calibri),
+        horizontalAlign: HorizontalAlign.Center,
+        fontSize: 9,
+      );
+      var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
+      column1
+        ..value = 'Emp ID'
+        ..cellStyle = cellStyle;
+
+      var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
+      column2
+        ..value = 'Name'
+        ..cellStyle = cellStyle;
+
+      var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
+      column3
+        ..value = 'Date'
+        ..cellStyle = cellStyle;
+
+      var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
+      column4
+        ..value = 'Time'
+        ..cellStyle = cellStyle;
+
+      var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
+      column5
+        ..value = 'Log type'
+        ..cellStyle = cellStyle;
+
+      var cellStyleData = CellStyle(
+        fontFamily: getFontFamily(FontFamily.Calibri),
+        horizontalAlign: HorizontalAlign.Center,
+        fontSize: 9,
+      );
+      var rC = 0;
+
+      var sortedRawHistory = <HistoryModel>[];
+      // sortedRawHistory.addAll(_historyList);
+      sortedRawHistory.sort((a, b) {
+        var valueA = '${a.lastName.toLowerCase()} ${a.date}';
+        var valueB = '${b.lastName.toLowerCase()} ${b.date}';
+        return valueA.compareTo(valueB);
+      });
+
+      for (int i = 0; i < sortedRawHistory.length; i++) {
+        for (int j = 0; j < sortedRawHistory[i].logs.length; j++) {
+          rC = rC + 1;
+          List<dynamic> dataList = [
+            sortedRawHistory[i].employeeId,
+            fullNameHistory(sortedRawHistory[i]),
+            _dateYmd.format(sortedRawHistory[i].date),
+            dateFormat12or24Web(sortedRawHistory[i].logs[j].timeStamp),
+            sortedRawHistory[i].logs[j].logType,
+          ];
+          sheetObject.appendRow(dataList);
+          sheetObject.setColWidth(0, 7.0);
+          sheetObject.setColWidth(1, 22.0);
+          sheetObject.setColWidth(2, 10.0);
+          sheetObject.setColWidth(3, 10.1);
+          sheetObject.setColWidth(4, 8.1);
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 0,
+              rowIndex: rC,
+            ),
+            sortedRawHistory[i].employeeId,
+            cellStyle: cellStyleData,
+          );
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 1,
+              rowIndex: rC,
+            ),
+            fullNameHistory(sortedRawHistory[i]),
+            cellStyle: cellStyleData,
+          );
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 2,
+              rowIndex: rC,
+            ),
+            _dateYmd.format(sortedRawHistory[i].date),
+            cellStyle: cellStyleData,
+          );
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 3,
+              rowIndex: rC,
+            ),
+            dateFormat12or24Web(sortedRawHistory[i].logs[j].timeStamp),
+            cellStyle: cellStyleData,
+          );
+          sheetObject.updateCell(
+            CellIndex.indexByColumnRow(
+              columnIndex: 4,
+              rowIndex: rC,
+            ),
+            sortedRawHistory[i].logs[j].logType,
+            cellStyle: cellStyleData,
+          );
+        }
+      }
+      excel.save(fileName: 'DTR-raw.xlsx');
+    } catch (e) {
+      debugPrint('$e exportRawLogsExcel');
     }
   }
 }

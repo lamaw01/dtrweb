@@ -18,7 +18,6 @@ class HistoryProvider with ChangeNotifier {
   DateTime selectedFrom = DateTime.now();
   DateTime selectedTo = DateTime.now();
   final _dateFormat1 = DateFormat('yyyy-MM-dd HH:mm');
-  // DateFormat get dateFormat1 => _dateFormat1;
   final _is24HourFormat = ValueNotifier(false);
   ValueNotifier<bool> get is24HourFormat => _is24HourFormat;
 
@@ -77,7 +76,6 @@ class HistoryProvider with ChangeNotifier {
       setData(result);
     } catch (e) {
       debugPrint('$e getRecords');
-      // errorString.value = e.toString();
     }
   }
 
@@ -94,7 +92,6 @@ class HistoryProvider with ChangeNotifier {
       setData(result);
     } catch (e) {
       debugPrint('$e getRecordsAll');
-      // errorString.value = e.toString();
     }
   }
 }

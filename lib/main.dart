@@ -6,7 +6,6 @@ import 'package:url_strategy/url_strategy.dart';
 import 'data/department_provider.dart';
 import 'data/excel_provider.dart';
 import 'data/history_provider.dart';
-import 'data/home_data.dart';
 import 'data/schedule_provider.dart';
 import 'data/version_provider.dart';
 import 'view/home_view.dart';
@@ -17,9 +16,6 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<HomeData>(
-          create: (_) => HomeData(),
-        ),
         ChangeNotifierProvider<DepartmentProvider>(
           create: (_) => DepartmentProvider(),
         ),
