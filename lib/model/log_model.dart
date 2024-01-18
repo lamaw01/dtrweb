@@ -2,12 +2,14 @@ class Log {
   DateTime timeStamp;
   String logType;
   String id;
+  String imagePath;
   String isSelfie;
 
   Log({
     required this.timeStamp,
     required this.logType,
     required this.id,
+    this.imagePath = '',
     required this.isSelfie,
   });
 
@@ -15,6 +17,7 @@ class Log {
         timeStamp: DateTime.parse(json["time_stamp"]),
         logType: json["log_type"].toString(),
         id: json["id"].toString(),
+        imagePath: json["image_path"].toString(),
         isSelfie: json["is_selfie"].toString(),
       );
 
@@ -22,6 +25,7 @@ class Log {
         "time_stamp": timeStamp.toIso8601String(),
         "log_type": logType,
         "id": id,
+        "image_path": imagePath,
         "is_selfie": isSelfie,
       };
 }

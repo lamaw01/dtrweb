@@ -9,6 +9,8 @@ class HttpService {
   static const String _serverUrl = 'http://103.62.153.74:53000/dtr_history_api';
   static String get serverUrl => _serverUrl;
 
+  //http://103.62.153.74:53000/field_api/images/02222/20240116091536.jpg
+
   static Future<List<HistoryModel>> getRecords({
     required String employeeId,
     required String dateFrom,

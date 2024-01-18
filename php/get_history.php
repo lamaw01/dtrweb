@@ -61,7 +61,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('employee_id', $inpu
             $time_tail = $result['time_stamp'];
             // get logs
             $get_logs_within= $conn->prepare("SELECT case is_selfie when 0 then time_stamp when 1 then selfie_timestamp end time_stamp,
-            log_type, id, is_selfie FROM tbl_logs
+            log_type, id, image_path, is_selfie FROM tbl_logs
             WHERE employee_id = :id AND (case is_selfie when 0 then time_stamp when 1 then selfie_timestamp end) BETWEEN '$time_head 00:00:00' AND '$time_tail 23:59:59' LIMIT 6;");
             $get_logs_within->bindParam(':id', $id, PDO::PARAM_STR);
             $get_logs_within->execute();

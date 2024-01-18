@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../data/excel_provider.dart';
 import '../model/log_model.dart';
-import '../services/http_service.dart';
 
 class LogsWidget extends StatefulWidget {
   const LogsWidget({super.key, required this.logs});
@@ -20,6 +19,8 @@ class _LogsWidgetState extends State<LogsWidget> {
     decoration: TextDecoration.underline,
   );
 
+  static const String imageFolder = 'http://103.62.153.74:53000/field_api/';
+
   @override
   Widget build(BuildContext context) {
     var excel = Provider.of<ExcelProvider>(context, listen: false);
@@ -32,8 +33,7 @@ class _LogsWidgetState extends State<LogsWidget> {
               hoverColor: Colors.transparent,
               onTap: () {
                 launchUrl(
-                  Uri.parse(
-                      '${HttpService.serverUrl}/show_image.php?id=${widget.logs[j].id}'),
+                  Uri.parse('$imageFolder${widget.logs[j].imagePath}'),
                 );
               },
               child: Column(
