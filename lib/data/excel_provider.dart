@@ -21,27 +21,27 @@ class ExcelProvider with ChangeNotifier {
   DateFormat get dateFormat1 => _dateFormat1;
   final _dateYmd = DateFormat('yyyy-MM-dd');
 
-  String selectDay({required String day, required HistoryModel model}) {
-    switch (day) {
-      case 'monday':
-        return model.monday;
-      case 'tuesday':
-        return model.tuesday;
-      case 'wednesday':
-        return model.wednesday;
-      case 'thursday':
-        return model.thursday;
-      case 'friday':
-        return model.friday;
-      case 'saturday':
-        return model.saturday;
-      default:
-        return model.sunday;
-    }
-  }
+  // String selectDay({required String day, required HistoryModel model}) {
+  //   switch (day) {
+  //     case 'monday':
+  //       return model.monday;
+  //     case 'tuesday':
+  //       return model.tuesday;
+  //     case 'wednesday':
+  //       return model.wednesday;
+  //     case 'thursday':
+  //       return model.thursday;
+  //     case 'friday':
+  //       return model.friday;
+  //     case 'saturday':
+  //       return model.saturday;
+  //     default:
+  //       return model.sunday;
+  //   }
+  // }
 
-  bool isEvening(CleanDataModel c) {
-    if (c.currentSched.schedId.substring(0, 1).toUpperCase() == 'E') {
+  bool isMorning(CleanDataModel c) {
+    if (c.currentSched.schedId.substring(0, 1).toUpperCase() != 'E') {
       return true;
     }
     return false;
@@ -78,10 +78,13 @@ class ExcelProvider with ChangeNotifier {
     _cleanData.clear();
 
     for (int i = 0; i < historyList.length; i++) {
-      var dayOfWeek =
-          DateFormat('EEEE').format(historyList[i].date).toLowerCase();
-      var todaySched = scheduleList.singleWhere((element) =>
-          element.schedId == selectDay(day: dayOfWeek, model: historyList[i]));
+      // var dayOfWeek =
+      //     DateFormat('EEEE').format(historyList[i].date).toLowerCase();
+      // var todaySched = scheduleList.singleWhere((element) =>
+      //     element.schedId == selectDay(day: dayOfWeek, model: historyList[i]));
+
+      var todaySched = scheduleList.singleWhere(
+          (element) => element.schedId == historyList[i].currentSchedId);
 
       _cleanData.add(
         CleanDataModel(
@@ -103,7 +106,9 @@ class ExcelProvider with ChangeNotifier {
   void cleanseData() {
     try {
       for (int i = 0; i < _cleanData.length; i++) {
-        if (isEvening(_cleanData[i])) {
+        if (isMorning(_cleanData[i])) {
+          arrangeDataMorning(i);
+        } else {
           arrangeDataEvening(i);
         }
       }
@@ -159,6 +164,28 @@ class ExcelProvider with ChangeNotifier {
       }
       _cleanData[i].logs = logs;
     }
+
+    // for (int i = 0; i < _cleanData.length; i++) {
+    //   for (int j = 0; j < _cleanData[i].logs.length; j++) {
+    //     log("${_cleanData[i].logs[j].logType} ${_cleanData[i].logs[j].timeStamp}");
+    //   }
+    //   log('--------');
+    // }
+  }
+
+  void arrangeDataMorning(int i) {
+    var logs = <Log>[];
+    try {
+      if (_cleanData[i].logs.first.logType == 'OUT' &&
+          _cleanData[i].logs.length > 1) {
+        logs.addAll(_cleanData[i].logs.skip(1));
+      } else {
+        logs.addAll(_cleanData[i].logs);
+      }
+    } catch (e) {
+      debugPrint('$e arrangeDataMorning');
+    }
+    _cleanData[i].logs = logs;
 
     // for (int i = 0; i < _cleanData.length; i++) {
     //   for (int j = 0; j < _cleanData[i].logs.length; j++) {

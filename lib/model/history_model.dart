@@ -20,13 +20,14 @@ class HistoryModel {
   DateTime date;
   List<Log> logs;
   String weekSchedId;
-  String monday;
-  String tuesday;
-  String wednesday;
-  String thursday;
-  String friday;
-  String saturday;
-  String sunday;
+  String currentSchedId;
+  // String monday;
+  // String tuesday;
+  // String wednesday;
+  // String thursday;
+  // String friday;
+  // String saturday;
+  // String sunday;
 
   HistoryModel({
     required this.employeeId,
@@ -36,13 +37,14 @@ class HistoryModel {
     required this.date,
     required this.logs,
     required this.weekSchedId,
-    required this.monday,
-    required this.tuesday,
-    required this.wednesday,
-    required this.thursday,
-    required this.friday,
-    required this.saturday,
-    required this.sunday,
+    required this.currentSchedId,
+    // required this.monday,
+    // required this.tuesday,
+    // required this.wednesday,
+    // required this.thursday,
+    // required this.friday,
+    // required this.saturday,
+    // required this.sunday,
   });
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) => HistoryModel(
@@ -53,13 +55,14 @@ class HistoryModel {
         date: DateTime.parse(json["date"]),
         logs: List<Log>.from(json["logs"].map((x) => Log.fromJson(x))),
         weekSchedId: json["week_sched_id"],
-        monday: json["monday"],
-        tuesday: json["tuesday"],
-        wednesday: json["wednesday"],
-        thursday: json["thursday"],
-        friday: json["friday"],
-        saturday: json["saturday"],
-        sunday: json["sunday"],
+        currentSchedId: json["current_sched_id"],
+        // monday: json["monday"],
+        // tuesday: json["tuesday"],
+        // wednesday: json["wednesday"],
+        // thursday: json["thursday"],
+        // friday: json["friday"],
+        // saturday: json["saturday"],
+        // sunday: json["sunday"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -71,12 +74,13 @@ class HistoryModel {
             "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         "logs": List<dynamic>.from(logs.map((x) => x.toJson())),
         "week_sched_id": weekSchedId,
-        "monday": monday,
-        "tuesday": tuesday,
-        "wednesday": wednesday,
-        "thursday": thursday,
-        "friday": friday,
-        "saturday": saturday,
-        "sunday": sunday,
+        "current_sched_id": currentSchedId,
+        // "monday": monday,
+        // "tuesday": tuesday,
+        // "wednesday": wednesday,
+        // "thursday": thursday,
+        // "friday": friday,
+        // "saturday": saturday,
+        // "sunday": sunday,
       };
 }

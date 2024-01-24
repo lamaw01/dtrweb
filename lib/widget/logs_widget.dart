@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,6 +23,8 @@ class _LogsWidgetState extends State<LogsWidget> {
 
   static const String imageFolder = 'http://103.62.153.74:53000/field_api/';
 
+  static const String googleMapsUrl = 'https://maps.google.com/maps?q=loc:';
+
   @override
   Widget build(BuildContext context) {
     var excel = Provider.of<ExcelProvider>(context, listen: false);
@@ -29,29 +33,47 @@ class _LogsWidgetState extends State<LogsWidget> {
       children: [
         for (int j = 0; j < widget.logs.length; j++) ...[
           if (widget.logs[j].isSelfie == '1') ...[
-            InkWell(
-              hoverColor: Colors.transparent,
-              onTap: () {
-                launchUrl(
-                  Uri.parse('$imageFolder${widget.logs[j].imagePath}'),
-                );
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.logs[j].logType,
-                    style: textStyleImage,
-                  ),
-                  const SizedBox(height: 5.0),
-                  Text(
-                    excel.dateFormat12or24Web(widget.logs[j].timeStamp),
-                    style: textStyleImage,
-                  ),
-                ],
-              ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.logs[j].logType,
+                  style: textStyleImage,
+                ),
+                const SizedBox(height: 5.0),
+                Text(
+                  excel.dateFormat12or24Web(widget.logs[j].timeStamp),
+                  style: textStyleImage,
+                ),
+              ],
             ),
-            const SizedBox(width: 30.0),
+            PopupMenuButton<String>(
+              onSelected: (String value) {
+                String latlng = widget.logs[j].latlng.replaceAll(' ', ',');
+                log('kani $latlng');
+
+                if (value == 'Show Image') {
+                  launchUrl(
+                    Uri.parse('$imageFolder${widget.logs[j].imagePath}'),
+                  );
+                } else {
+                  launchUrl(
+                    Uri.parse('$googleMapsUrl$latlng'),
+                  );
+                }
+              },
+              tooltip: 'Menu',
+              splashRadius: 15.0,
+              padding: const EdgeInsets.all(0.0),
+              itemBuilder: (BuildContext context) {
+                return {'Show Image', 'Show Map'}.map((String choice) {
+                  return PopupMenuItem<String>(
+                    value: choice,
+                    child: Text(choice),
+                  );
+                }).toList();
+              },
+            ),
           ] else ...[
             Column(
               mainAxisSize: MainAxisSize.min,

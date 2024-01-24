@@ -241,6 +241,7 @@ class _ExcelViewState extends State<ExcelView> {
           logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
           id: '0',
           isSelfie: '0',
+          latlng: c.logs.last.latlng,
         ));
       }
       // ignore: prefer_is_empty
@@ -320,6 +321,7 @@ class _ExcelViewState extends State<ExcelView> {
             logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
             id: '0',
             isSelfie: '0',
+            latlng: c.logs.last.latlng,
           ));
           c.out1.timestamp = excel.formatPrettyDate(tempDate);
         }
@@ -329,6 +331,7 @@ class _ExcelViewState extends State<ExcelView> {
             logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
             id: '0',
             isSelfie: '0',
+            latlng: c.logs.last.latlng,
           ));
           c.in2.timestamp = excel.formatPrettyDate(dateResult);
         }
@@ -339,6 +342,7 @@ class _ExcelViewState extends State<ExcelView> {
             logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
             id: '0',
             isSelfie: '0',
+            latlng: c.logs.last.latlng,
           ));
           c.out1.timestamp = excel.formatPrettyDate(tempDate);
         }
@@ -348,6 +352,7 @@ class _ExcelViewState extends State<ExcelView> {
             logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
             id: '0',
             isSelfie: '0',
+            latlng: c.logs.last.latlng,
           ));
           c.in2.timestamp = excel.formatPrettyDate(tempDate);
         }
@@ -357,6 +362,7 @@ class _ExcelViewState extends State<ExcelView> {
             logType: c.logs.last.logType == 'OUT' ? 'IN' : 'OUT',
             id: '0',
             isSelfie: '0',
+            latlng: c.logs.last.latlng,
           ));
           c.out2.timestamp = excel.formatPrettyDate(dateResult);
         }

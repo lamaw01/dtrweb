@@ -19,7 +19,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     $department = $input['department'];
 
     $sql_get_history_all = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name,
-    tbl_employee.week_sched_id, tbl_week_schedule.monday, tbl_week_schedule.tuesday, tbl_week_schedule.wednesday, tbl_week_schedule.thursday, tbl_week_schedule.friday, tbl_week_schedule.saturday, tbl_week_schedule.sunday,
+    tbl_employee.week_sched_id, tbl_logs.current_sched_id,
     DATE_FORMAT((case is_selfie when 0 then time_stamp when 1 then selfie_timestamp end), '%Y-%m-%d') time_stamp FROM tbl_logs 
     LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     LEFT JOIN tbl_week_schedule ON tbl_employee.week_sched_id = tbl_week_schedule.week_sched_id 
@@ -29,7 +29,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     //AND tbl_employee.last_name IS NOT NULL
 
     $sql_get_history_all_with_department = "SELECT tbl_logs.id, tbl_logs.employee_id, tbl_employee.first_name, tbl_employee.last_name, tbl_employee.middle_name, 
-    tbl_employee.week_sched_id, tbl_week_schedule.monday, tbl_week_schedule.tuesday, tbl_week_schedule.wednesday, tbl_week_schedule.thursday, tbl_week_schedule.friday, tbl_week_schedule.saturday, tbl_week_schedule.sunday,
+    tbl_employee.week_sched_id, tbl_logs.current_sched_id,
     DATE_FORMAT((case is_selfie when 0 then time_stamp when 1 then selfie_timestamp end), '%Y-%m-%d') time_stamp FROM tbl_logs 
     LEFT JOIN tbl_employee ON tbl_logs.employee_id = tbl_employee.employee_id 
     LEFT JOIN tbl_employee_department ON tbl_employee.employee_id = tbl_employee_department.employee_id 
@@ -64,7 +64,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $get_logs_within->bindParam(':id', $id, PDO::PARAM_STR);
             $get_logs_within->execute();
             $result_get_logs_within = $get_logs_within->fetchAll(PDO::FETCH_ASSOC);
-            $my_array = array('employee_id'=>$result['employee_id'],'first_name'=>$result['first_name'] ?? 'NA','last_name'=>$result['last_name'] ?? 'NA','middle_name'=>$result['middle_name'] ?? 'NA','date'=>$result['time_stamp'],'logs'=>$result_get_logs_within,'week_sched_id'=>$result['week_sched_id'] ?? 'NA','monday'=>$result['monday'] ?? 'NA','tuesday'=>$result['tuesday'] ?? 'NA','wednesday'=>$result['wednesday'] ?? 'NA','thursday'=>$result['thursday'] ?? 'NA','friday'=>$result['friday']?? 'NA','saturday'=>$result['saturday'] ?? 'NA','sunday'=>$result['sunday'] ?? 'NA');
+            $my_array = array('employee_id'=>$result['employee_id'],'first_name'=>$result['first_name'] ?? 'NA','last_name'=>$result['last_name'] ?? 'NA','middle_name'=>$result['middle_name'] ?? 'NA','date'=>$result['time_stamp'],'logs'=>$result_get_logs_within,'week_sched_id'=>$result['week_sched_id'],'current_sched_id'=>$result['current_sched_id']);
             array_push($result_array,$my_array);
         }
         echo json_encode($result_array);

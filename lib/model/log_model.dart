@@ -4,6 +4,7 @@ class Log {
   String id;
   String imagePath;
   String isSelfie;
+  String latlng;
 
   Log({
     required this.timeStamp,
@@ -11,6 +12,7 @@ class Log {
     required this.id,
     this.imagePath = '',
     required this.isSelfie,
+    required this.latlng,
   });
 
   factory Log.fromJson(Map<String, dynamic> json) => Log(
@@ -19,6 +21,7 @@ class Log {
         id: json["id"].toString(),
         imagePath: json["image_path"].toString(),
         isSelfie: json["is_selfie"].toString(),
+        latlng: json["latlng"].toString(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -27,6 +30,7 @@ class Log {
         "id": id,
         "image_path": imagePath,
         "is_selfie": isSelfie,
+        "latlng": latlng,
       };
 }
 
