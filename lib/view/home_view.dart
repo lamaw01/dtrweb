@@ -390,36 +390,76 @@ class _HomeViewState extends State<HomeView> {
                               ),
                               if (history.historyList.isNotEmpty) ...[
                                 const SizedBox(height: 5.0),
-                                InkWell(
-                                  onTap: () {
-                                    // history.exportRawLogsExcel();
-                                  },
-                                  child: Ink(
-                                    height: 30.0,
-                                    width: 160.0,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5.0),
-                                      color: Colors.orange[300],
-                                    ),
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.download,
-                                          color: Colors.white,
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        history.exportRawLogsExcel();
+                                      },
+                                      child: Ink(
+                                        height: 30.0,
+                                        width: 160.0,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5.0),
+                                          color: Colors.orange[300],
                                         ),
-                                        Text(
-                                          'Export Raw Log excel',
-                                          style: TextStyle(
-                                            fontSize: 12.0,
-                                            color: Colors.white,
-                                          ),
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.download,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              'Export Raw Log excel',
+                                              style: TextStyle(
+                                                fontSize: 12.0,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 15.0),
+                                    InkWell(
+                                      onTap: () {
+                                        history.saveTextFile();
+                                        // history.testTime();
+                                      },
+                                      child: Ink(
+                                        height: 30.0,
+                                        width: 160.0,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5.0),
+                                          color: Colors.orange[300],
+                                        ),
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.download,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              'Export EXF File',
+                                              style: TextStyle(
+                                                fontSize: 12.0,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                               const SizedBox(height: 10.0),

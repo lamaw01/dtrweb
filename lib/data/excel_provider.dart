@@ -19,7 +19,6 @@ class ExcelProvider with ChangeNotifier {
   final _is24HourFormat = ValueNotifier(false);
   final _dateFormat1 = DateFormat('yyyy-MM-dd HH:mm');
   DateFormat get dateFormat1 => _dateFormat1;
-  final _dateYmd = DateFormat('yyyy-MM-dd');
 
   // String selectDay({required String day, required HistoryModel model}) {
   //   switch (day) {
@@ -83,20 +82,28 @@ class ExcelProvider with ChangeNotifier {
       // var todaySched = scheduleList.singleWhere((element) =>
       //     element.schedId == selectDay(day: dayOfWeek, model: historyList[i]));
 
-      var todaySched = scheduleList.singleWhere(
-          (element) => element.schedId == historyList[i].currentSchedId);
+      late ScheduleModel todaySched;
 
-      _cleanData.add(
-        CleanDataModel(
-          employeeId: historyList[i].employeeId,
-          firstName: historyList[i].firstName,
-          lastName: historyList[i].lastName,
-          middleName: historyList[i].middleName,
-          currentSched: todaySched,
-          date: historyList[i].date,
-          logs: historyList[i].logs,
-        ),
-      );
+      try {
+        todaySched = scheduleList.singleWhere(
+            (element) => element.schedId == historyList[i].currentSchedId);
+      } catch (e) {
+        debugPrint('$e');
+        todaySched =
+            scheduleList.singleWhere((element) => element.schedId == 'M-B-85');
+      } finally {
+        _cleanData.add(
+          CleanDataModel(
+            employeeId: historyList[i].employeeId,
+            firstName: historyList[i].firstName,
+            lastName: historyList[i].lastName,
+            middleName: historyList[i].middleName,
+            currentSched: todaySched,
+            date: historyList[i].date,
+            logs: historyList[i].logs,
+          ),
+        );
+      }
     }
 
     cleanseData();
@@ -742,120 +749,6 @@ class ExcelProvider with ChangeNotifier {
       excel.save(fileName: 'DTR-excel.xlsx');
     } catch (e) {
       debugPrint('exportExcel $e');
-    }
-  }
-
-  void exportRawLogsExcel() {
-    try {
-      var excel = Excel.createExcel();
-      Sheet sheetObject = excel['Sheet1'];
-      var cellStyle = CellStyle(
-        backgroundColorHex: '#dddddd',
-        fontFamily: getFontFamily(FontFamily.Calibri),
-        horizontalAlign: HorizontalAlign.Center,
-        fontSize: 9,
-      );
-      var column1 = sheetObject.cell(CellIndex.indexByString('A1'));
-      column1
-        ..value = 'Emp ID'
-        ..cellStyle = cellStyle;
-
-      var column2 = sheetObject.cell(CellIndex.indexByString('B1'));
-      column2
-        ..value = 'Name'
-        ..cellStyle = cellStyle;
-
-      var column3 = sheetObject.cell(CellIndex.indexByString('C1'));
-      column3
-        ..value = 'Date'
-        ..cellStyle = cellStyle;
-
-      var column4 = sheetObject.cell(CellIndex.indexByString('D1'));
-      column4
-        ..value = 'Time'
-        ..cellStyle = cellStyle;
-
-      var column5 = sheetObject.cell(CellIndex.indexByString('E1'));
-      column5
-        ..value = 'Log type'
-        ..cellStyle = cellStyle;
-
-      var cellStyleData = CellStyle(
-        fontFamily: getFontFamily(FontFamily.Calibri),
-        horizontalAlign: HorizontalAlign.Center,
-        fontSize: 9,
-      );
-      var rC = 0;
-
-      var sortedRawHistory = <HistoryModel>[];
-      // sortedRawHistory.addAll(_historyList);
-      sortedRawHistory.sort((a, b) {
-        var valueA = '${a.lastName.toLowerCase()} ${a.date}';
-        var valueB = '${b.lastName.toLowerCase()} ${b.date}';
-        return valueA.compareTo(valueB);
-      });
-
-      for (int i = 0; i < sortedRawHistory.length; i++) {
-        for (int j = 0; j < sortedRawHistory[i].logs.length; j++) {
-          rC = rC + 1;
-          List<dynamic> dataList = [
-            sortedRawHistory[i].employeeId,
-            fullNameHistory(sortedRawHistory[i]),
-            _dateYmd.format(sortedRawHistory[i].date),
-            dateFormat12or24Web(sortedRawHistory[i].logs[j].timeStamp),
-            sortedRawHistory[i].logs[j].logType,
-          ];
-          sheetObject.appendRow(dataList);
-          sheetObject.setColWidth(0, 7.0);
-          sheetObject.setColWidth(1, 22.0);
-          sheetObject.setColWidth(2, 10.0);
-          sheetObject.setColWidth(3, 10.1);
-          sheetObject.setColWidth(4, 8.1);
-          sheetObject.updateCell(
-            CellIndex.indexByColumnRow(
-              columnIndex: 0,
-              rowIndex: rC,
-            ),
-            sortedRawHistory[i].employeeId,
-            cellStyle: cellStyleData,
-          );
-          sheetObject.updateCell(
-            CellIndex.indexByColumnRow(
-              columnIndex: 1,
-              rowIndex: rC,
-            ),
-            fullNameHistory(sortedRawHistory[i]),
-            cellStyle: cellStyleData,
-          );
-          sheetObject.updateCell(
-            CellIndex.indexByColumnRow(
-              columnIndex: 2,
-              rowIndex: rC,
-            ),
-            _dateYmd.format(sortedRawHistory[i].date),
-            cellStyle: cellStyleData,
-          );
-          sheetObject.updateCell(
-            CellIndex.indexByColumnRow(
-              columnIndex: 3,
-              rowIndex: rC,
-            ),
-            dateFormat12or24Web(sortedRawHistory[i].logs[j].timeStamp),
-            cellStyle: cellStyleData,
-          );
-          sheetObject.updateCell(
-            CellIndex.indexByColumnRow(
-              columnIndex: 4,
-              rowIndex: rC,
-            ),
-            sortedRawHistory[i].logs[j].logType,
-            cellStyle: cellStyleData,
-          );
-        }
-      }
-      excel.save(fileName: 'DTR-raw.xlsx');
-    } catch (e) {
-      debugPrint('$e exportRawLogsExcel');
     }
   }
 }

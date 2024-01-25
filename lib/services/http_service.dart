@@ -1,3 +1,4 @@
+// ignore: unused_import
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -35,7 +36,7 @@ class HttpService {
           ),
         )
         .timeout(const Duration(seconds: 10));
-    debugPrint('getRecords ${response.body}');
+    // debugPrint('getRecords ${response.body}');
     return historyModelFromJson(response.body);
   }
 
@@ -60,7 +61,7 @@ class HttpService {
           ),
         )
         .timeout(const Duration(seconds: 10));
-    debugPrint('getRecordsAll ${response.body}');
+    // debugPrint('getRecordsAll ${response.body}');
     return historyModelFromJson(response.body);
   }
 
@@ -72,7 +73,7 @@ class HttpService {
         'Content-Type': 'application/json; charset=UTF-8',
       },
     ).timeout(const Duration(seconds: 10));
-    debugPrint('getDepartment ${response.body}');
+    // debugPrint('getDepartment ${response.body}');
     return departmentModelFromJson(response.body);
   }
 
@@ -84,7 +85,7 @@ class HttpService {
         'Content-Type': 'application/json; charset=UTF-8',
       },
     ).timeout(const Duration(seconds: 10));
-    debugPrint('geSchedule ${response.body}');
+    // debugPrint('geSchedule ${response.body}');
     return scheduleModelFromJson(response.body);
   }
 }

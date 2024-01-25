@@ -55,7 +55,7 @@ class HistoryModel {
         date: DateTime.parse(json["date"]),
         logs: List<Log>.from(json["logs"].map((x) => Log.fromJson(x))),
         weekSchedId: json["week_sched_id"],
-        currentSchedId: json["current_sched_id"],
+        currentSchedId: json["current_sched_id"] ?? 'M-B-85',
         // monday: json["monday"],
         // tuesday: json["tuesday"],
         // wednesday: json["wednesday"],
