@@ -12,8 +12,8 @@ import '../model/log_model.dart';
 import '../model/schedule_model.dart';
 
 class ExcelProvider with ChangeNotifier {
-  final _cleanData = <CleanDataModel>[];
-  List<CleanDataModel> get cleanData => _cleanData;
+  // final _cleanData = <CleanDataModel>[];
+  // List<CleanDataModel> get cleanData => _cleanData;
 
   final _cleanExcelData = <CleanExcelDataModel>[];
   List<CleanExcelDataModel> get cleanExcelData => _cleanExcelData;
@@ -93,7 +93,7 @@ class ExcelProvider with ChangeNotifier {
         counterOfUniqueId++;
         initialIndex = historyList[i];
         listOfUniqueId.add(historyList[i].employeeId);
-        log('sublist length ${historyList.sublist(indexOfLastCut, i).length}');
+        // log('sublist length ${historyList.sublist(indexOfLastCut, i).length}');
         listOfListHistory.add(historyList.sublist(indexOfLastCut, i));
         indexOfLastCut = i;
       }
@@ -117,7 +117,7 @@ class ExcelProvider with ChangeNotifier {
     required List<ScheduleModel> scheduleList,
     required List<HistoryModel> historyList,
   }) {
-    _cleanData.clear();
+    // _cleanData.clear();
 
     final disectedHistory = disectHistory(historyList);
 
@@ -146,7 +146,11 @@ class ExcelProvider with ChangeNotifier {
     //   }
     // }
 
+    var listOfListCleanData = <List<CleanDataModel>>[];
+
     for (int i = 0; i < disectedHistory.length; i++) {
+      var listCleanData = <CleanDataModel>[];
+
       for (int j = 0; j < disectedHistory[i].length; j++) {
         late ScheduleModel todaySched;
         try {
@@ -157,85 +161,125 @@ class ExcelProvider with ChangeNotifier {
           todaySched = scheduleList.singleWhere(
               (element) => element.schedId == 'M-B-85'); //E-B-96 M-B-85
         } finally {
-          _cleanData.add(
-            CleanDataModel(
-              employeeId: disectedHistory[i][j].employeeId,
-              firstName: disectedHistory[i][j].firstName,
-              lastName: disectedHistory[i][j].lastName,
-              middleName: disectedHistory[i][j].middleName,
-              currentSched: todaySched,
-              date: disectedHistory[i][j].date,
-              logs: disectedHistory[i][j].logs,
-            ),
-          );
+          listCleanData.add(CleanDataModel(
+            employeeId: disectedHistory[i][j].employeeId,
+            firstName: disectedHistory[i][j].firstName,
+            lastName: disectedHistory[i][j].lastName,
+            middleName: disectedHistory[i][j].middleName,
+            currentSched: todaySched,
+            date: disectedHistory[i][j].date,
+            logs: disectedHistory[i][j].logs,
+          ));
+          // _cleanData.add(CleanDataModel(
+          //   employeeId: disectedHistory[i][j].employeeId,
+          //   firstName: disectedHistory[i][j].firstName,
+          //   lastName: disectedHistory[i][j].lastName,
+          //   middleName: disectedHistory[i][j].middleName,
+          //   currentSched: todaySched,
+          //   date: disectedHistory[i][j].date,
+          //   logs: disectedHistory[i][j].logs,
+          // ));
         }
       }
+      listOfListCleanData.add(listCleanData);
+      log('sortData ${listOfListCleanData[i].length}');
     }
 
-    cleanseData();
+    // cleanseData();
+    cleanseData2(listOfListCleanData);
   }
 
-  //clean data
-  void cleanseData() {
+  void cleanseData2(List<List<CleanDataModel>> listOfListCleanData) {
     try {
-      for (int i = 0; i < _cleanData.length; i++) {
-        if (isMorning(_cleanData[i])) {
-          arrangeDataMorning(i);
-        } else {
-          arrangeDataEvening(i);
+      int counter = 0;
+      for (int i = 0; i < listOfListCleanData.length; i++) {
+        for (int j = 0; j < listOfListCleanData[i].length; j++) {
+          counter++;
+          List<Log> cleanLog = [];
+          if (isMorning(listOfListCleanData[i][j])) {
+            cleanLog = arrangeDataMorning2(listOfListCleanData[i][j]);
+          } else {
+            cleanLog = arrangeDataEvening2(listOfListCleanData[i], i);
+          }
+          listOfListCleanData[i][j].logs = cleanLog;
+          listOfListCleanData[i][j] = calcLogs2(listOfListCleanData[i][j]);
         }
+        listOfListCleanData[i].removeWhere((e) => e.logs.isEmpty);
       }
-      _cleanData.removeWhere((e) => e.logs.isEmpty);
-      calcLogs();
-      finalizeData();
+      // _cleanData.removeWhere((e) => e.logs.isEmpty);
+      // calcLogs();
+      // finalizeData();
+      log('cleanseData2 $counter');
+      finalizeData2(listOfListCleanData);
     } catch (e) {
-      debugPrint('$e cleanseData');
+      debugPrint('$e cleanseData2');
     }
   }
 
-  void arrangeDataEvening(int i) {
+  // //clean data
+  // void cleanseData() {
+  //   try {
+  //     for (int i = 0; i < _cleanData.length; i++) {
+  //       if (isMorning(_cleanData[i])) {
+  //         arrangeDataMorning(i);
+  //       } else {
+  //         arrangeDataEvening(i);
+  //       }
+  //     }
+  //     _cleanData.removeWhere((e) => e.logs.isEmpty);
+  //     calcLogs();
+  //     finalizeData();
+  //   } catch (e) {
+  //     debugPrint('$e cleanseData');
+  //   }
+  // }
+
+  List<Log> arrangeDataEvening2(List<CleanDataModel> model, i) {
     if (i == 0) {
       var logs = <Log>[];
       try {
-        if (_cleanData[i].logs.last.logType == 'IN') {
-          logs.add(_cleanData[i].logs.last);
-          if (_cleanData[i + 1].logs.length >= 4) {
-            final removedLastLogIndex = _cleanData[i + 1].logs.reversed.skip(1);
+        if (model[i].logs.last.logType == 'IN') {
+          logs.add(model[i].logs.last);
+          if (model[i + 1].logs.length >= 4) {
+            final removedLastLogIndex = model[i + 1].logs.reversed.skip(1);
             var logsTemp = <Log>[];
             logsTemp.addAll(removedLastLogIndex);
             logs.addAll(logsTemp.reversed);
           } else {
-            logs.addAll(_cleanData[i + 1].logs);
+            logs.addAll(model[i + 1].logs);
           }
         }
       } catch (e) {
         debugPrint('$e if');
       }
-      _cleanData[i].logs = logs;
-    } else if (i == _cleanData.length - 1) {
+      // model[i].logs = logs;
+      return logs;
+    } else if (i == model.length - 1) {
       try {
-        _cleanData.removeLast();
+        // model.removeLast();
       } catch (e) {
         debugPrint('$e else if');
       }
+      return model[i].logs;
     } else {
       var logs = <Log>[];
       try {
-        if (_cleanData[i].logs.last.logType == 'IN') {
-          logs.add(_cleanData[i].logs.last);
-          if (_cleanData[i + 1].logs.length >= 4) {
-            final removedLastLogIndex = _cleanData[i + 1].logs.reversed.skip(1);
+        if (model[i].logs.last.logType == 'IN') {
+          logs.add(model[i].logs.last);
+          if (model[i + 1].logs.length >= 4) {
+            final removedLastLogIndex = model[i + 1].logs.reversed.skip(1);
             var logsTemp = <Log>[];
             logsTemp.addAll(removedLastLogIndex);
             logs.addAll(logsTemp.reversed);
           } else {
-            logs.addAll(_cleanData[i + 1].logs);
+            logs.addAll(model[i + 1].logs);
           }
         }
       } catch (e) {
         debugPrint('$e else');
       }
-      _cleanData[i].logs = logs;
+      // _cleanData[i].logs = logs;
+      return logs;
     }
 
     // for (int i = 0; i < _cleanData.length; i++) {
@@ -246,27 +290,94 @@ class ExcelProvider with ChangeNotifier {
     // }
   }
 
-  void arrangeDataMorning(int i) {
+  // void arrangeDataEvening(int i) {
+  //   if (i == 0) {
+  //     var logs = <Log>[];
+  //     try {
+  //       if (_cleanData[i].logs.last.logType == 'IN') {
+  //         logs.add(_cleanData[i].logs.last);
+  //         if (_cleanData[i + 1].logs.length >= 4) {
+  //           final removedLastLogIndex = _cleanData[i + 1].logs.reversed.skip(1);
+  //           var logsTemp = <Log>[];
+  //           logsTemp.addAll(removedLastLogIndex);
+  //           logs.addAll(logsTemp.reversed);
+  //         } else {
+  //           logs.addAll(_cleanData[i + 1].logs);
+  //         }
+  //       }
+  //     } catch (e) {
+  //       debugPrint('$e if');
+  //     }
+  //     _cleanData[i].logs = logs;
+  //   } else if (i == _cleanData.length - 1) {
+  //     try {
+  //       _cleanData.removeLast();
+  //     } catch (e) {
+  //       debugPrint('$e else if');
+  //     }
+  //   } else {
+  //     var logs = <Log>[];
+  //     try {
+  //       if (_cleanData[i].logs.last.logType == 'IN') {
+  //         logs.add(_cleanData[i].logs.last);
+  //         if (_cleanData[i + 1].logs.length >= 4) {
+  //           final removedLastLogIndex = _cleanData[i + 1].logs.reversed.skip(1);
+  //           var logsTemp = <Log>[];
+  //           logsTemp.addAll(removedLastLogIndex);
+  //           logs.addAll(logsTemp.reversed);
+  //         } else {
+  //           logs.addAll(_cleanData[i + 1].logs);
+  //         }
+  //       }
+  //     } catch (e) {
+  //       debugPrint('$e else');
+  //     }
+  //     _cleanData[i].logs = logs;
+  //   }
+
+  //   // for (int i = 0; i < _cleanData.length; i++) {
+  //   //   for (int j = 0; j < _cleanData[i].logs.length; j++) {
+  //   //     log("${_cleanData[i].logs[j].logType} ${_cleanData[i].logs[j].timeStamp}");
+  //   //   }
+  //   //   log('--------');
+  //   // }
+  // }
+
+  List<Log> arrangeDataMorning2(CleanDataModel model) {
     var logs = <Log>[];
     try {
-      if (_cleanData[i].logs.first.logType == 'OUT' &&
-          _cleanData[i].logs.length > 1) {
-        logs.addAll(_cleanData[i].logs.skip(1));
+      if (model.logs.first.logType == 'OUT' && model.logs.length > 1) {
+        logs.addAll(model.logs.skip(1));
       } else {
-        logs.addAll(_cleanData[i].logs);
+        logs.addAll(model.logs);
       }
     } catch (e) {
       debugPrint('$e arrangeDataMorning');
     }
-    _cleanData[i].logs = logs;
-
-    // for (int i = 0; i < _cleanData.length; i++) {
-    //   for (int j = 0; j < _cleanData[i].logs.length; j++) {
-    //     log("${_cleanData[i].logs[j].logType} ${_cleanData[i].logs[j].timeStamp}");
-    //   }
-    //   log('--------');
-    // }
+    return logs;
   }
+
+  // void arrangeDataMorning(int i) {
+  //   var logs = <Log>[];
+  //   try {
+  //     if (_cleanData[i].logs.first.logType == 'OUT' &&
+  //         _cleanData[i].logs.length > 1) {
+  //       logs.addAll(_cleanData[i].logs.skip(1));
+  //     } else {
+  //       logs.addAll(_cleanData[i].logs);
+  //     }
+  //   } catch (e) {
+  //     debugPrint('$e arrangeDataMorning');
+  //   }
+  //   _cleanData[i].logs = logs;
+
+  //   // for (int i = 0; i < _cleanData.length; i++) {
+  //   //   for (int j = 0; j < _cleanData[i].logs.length; j++) {
+  //   //     log("${_cleanData[i].logs[j].logType} ${_cleanData[i].logs[j].timeStamp}");
+  //   //   }
+  //   //   log('--------');
+  //   // }
+  // }
 
   LateMinutesModel calcLate({
     required List<Log> logs,
@@ -454,57 +565,86 @@ class ExcelProvider with ChangeNotifier {
     return finalOtString;
   }
 
-  void calcLogs() {
+  CleanDataModel calcLogs2(CleanDataModel model) {
     try {
-      for (int i = 0; i < _cleanData.length; i++) {
-        var duration = calcDurationInOut(
-          logs: _cleanData[i].logs,
-          name: _cleanData[i].firstName,
-          sched: _cleanData[i].currentSched,
-        );
+      // for (int i = 0; i < model.length; i++) {
+      var duration = calcDurationInOut(
+        logs: model.logs,
+        name: model.firstName,
+        sched: model.currentSched,
+      );
 
-        var finalOtString = calcOvertimeHour(
-            duration.overtime, _cleanData[i].firstName,
-            dt: _cleanData[i].date);
-        _cleanData[i].duration = duration.hour.toString();
-        _cleanData[i].lateIn = duration.lateIn.toString();
-        _cleanData[i].lateBreak = duration.lateBreak.toString();
-        _cleanData[i].overtime = finalOtString;
-        // c[i].undertimeIn = duration.undertimeIn.toString();
-        // c[i].undertimeBreak = duration.undertimelateBreak.toString();
-      }
+      var finalOtString =
+          calcOvertimeHour(duration.overtime, model.firstName, dt: model.date);
+      model.duration = duration.hour.toString();
+      model.lateIn = duration.lateIn.toString();
+      model.lateBreak = duration.lateBreak.toString();
+      model.overtime = finalOtString;
+      // c[i].undertimeIn = duration.undertimeIn.toString();
+      // c[i].undertimeBreak = duration.undertimelateBreak.toString();
+      // }
     } catch (e) {
       debugPrint('$e calcLogs');
     }
+    return model;
   }
 
-  void finalizeData() {
-    _cleanExcelData.clear();
+  // void calcLogs() {
+  //   try {
+  //     for (int i = 0; i < _cleanData.length; i++) {
+  //       var duration = calcDurationInOut(
+  //         logs: _cleanData[i].logs,
+  //         name: _cleanData[i].firstName,
+  //         sched: _cleanData[i].currentSched,
+  //       );
+
+  //       var finalOtString = calcOvertimeHour(
+  //           duration.overtime, _cleanData[i].firstName,
+  //           dt: _cleanData[i].date);
+  //       _cleanData[i].duration = duration.hour.toString();
+  //       _cleanData[i].lateIn = duration.lateIn.toString();
+  //       _cleanData[i].lateBreak = duration.lateBreak.toString();
+  //       _cleanData[i].overtime = finalOtString;
+  //       // c[i].undertimeIn = duration.undertimeIn.toString();
+  //       // c[i].undertimeBreak = duration.undertimelateBreak.toString();
+  //     }
+  //   } catch (e) {
+  //     debugPrint('$e calcLogs');
+  //   }
+  // }
+
+  void finalizeData2(List<List<CleanDataModel>> listOfListCleanData) {
     var count = 0;
+    _cleanExcelData.clear();
+
     try {
-      for (int i = 0; i < _cleanData.length; i++) {
-        count = count + 1;
-        _cleanExcelData.add(
-          CleanExcelDataModel(
-            employeeId: _cleanData[i].employeeId,
-            name: fullName(_cleanData[i]),
-            currentSched: _cleanData[i].currentSched,
-            date: _cleanData[i].date,
-            logs: _cleanData[i].logs,
-            duration: _cleanData[i].duration!,
-            lateIn: _cleanData[i].lateIn!,
-            lateBreak: _cleanData[i].lateBreak!,
-            overtime: _cleanData[i].overtime!,
-            // undertimeIn: c[i].undertimeIn!,
-            // undertimeBreak: c[i].undertimeBreak!,
-            rowCount: '$count',
-            in1: TimeLog(),
-            out1: TimeLog(),
-            in2: TimeLog(),
-            out2: TimeLog(),
-          ),
-        );
+      for (int i = 0; i < listOfListCleanData.length; i++) {
+        for (int j = 0; j < listOfListCleanData[i].length; j++) {
+          count++;
+          log('kani $count');
+          _cleanExcelData.add(
+            CleanExcelDataModel(
+              employeeId: listOfListCleanData[i][j].employeeId,
+              name: fullName(listOfListCleanData[i][j]),
+              currentSched: listOfListCleanData[i][j].currentSched,
+              date: listOfListCleanData[i][j].date,
+              logs: listOfListCleanData[i][j].logs,
+              duration: listOfListCleanData[i][j].duration!,
+              lateIn: listOfListCleanData[i][j].lateIn!,
+              lateBreak: listOfListCleanData[i][j].lateBreak!,
+              overtime: listOfListCleanData[i][j].overtime!,
+              // undertimeIn: c[i].undertimeIn!,
+              // undertimeBreak: c[i].undertimeBreak!,
+              rowCount: '$count',
+              in1: TimeLog(),
+              out1: TimeLog(),
+              in2: TimeLog(),
+              out2: TimeLog(),
+            ),
+          );
+        }
       }
+
       for (var cxd in _cleanExcelData) {
         // ignore: prefer_is_empty
         if (cxd.logs.length >= 1) {
@@ -535,9 +675,70 @@ class ExcelProvider with ChangeNotifier {
         // if (cxd.undertimeBreak == '0') cxd.undertimeBreak = '';
       }
     } catch (e) {
-      debugPrint('$e finalizeData');
+      debugPrint('$e finalizeData2');
     }
   }
+
+  // void finalizeData() {
+  //   _cleanExcelData.clear();
+  //   var count = 0;
+  //   try {
+  //     for (int i = 0; i < _cleanData.length; i++) {
+  //       count = count + 1;
+  //       _cleanExcelData.add(
+  //         CleanExcelDataModel(
+  //           employeeId: _cleanData[i].employeeId,
+  //           name: fullName(_cleanData[i]),
+  //           currentSched: _cleanData[i].currentSched,
+  //           date: _cleanData[i].date,
+  //           logs: _cleanData[i].logs,
+  //           duration: _cleanData[i].duration!,
+  //           lateIn: _cleanData[i].lateIn!,
+  //           lateBreak: _cleanData[i].lateBreak!,
+  //           overtime: _cleanData[i].overtime!,
+  //           // undertimeIn: c[i].undertimeIn!,
+  //           // undertimeBreak: c[i].undertimeBreak!,
+  //           rowCount: '$count',
+  //           in1: TimeLog(),
+  //           out1: TimeLog(),
+  //           in2: TimeLog(),
+  //           out2: TimeLog(),
+  //         ),
+  //       );
+  //     }
+  //     for (var cxd in _cleanExcelData) {
+  //       // ignore: prefer_is_empty
+  //       if (cxd.logs.length >= 1) {
+  //         cxd.in1.timestamp = formatPrettyDate(cxd.logs[0].timeStamp);
+  //         cxd.in1.isSelfie = cxd.logs[0].isSelfie;
+  //         cxd.in1.id = cxd.logs[0].id;
+  //       }
+  //       if (cxd.logs.length >= 2) {
+  //         cxd.out1.timestamp = formatPrettyDate(cxd.logs[1].timeStamp);
+  //         cxd.out1.isSelfie = cxd.logs[1].isSelfie;
+  //         cxd.out1.id = cxd.logs[1].id;
+  //       }
+  //       if (cxd.logs.length >= 3) {
+  //         cxd.in2.timestamp = formatPrettyDate(cxd.logs[2].timeStamp);
+  //         cxd.in2.isSelfie = cxd.logs[2].isSelfie;
+  //         cxd.in2.id = cxd.logs[2].id;
+  //       }
+  //       if (cxd.logs.length >= 4) {
+  //         cxd.out2.timestamp = formatPrettyDate(cxd.logs[3].timeStamp);
+  //         cxd.out2.isSelfie = cxd.logs[3].isSelfie;
+  //         cxd.out2.id = cxd.logs[3].id;
+  //       }
+  //       if (cxd.duration == '0') cxd.duration = '';
+  //       if (cxd.lateIn == '0') cxd.lateIn = '';
+  //       if (cxd.lateBreak == '0') cxd.lateBreak = '';
+  //       if (cxd.overtime == '0') cxd.overtime = '';
+  //       // if (cxd.undertimeIn == '0') cxd.undertimeIn = '';
+  //       // if (cxd.undertimeBreak == '0') cxd.undertimeBreak = '';
+  //     }
+  //   } catch (e) {
+  //     debugPrint('$e finalizeData');
+  //   }
+  // }
 
   String fullName(CleanDataModel c) {
     return '${c.lastName}, ${c.firstName} ${c.middleName}';

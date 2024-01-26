@@ -252,7 +252,7 @@ class HistoryProvider with ChangeNotifier {
             logValue(_historyList[i].logs[j]).toString() +
             _dateExf.format(_historyList[i].logs[j].timeStamp) +
             space;
-        int modulo = counter % 5;
+        int modulo = counter % 6;
         int value = logValue(_historyList[i].logs[j]);
         log('counter $counter modulo $modulo value $value');
         if (modulo == 0) {
@@ -261,12 +261,37 @@ class HistoryProvider with ChangeNotifier {
       }
     }
 
+    // const String garbleStart =
+    //     '♥↨♂←î☺  ¢ "                     EMP_NO bìbIC♂↑  ► ☺ ☺ ♫möb!"Y☺ IO _NO bìbIC♂↑  ☺ ☺ ☺ ♫möb!"Y☺ DDATE  bìbID♂↑  ◘ ☺ ☺ ♫möb!"Y☺ TTIME  bìbIC♂↑  ◘ ☺ ☺ ♫möb!"Y☺ \n             ';
+    // const String garbleEnd = '→';
+
+    final String decodedGarbleStart = decode(
+        '00000011 00010111 00001011 00011011 11101111 10111111 10111101 00000001 00000000 00000000 11101111 10111111 10111101 00000000 00100010 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 01000101 01001101 01010000 01011111 01001110 01001111 00000000 01100010 11101111 10111111 10111101 01100010 01001001 01000011 00001011 00011000 00000000 00000000 00010000 00000000 00000001 00000000 00000001 00000000 00001110 01101101 11101111 10111111 10111101 01100010 11101111 10111111 10111101 00100001 00100010 01011001 00000001 00000000 01001001 01001111 00000000 01011111 01001110 01001111 00000000 01100010 11101111 10111111 10111101 01100010 01001001 01000011 00001011 00011000 00000000 00000000 00000001 00000000 00000001 00000000 00000001 00000000 00001110 01101101 11101111 10111111 10111101 01100010 11101111 10111111 10111101 00100001 00100010 01011001 00000001 00000000 01000100 01000100 01000001 01010100 01000101 00000000 00000000 01100010 11101111 10111111 10111101 01100010 01001001 01000100 00001011 00011000 00000000 00000000 00001000 00000000 00000001 00000000 00000001 00000000 00001110 01101101 11101111 10111111 10111101 01100010 11101111 10111111 10111101 00100001 00100010 01011001 00000001 00000000 01010100 01010100 01001001 01001101 01000101 00000000 00000000 01100010 11101111 10111111 10111101 01100010 01001001 01000011 00001011 00011000 00000000 00000000 00001000 00000000 00000001 00000000 00000001 00000000 00001110 01101101 11101111 10111111 10111101 01100010 11101111 10111111 10111101 00100001 00100010 01011001 00000001 00000000 00001010 00000000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000');
+
+    final String decodedGarbleEnd = decode('00011010');
+
     AnchorElement()
       ..href =
-          '${Uri.dataFromString(data, mimeType: 'text/plain', encoding: utf8)}'
+          '${Uri.dataFromString('$decodedGarbleStart${data.trim()}$decodedGarbleEnd', mimeType: 'text/plain', encoding: utf8)}'
       ..download = filename
       ..style.display = 'none'
       ..click();
+  }
+
+  String encode(String value) {
+    // Map each code unit from the given value to a base-2 representation of this
+    // code unit, adding zeroes to the left until the string has length 8, and join
+    // each code unit representation to a single string using spaces
+    return value.codeUnits
+        .map((v) => v.toRadixString(2).padLeft(8, '0'))
+        .join(" ");
+  }
+
+  String decode(String value) {
+    // Split the given value on spaces, parse each base-2 representation string to
+    // an integer and return a new string from the corresponding code units
+    return String.fromCharCodes(
+        value.split(" ").map((v) => int.parse(v, radix: 2)));
   }
 
   int logValue(Log logval) {
