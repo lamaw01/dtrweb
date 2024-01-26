@@ -38,12 +38,12 @@ class HistoryProvider with ChangeNotifier {
     if (_uiList.isEmpty) {
       return false;
     }
-    HistoryModel firstIndexUser = _uiList.first;
-    for (HistoryModel data in _uiList) {
-      if (firstIndexUser.employeeId != data.employeeId) {
-        return false;
-      }
-    }
+    // HistoryModel firstIndexUser = _uiList.first;
+    // for (HistoryModel data in _uiList) {
+    //   if (firstIndexUser.employeeId != data.employeeId) {
+    //     return false;
+    //   }
+    // }
     return true;
   }
 
@@ -159,10 +159,10 @@ class HistoryProvider with ChangeNotifier {
       var rC = 0;
 
       var sortedRawHistory = <HistoryModel>[];
-      // sortedRawHistory.addAll(_historyList);
+      sortedRawHistory.addAll(_historyList);
       sortedRawHistory.sort((a, b) {
-        var valueA = '${a.lastName.toLowerCase()} ${a.date}';
-        var valueB = '${b.lastName.toLowerCase()} ${b.date}';
+        var valueA = '${a.employeeId.toLowerCase()} ${a.date}';
+        var valueB = '${b.employeeId.toLowerCase()} ${b.date}';
         return valueA.compareTo(valueB);
       });
 

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -69,6 +71,47 @@ class ExcelProvider with ChangeNotifier {
     }
   }
 
+  List<List<HistoryModel>> disectHistory(List<HistoryModel> historyList) {
+    historyList.sort((a, b) {
+      var valueA = '${a.employeeId} ${a.date}';
+      var valueB = '${b.employeeId} ${b.date}';
+      return valueA.compareTo(valueB);
+    });
+
+    final List<String> listOfUniqueId = <String>[];
+
+    var listOfListHistory = <List<HistoryModel>>[];
+
+    HistoryModel initialIndex = historyList.first;
+    int counterOfUniqueId = 1;
+    int indexOfLastCut = 0;
+
+    listOfUniqueId.add(initialIndex.employeeId);
+
+    for (int i = 0; i < historyList.length; i++) {
+      if (initialIndex.employeeId != historyList[i].employeeId) {
+        counterOfUniqueId++;
+        initialIndex = historyList[i];
+        listOfUniqueId.add(historyList[i].employeeId);
+        log('sublist length ${historyList.sublist(indexOfLastCut, i).length}');
+        listOfListHistory.add(historyList.sublist(indexOfLastCut, i));
+        indexOfLastCut = i;
+      }
+    }
+
+    listOfListHistory
+        .add(historyList.sublist(indexOfLastCut, historyList.length));
+
+    log('counterOfUniqueId $counterOfUniqueId listOfListHistory ${listOfListHistory.length}');
+
+    // for (int i = 0; i < listOfListHistory.length; i++) {
+    //   for (int j = 0; j < listOfListHistory[i].length; j++) {
+    //     log('2d ${listOfListHistory[i][j].employeeId} ${listOfListHistory[i].length}');
+    //   }
+    // }
+    return listOfListHistory;
+  }
+
   //assign historylist to cleandata
   void sortData({
     required List<ScheduleModel> scheduleList,
@@ -76,33 +119,56 @@ class ExcelProvider with ChangeNotifier {
   }) {
     _cleanData.clear();
 
-    for (int i = 0; i < historyList.length; i++) {
-      // var dayOfWeek =
-      //     DateFormat('EEEE').format(historyList[i].date).toLowerCase();
-      // var todaySched = scheduleList.singleWhere((element) =>
-      //     element.schedId == selectDay(day: dayOfWeek, model: historyList[i]));
+    final disectedHistory = disectHistory(historyList);
 
-      late ScheduleModel todaySched;
+    // for (int i = 0; i < historyList.length; i++) {
+    //   late ScheduleModel todaySched;
 
-      try {
-        todaySched = scheduleList.singleWhere(
-            (element) => element.schedId == historyList[i].currentSchedId);
-      } catch (e) {
-        debugPrint('$e');
-        todaySched =
-            scheduleList.singleWhere((element) => element.schedId == 'M-B-85');
-      } finally {
-        _cleanData.add(
-          CleanDataModel(
-            employeeId: historyList[i].employeeId,
-            firstName: historyList[i].firstName,
-            lastName: historyList[i].lastName,
-            middleName: historyList[i].middleName,
-            currentSched: todaySched,
-            date: historyList[i].date,
-            logs: historyList[i].logs,
-          ),
-        );
+    //   try {
+    //     todaySched = scheduleList.singleWhere(
+    //         (element) => element.schedId == historyList[i].currentSchedId);
+    //   } catch (e) {
+    //     // debugPrint('$e sortData');
+    //     todaySched = scheduleList.singleWhere(
+    //         (element) => element.schedId == 'M-B-85'); //E-B-96 M-B-85
+    //   } finally {
+    //     _cleanData.add(
+    //       CleanDataModel(
+    //         employeeId: historyList[i].employeeId,
+    //         firstName: historyList[i].firstName,
+    //         lastName: historyList[i].lastName,
+    //         middleName: historyList[i].middleName,
+    //         currentSched: todaySched,
+    //         date: historyList[i].date,
+    //         logs: historyList[i].logs,
+    //       ),
+    //     );
+    //   }
+    // }
+
+    for (int i = 0; i < disectedHistory.length; i++) {
+      for (int j = 0; j < disectedHistory[i].length; j++) {
+        late ScheduleModel todaySched;
+        try {
+          todaySched = scheduleList.singleWhere((element) =>
+              element.schedId == disectedHistory[i][j].currentSchedId);
+        } catch (e) {
+          // debugPrint('$e sortData');
+          todaySched = scheduleList.singleWhere(
+              (element) => element.schedId == 'M-B-85'); //E-B-96 M-B-85
+        } finally {
+          _cleanData.add(
+            CleanDataModel(
+              employeeId: disectedHistory[i][j].employeeId,
+              firstName: disectedHistory[i][j].firstName,
+              lastName: disectedHistory[i][j].lastName,
+              middleName: disectedHistory[i][j].middleName,
+              currentSched: todaySched,
+              date: disectedHistory[i][j].date,
+              logs: disectedHistory[i][j].logs,
+            ),
+          );
+        }
       }
     }
 
@@ -615,27 +681,47 @@ class ExcelProvider with ChangeNotifier {
         horizontalAlign: HorizontalAlign.Center,
         fontSize: 9,
       );
+      // CleanExcelDataModel(
+      //   rowCount: '0',
+      //   employeeId: '',
+      //   name: '',
+      //   date: DateTime.now(),
+      //   logs: [],
+      //   currentSched: ScheduleModel(
+      //       schedId: '',
+      //       schedType: '',
+      //       schedIn: '',
+      //       breakStart: '',
+      //       breakEnd: '',
+      //       schedOut: '',
+      //       description: ''),
+      //   duration: '',
+      //   lateIn: '',
+      //   lateBreak: '',
+      //   overtime: '',
+      //   in1: '',
+      //   out1: ''
+      // )
+      var tempCleanData = <CleanExcelDataModel>[_cleanExcelData.first];
 
-      for (int i = 1; i < _cleanExcelData.length; i++) {
-        var idName = '';
-        if (_cleanExcelData[i].name != '') {
-          idName =
-              '${_cleanExcelData[i].employeeId} / ${_cleanExcelData[i].name}';
-        }
+      tempCleanData.addAll(_cleanExcelData);
 
-        var duration = int.tryParse(_cleanExcelData[i].duration);
-        var lateIn = int.tryParse(_cleanExcelData[i].lateIn);
-        var lateBreak = int.tryParse(_cleanExcelData[i].lateBreak);
-        var overtime = _cleanExcelData[i].overtime;
-        // var undertimeIn = int.tryParse(_cleanExcelData[i].undertimeIn);
-        // var undertimeBreak = int.tryParse(_cleanExcelData[i].undertimeBreak);
+      for (int i = 1; i < tempCleanData.length; i++) {
+        var idName =
+            '${tempCleanData[i].employeeId} / ${tempCleanData[i].name}';
+        var duration = int.tryParse(tempCleanData[i].duration);
+        var lateIn = int.tryParse(tempCleanData[i].lateIn);
+        var lateBreak = int.tryParse(tempCleanData[i].lateBreak);
+        var overtime = tempCleanData[i].overtime;
+        // var undertimeIn = int.tryParse(tempCleanData[i].undertimeIn);
+        // var undertimeBreak = int.tryParse(tempCleanData[i].undertimeBreak);
 
         List<dynamic> dataList = [
           idName,
-          _cleanExcelData[i].in1.timestamp,
-          _cleanExcelData[i].out1.timestamp,
-          _cleanExcelData[i].in2.timestamp,
-          _cleanExcelData[i].out2.timestamp,
+          tempCleanData[i].in1.timestamp,
+          tempCleanData[i].out1.timestamp,
+          tempCleanData[i].in2.timestamp,
+          tempCleanData[i].out2.timestamp,
           duration,
           lateIn,
           lateBreak,
@@ -670,7 +756,7 @@ class ExcelProvider with ChangeNotifier {
             columnIndex: 1,
             rowIndex: i,
           ),
-          _cleanExcelData[i].in1.timestamp,
+          tempCleanData[i].in1.timestamp,
           cellStyle: cellStyleData,
         );
         sheetObject.updateCell(
@@ -678,7 +764,7 @@ class ExcelProvider with ChangeNotifier {
             columnIndex: 2,
             rowIndex: i,
           ),
-          _cleanExcelData[i].out1.timestamp,
+          tempCleanData[i].out1.timestamp,
           cellStyle: cellStyleData,
         );
         sheetObject.updateCell(
@@ -686,7 +772,7 @@ class ExcelProvider with ChangeNotifier {
             columnIndex: 3,
             rowIndex: i,
           ),
-          _cleanExcelData[i].in2.timestamp,
+          tempCleanData[i].in2.timestamp,
           cellStyle: cellStyleData,
         );
         sheetObject.updateCell(
@@ -694,7 +780,7 @@ class ExcelProvider with ChangeNotifier {
             columnIndex: 4,
             rowIndex: i,
           ),
-          _cleanExcelData[i].out2.timestamp,
+          tempCleanData[i].out2.timestamp,
           cellStyle: cellStyleData,
         );
         sheetObject.updateCell(

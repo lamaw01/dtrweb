@@ -483,9 +483,9 @@ class _ExcelViewState extends State<ExcelView> {
           scrollDirection: Axis.horizontal,
           // primary: false,
           child: Consumer<ExcelProvider>(builder: (ctx, provider, widget) {
-            var w = MediaQuery.of(context).size.width;
-            var h = MediaQuery.of(context).size.height;
-            debugPrint('w $w h $h');
+            // var w = MediaQuery.of(context).size.width;
+            // var h = MediaQuery.of(context).size.height;
+            // debugPrint('w $w h $h');
             return SizedBox(
               width: 1920.0,
               height: 1080.0,
