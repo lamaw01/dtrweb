@@ -11,6 +11,7 @@ import '../model/department_model.dart';
 import '../model/history_model.dart';
 import '../model/log_model.dart';
 import '../services/http_service.dart';
+import '../view/home_view.dart';
 
 class HistoryProvider with ChangeNotifier {
   var _historyList = <HistoryModel>[];
@@ -27,8 +28,6 @@ class HistoryProvider with ChangeNotifier {
   final _dateFormat1 = DateFormat('yyyy-MM-dd HH:mm');
   final _dateYmd = DateFormat('yyyy-MM-dd');
   final _dateExf = DateFormat('yyyyMMddHH:mm:ss');
-  final _is24HourFormat = ValueNotifier(false);
-  ValueNotifier<bool> get is24HourFormat => _is24HourFormat;
 
   void changeLoadingState(bool state) {
     _isLoading.value = state;
@@ -109,7 +108,7 @@ class HistoryProvider with ChangeNotifier {
   }
 
   String dateFormat12or24Web(DateTime dateTime) {
-    if (_is24HourFormat.value) {
+    if (is24HourFormat.value) {
       return DateFormat('HH:mm').format(dateTime);
     } else {
       return DateFormat('hh:mm aa').format(dateTime);

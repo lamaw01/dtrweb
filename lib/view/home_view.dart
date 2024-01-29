@@ -10,6 +10,9 @@ import '../model/department_model.dart';
 import '../widget/logs_widget.dart';
 import 'excel_view.dart';
 
+final _is24HourFormat = ValueNotifier(false);
+ValueNotifier<bool> get is24HourFormat => _is24HourFormat;
+
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
@@ -123,9 +126,8 @@ class _HomeViewState extends State<HomeView> {
                   if (mounted) {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => ExcelView(
-                          historyList: history.historyList,
-                        ),
+                        builder: (context) =>
+                            ExcelView(historyList: history.historyList),
                       ),
                     );
                   }
@@ -375,12 +377,12 @@ class _HomeViewState extends State<HomeView> {
                                     ),
                                   ),
                                   ValueListenableBuilder(
-                                    valueListenable: history.is24HourFormat,
+                                    valueListenable: is24HourFormat,
                                     builder: (_, value, __) {
                                       return Checkbox(
-                                        value: history.is24HourFormat.value,
+                                        value: is24HourFormat.value,
                                         onChanged: (newCheckboxState) {
-                                          history.is24HourFormat.value =
+                                          is24HourFormat.value =
                                               newCheckboxState!;
                                         },
                                       );
@@ -814,12 +816,12 @@ class _HomeViewState extends State<HomeView> {
                                     ),
                                   ),
                                   ValueListenableBuilder(
-                                    valueListenable: history.is24HourFormat,
+                                    valueListenable: is24HourFormat,
                                     builder: (_, value, __) {
                                       return Checkbox(
-                                        value: history.is24HourFormat.value,
+                                        value: is24HourFormat.value,
                                         onChanged: (newCheckboxState) {
-                                          history.is24HourFormat.value =
+                                          is24HourFormat.value =
                                               newCheckboxState!;
                                         },
                                       );

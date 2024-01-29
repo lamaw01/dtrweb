@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../data/excel_provider.dart';
+import '../data/history_provider.dart';
 import '../model/log_model.dart';
 
 class LogsWidget extends StatefulWidget {
@@ -27,7 +27,7 @@ class _LogsWidgetState extends State<LogsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var excel = Provider.of<ExcelProvider>(context, listen: false);
+    var history = Provider.of<HistoryProvider>(context, listen: false);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -42,7 +42,7 @@ class _LogsWidgetState extends State<LogsWidget> {
                 ),
                 const SizedBox(height: 5.0),
                 Text(
-                  excel.dateFormat12or24Web(widget.logs[j].timeStamp),
+                  history.dateFormat12or24Web(widget.logs[j].timeStamp),
                   style: textStyleImage,
                 ),
               ],
@@ -83,7 +83,7 @@ class _LogsWidgetState extends State<LogsWidget> {
                 ),
                 const SizedBox(height: 5.0),
                 Text(
-                  excel.dateFormat12or24Web(widget.logs[j].timeStamp),
+                  history.dateFormat12or24Web(widget.logs[j].timeStamp),
                 ),
               ],
             ),

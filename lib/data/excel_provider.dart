@@ -10,6 +10,7 @@ import '../model/history_model.dart';
 import '../model/late_model.dart';
 import '../model/log_model.dart';
 import '../model/schedule_model.dart';
+import '../view/home_view.dart';
 
 class ExcelProvider with ChangeNotifier {
   // final _cleanData = <CleanDataModel>[];
@@ -18,7 +19,7 @@ class ExcelProvider with ChangeNotifier {
   final _cleanExcelData = <CleanExcelDataModel>[];
   List<CleanExcelDataModel> get cleanExcelData => _cleanExcelData;
 
-  final _is24HourFormat = ValueNotifier(false);
+  // final _is24HourFormat = ValueNotifier(false);
   final _dateFormat1 = DateFormat('yyyy-MM-dd HH:mm');
   DateFormat get dateFormat1 => _dateFormat1;
 
@@ -49,7 +50,7 @@ class ExcelProvider with ChangeNotifier {
   }
 
   String dateFormat12or24Excel(DateTime dateTime) {
-    if (_is24HourFormat.value) {
+    if (is24HourFormat.value) {
       return DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
     } else {
       return DateFormat('yyyy-MM-dd hh:mm aa').format(dateTime);
@@ -63,13 +64,13 @@ class ExcelProvider with ChangeNotifier {
     return dateFormat12or24Excel(d);
   }
 
-  String dateFormat12or24Web(DateTime dateTime) {
-    if (_is24HourFormat.value) {
-      return DateFormat('HH:mm').format(dateTime);
-    } else {
-      return DateFormat('hh:mm aa').format(dateTime);
-    }
-  }
+  // String dateFormat12or24Web(DateTime dateTime) {
+  //   if (_is24HourFormat.value) {
+  //     return DateFormat('HH:mm').format(dateTime);
+  //   } else {
+  //     return DateFormat('hh:mm aa').format(dateTime);
+  //   }
+  // }
 
   List<List<HistoryModel>> disectHistory(List<HistoryModel> historyList) {
     historyList.sort((a, b) {
@@ -621,7 +622,7 @@ class ExcelProvider with ChangeNotifier {
       for (int i = 0; i < listOfListCleanData.length; i++) {
         for (int j = 0; j < listOfListCleanData[i].length; j++) {
           count++;
-          log('kani $count');
+          // log('kani $count');
           _cleanExcelData.add(
             CleanExcelDataModel(
               employeeId: listOfListCleanData[i][j].employeeId,
@@ -636,6 +637,37 @@ class ExcelProvider with ChangeNotifier {
               // undertimeIn: c[i].undertimeIn!,
               // undertimeBreak: c[i].undertimeBreak!,
               rowCount: '$count',
+              in1: TimeLog(),
+              out1: TimeLog(),
+              in2: TimeLog(),
+              out2: TimeLog(),
+            ),
+          );
+        }
+        log('i $i listOfListCleanData ${listOfListCleanData.length}');
+        if (i + 1 != listOfListCleanData.length) {
+          count = 0;
+          _cleanExcelData.add(
+            CleanExcelDataModel(
+              employeeId: '',
+              name: '',
+              currentSched: ScheduleModel(
+                  schedId: '',
+                  schedType: '',
+                  schedIn: '',
+                  breakStart: '',
+                  breakEnd: '',
+                  schedOut: '',
+                  description: ''),
+              date: DateTime.now(),
+              logs: <Log>[],
+              duration: '',
+              lateIn: '',
+              lateBreak: '',
+              overtime: '',
+              // undertimeIn: c[i].undertimeIn!,
+              // undertimeBreak: c[i].undertimeBreak!,
+              rowCount: '',
               in1: TimeLog(),
               out1: TimeLog(),
               in2: TimeLog(),
@@ -908,8 +940,10 @@ class ExcelProvider with ChangeNotifier {
       tempCleanData.addAll(_cleanExcelData);
 
       for (int i = 1; i < tempCleanData.length; i++) {
-        var idName =
-            '${tempCleanData[i].employeeId} / ${tempCleanData[i].name}';
+        var idName = '';
+        if (tempCleanData[i].name != '') {
+          idName = '${tempCleanData[i].employeeId} / ${tempCleanData[i].name}';
+        }
         var duration = int.tryParse(tempCleanData[i].duration);
         var lateIn = int.tryParse(tempCleanData[i].lateIn);
         var lateBreak = int.tryParse(tempCleanData[i].lateBreak);
