@@ -10,7 +10,7 @@ class VersionProvider with ChangeNotifier {
     try {
       await PackageInfo.fromPlatform().then((result) {
         _version = result.version;
-        debugPrint('_appVersion $_version');
+        // debugPrint('_appVersion $_version');
       });
       notifyListeners();
     } catch (e) {

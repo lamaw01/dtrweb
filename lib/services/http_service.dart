@@ -6,6 +6,7 @@ import 'dart:convert';
 import '../model/department_model.dart';
 import '../model/schedule_model.dart';
 import '../model/history_model.dart';
+import '../model/settings_model.dart';
 
 class HttpService {
   static const String _serverUrl = 'http://103.62.153.74:53000/dtr_history_api';
@@ -87,5 +88,17 @@ class HttpService {
     ).timeout(const Duration(seconds: 10));
     // debugPrint('geSchedule ${response.body}');
     return scheduleModelFromJson(response.body);
+  }
+
+  static Future<SettingsModel> getSettings() async {
+    var response = await http.get(
+      Uri.parse('$_serverUrl/get_settings.php'),
+      headers: <String, String>{
+        'Accept': '*/*',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    ).timeout(const Duration(seconds: 10));
+    debugPrint('getSettings ${response.body}');
+    return settingsModelFromJson(response.body);
   }
 }

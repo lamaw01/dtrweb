@@ -10,6 +10,7 @@ import '../model/history_model.dart';
 import '../model/late_model.dart';
 import '../model/log_model.dart';
 import '../model/schedule_model.dart';
+import '../services/http_service.dart';
 import '../view/home_view.dart';
 
 class ExcelProvider with ChangeNotifier {
@@ -22,6 +23,9 @@ class ExcelProvider with ChangeNotifier {
   // final _is24HourFormat = ValueNotifier(false);
   final _dateFormat1 = DateFormat('yyyy-MM-dd HH:mm');
   DateFormat get dateFormat1 => _dateFormat1;
+
+  var _lateThreshold = 300;
+  int get lateThreshold => _lateThreshold;
 
   // String selectDay({required String day, required HistoryModel model}) {
   //   switch (day) {
@@ -41,6 +45,15 @@ class ExcelProvider with ChangeNotifier {
   //       return model.sunday;
   //   }
   // }
+
+  Future<void> getSettings() async {
+    try {
+      final result = await HttpService.getSettings();
+      _lateThreshold = result.lateThreshold;
+    } catch (e) {
+      debugPrint('$e getSettings');
+    }
+  }
 
   bool isMorning(CleanDataModel c) {
     if (c.currentSched.schedId.substring(0, 1).toUpperCase() != 'E') {
@@ -399,6 +412,7 @@ class ExcelProvider with ChangeNotifier {
     // var undertimeIn = 0;
     // var undertimeBreak = 0;
     var calcOvertimebreak = true;
+
     try {
       if (sched.schedType.toLowerCase() != 'c') {
         if (logs.length >= 2) {
@@ -408,12 +422,12 @@ class ExcelProvider with ChangeNotifier {
                 .timeStamp
                 .difference(_dateFormat1
                     .parse(schedIn)
-                    .add(const Duration(seconds: 300)))
+                    .add(Duration(seconds: _lateThreshold)))
                 .inSeconds;
 
             // late
             if (inDifference > 0) {
-              latePenaltyIn = latePenaltyIn + inDifference + 300;
+              latePenaltyIn = latePenaltyIn + inDifference + _lateThreshold;
             }
           }
           if (logs.length >= 4 && sched.schedType.toLowerCase() == 'b') {
@@ -425,11 +439,12 @@ class ExcelProvider with ChangeNotifier {
                   .timeStamp
                   .difference(_dateFormat1
                       .parse(breakEnd)
-                      .add(const Duration(seconds: 300)))
+                      .add(Duration(seconds: _lateThreshold)))
                   .inSeconds;
               // late
               if (inDifference > 0) {
-                latePenaltyBreak = latePenaltyBreak + inDifference + 300;
+                latePenaltyBreak =
+                    latePenaltyBreak + inDifference + _lateThreshold;
               }
             }
           }
@@ -497,6 +512,7 @@ class ExcelProvider with ChangeNotifier {
     required ScheduleModel sched,
   }) {
     var seconds = 0;
+
     try {
       for (int i = 0; i < logs.length; i++) {
         if (i + 1 < logs.length) {
@@ -514,7 +530,7 @@ class ExcelProvider with ChangeNotifier {
       name: name,
       sched: sched,
     );
-    seconds = seconds + 300;
+    seconds = seconds + _lateThreshold;
     var hours = Duration(seconds: seconds).inHours;
     var lateIn = Duration(seconds: latePenalty.lateInMinutes).inMinutes;
     var lateBreak = Duration(seconds: latePenalty.lateBreakMinutes).inMinutes;

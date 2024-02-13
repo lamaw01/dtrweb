@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../data/department_provider.dart';
+import '../data/excel_provider.dart';
 import '../data/history_provider.dart';
 import '../data/schedule_provider.dart';
 import '../data/version_provider.dart';
@@ -36,11 +37,13 @@ class _HomeViewState extends State<HomeView> {
     final department = Provider.of<DepartmentProvider>(context, listen: false);
     final schedule = Provider.of<ScheduleProvider>(context, listen: false);
     final version = Provider.of<VersionProvider>(context, listen: false);
+    final excel = Provider.of<ExcelProvider>(context, listen: false);
     department.departmentList.add(dropdownValue);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await version.getPackageInfo();
       await department.getDepartment();
       await schedule.getSchedule();
+      await excel.getSettings();
     });
   }
 
