@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +10,7 @@ import '../model/history_model.dart';
 import '../model/log_model.dart';
 import '../services/http_service.dart';
 import '../view/home_view.dart';
+import 'binary.dart';
 
 class HistoryProvider with ChangeNotifier {
   var _historyList = <HistoryModel>[];
@@ -241,37 +240,36 @@ class HistoryProvider with ChangeNotifier {
       return valueA.compareTo(valueB);
     });
 
-    int counter = 0;
+    // int counter = 0;
 
     for (int i = 0; i < _historyList.length; i++) {
       for (int j = 0; j < _historyList[i].logs.length; j++) {
-        counter++;
+        // counter++;
         data = data +
             _historyList[i].employeeId +
             logValue(_historyList[i].logs[j]).toString() +
             _dateExf.format(_historyList[i].logs[j].timeStamp) +
             space;
-        int modulo = counter % 6;
-        int value = logValue(_historyList[i].logs[j]);
-        log('counter $counter modulo $modulo value $value');
-        if (modulo == 0) {
-          data = data + newLine;
-        }
+        // int modulo = counter % 6;
+        // int value = logValue(_historyList[i].logs[j]);
+        // log('counter $counter modulo $modulo value $value');
+        // if (modulo == 0) {
+        //   data = data + newLine;
+        // }
       }
     }
 
-    // const String garbleStart =
-    //     '♥↨♂←î☺  ¢ "                     EMP_NO bìbIC♂↑  ► ☺ ☺ ♫möb!"Y☺ IO _NO bìbIC♂↑  ☺ ☺ ☺ ♫möb!"Y☺ DDATE  bìbID♂↑  ◘ ☺ ☺ ♫möb!"Y☺ TTIME  bìbIC♂↑  ◘ ☺ ☺ ♫möb!"Y☺ \n             ';
-    // const String garbleEnd = '→';
-
     final String decodedGarbleStart = decode(
-        '00000011 00010111 00001011 00011011 1111111111111101 00000001 00000000 00000000 1111111111111101 00000000 00100010 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 01000101 01001101 01010000 01011111 01001110 01001111 00000000 01100010 1111111111111101 01100010 01001001 01000011 00001011 00011000 00000000 00000000 00010000 00000000 00000001 00000000 00000001 00000000 00001110 01101101 1111111111111101 01100010 1111111111111101 00100001 00100010 01011001 00000001 00000000 01001001 01001111 00000000 01011111 01001110 01001111 00000000 01100010 1111111111111101 01100010 01001001 01000011 00001011 00011000 00000000 00000000 00000001 00000000 00000001 00000000 00000001 00000000 00001110 01101101 1111111111111101 01100010 1111111111111101 00100001 00100010 01011001 00000001 00000000 01000100 01000100 01000001 01010100 01000101 00000000 00000000 01100010 1111111111111101 01100010 01001001 01000100 00001011 00011000 00000000 00000000 00001000 00000000 00000001 00000000 00000001 00000000 00001110 01101101 1111111111111101 01100010 1111111111111101 00100001 00100010 01011001 00000001 00000000 01010100 01010100 01001001 01001101 01000101 00000000 00000000 01100010 1111111111111101 01100010 01001001 01000011 00001011 00011000 00000000 00000000 00001000 00000000 00000001 00000000 00000001 00000000 00001110 01101101 1111111111111101 01100010 1111111111111101 00100001 00100010 01011001 00000001 00000000 00001010 00000000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000 00100000');
+        '$etx $can $stx $ff $poste $etx $nul2 $nul2 $c $nul2 $quote $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $nul2 $emp_no $nul2 $bibIC $stx $can $nul2 $nul2 $dle $nul2 $soh $nul2 $soh $nul2 $dc4 $moba $exclamation $em $y $soh $nul2 $io $nul2 $no $nul2 $bibIC $stx $can $nul2 $nul2 $soh $nul2 $soh $nul2 $soh $nul2 $dc4 $moba $exclamation $em $y $soh $nul2 $ddate $nul2 $nul2 $bibID $stx $can $nul2 $nul2 $bs $nul2 $soh $nul2 $soh $nul2 $dc4 $moba $exclamation $em $y $soh $nul2 $ttime $nul2 $nul2 $bibIC $stx $can $nul2 $nul2 $bs $nul2 $soh $nul2 $soh $nul2 $dc4 $moba $exclamation $em $y $soh $nul2');
 
-    final String decodedGarbleEnd = decode('00011010');
+    final String decodedGarbleNew = decode(
+        '$nul2 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1');
+
+    final String decodedGarbleEnd = decode(sub);
 
     AnchorElement()
       ..href =
-          '${Uri.dataFromString('$decodedGarbleStart${data.trim()}$decodedGarbleEnd', mimeType: 'text/plain', encoding: utf8)}'
+          '${Uri.dataFromString('$decodedGarbleStart$newLine$decodedGarbleNew${data.trim()}$decodedGarbleEnd', mimeType: 'text/plain', encoding: utf8)}'
       ..download = filename
       ..style.display = 'none'
       ..click();
@@ -349,20 +347,20 @@ class HistoryProvider with ChangeNotifier {
     }
   }
 
-  void testTime() {
-    String date1 = '2024-01-02 00:01:01';
-    final parsedDate1 = DateFormat('yyyy-MM-dd HH:mm:ss').parse(date1);
+  // void testTime() {
+  //   String date1 = '2024-01-02 00:01:01';
+  //   final parsedDate1 = DateFormat('yyyy-MM-dd HH:mm:ss').parse(date1);
 
-    String date2 = '2024-01-02 23:00:01';
-    final parsedDate2 = DateFormat('yyyy-MM-dd HH:mm:ss').parse(date2);
+  //   String date2 = '2024-01-02 23:00:01';
+  //   final parsedDate2 = DateFormat('yyyy-MM-dd HH:mm:ss').parse(date2);
 
-    String date3 = '2024-01-02 01:01:01';
-    final parsedDate3 = DateFormat('yyyy-MM-dd HH:mm:ss').parse(date3);
+  //   String date3 = '2024-01-02 01:01:01';
+  //   final parsedDate3 = DateFormat('yyyy-MM-dd HH:mm:ss').parse(date3);
 
-    String date4 = '2024-01-02 12:01:01';
-    final parsedDate4 = DateFormat('yyyy-MM-dd HH:mm:ss').parse(date4);
-    log('1 $parsedDate1 2 $parsedDate2 3 $parsedDate3 4 $parsedDate4');
+  //   String date4 = '2024-01-02 12:01:01';
+  //   final parsedDate4 = DateFormat('yyyy-MM-dd HH:mm:ss').parse(date4);
+  //   log('1 $parsedDate1 2 $parsedDate2 3 $parsedDate3 4 $parsedDate4');
 
-    log('1 ${parsedDate1.hour} 2 ${parsedDate2.hour} 3 ${parsedDate3.hour} 4 ${parsedDate4.hour}');
-  }
+  //   log('1 ${parsedDate1.hour} 2 ${parsedDate2.hour} 3 ${parsedDate3.hour} 4 ${parsedDate4.hour}');
+  // }
 }
