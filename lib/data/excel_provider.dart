@@ -205,15 +205,15 @@ class ExcelProvider with ChangeNotifier {
 
   void cleanseData2(List<List<CleanDataModel>> listOfListCleanData) {
     try {
-      int counter = 0;
+      // int counter = 0;
       for (int i = 0; i < listOfListCleanData.length; i++) {
         for (int j = 0; j < listOfListCleanData[i].length; j++) {
-          counter++;
+          // counter++;
           List<Log> cleanLog = [];
           if (isMorning(listOfListCleanData[i][j])) {
             cleanLog = arrangeDataMorning2(listOfListCleanData[i][j]);
           } else {
-            cleanLog = arrangeDataEvening2(listOfListCleanData[i], i);
+            cleanLog = arrangeDataEvening2(listOfListCleanData[i], j);
           }
           listOfListCleanData[i][j].logs = cleanLog;
           listOfListCleanData[i][j] = calcLogs2(listOfListCleanData[i][j]);
@@ -223,7 +223,7 @@ class ExcelProvider with ChangeNotifier {
       // _cleanData.removeWhere((e) => e.logs.isEmpty);
       // calcLogs();
       // finalizeData();
-      log('cleanseData2 $counter');
+      // log('cleanseData2 $counter');
       finalizeData2(listOfListCleanData);
     } catch (e) {
       debugPrint('$e cleanseData2');
@@ -249,6 +249,7 @@ class ExcelProvider with ChangeNotifier {
   // }
 
   List<Log> arrangeDataEvening2(List<CleanDataModel> model, i) {
+    log('arrangeDataEvening2 $i');
     if (i == 0) {
       var logs = <Log>[];
       try {
@@ -259,6 +260,8 @@ class ExcelProvider with ChangeNotifier {
             var logsTemp = <Log>[];
             logsTemp.addAll(removedLastLogIndex);
             logs.addAll(logsTemp.reversed);
+          } else if (model[i + 1].logs.length == 2) {
+            logs.add(model[i + 1].logs.first);
           } else {
             logs.addAll(model[i + 1].logs);
           }
@@ -269,12 +272,15 @@ class ExcelProvider with ChangeNotifier {
       // model[i].logs = logs;
       return logs;
     } else if (i == model.length - 1) {
+      var logs = <Log>[];
       try {
-        // model.removeLast();
+        if (model[i].logs.length >= 4 && model[i].logs.last.logType == 'OUT') {
+          logs.add(model[i].logs.last);
+        }
       } catch (e) {
         debugPrint('$e else if');
       }
-      return model[i].logs;
+      return logs;
     } else {
       var logs = <Log>[];
       try {
@@ -285,6 +291,8 @@ class ExcelProvider with ChangeNotifier {
             var logsTemp = <Log>[];
             logsTemp.addAll(removedLastLogIndex);
             logs.addAll(logsTemp.reversed);
+          } else if (model[i + 1].logs.length == 2) {
+            logs.add(model[i + 1].logs.first);
           } else {
             logs.addAll(model[i + 1].logs);
           }
@@ -660,7 +668,7 @@ class ExcelProvider with ChangeNotifier {
             ),
           );
         }
-        log('i $i listOfListCleanData ${listOfListCleanData.length}');
+        // log('i $i listOfListCleanData ${listOfListCleanData.length}');
         if (i + 1 != listOfListCleanData.length) {
           count = 0;
           _cleanExcelData.add(
