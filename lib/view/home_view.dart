@@ -552,11 +552,18 @@ class _HomeViewState extends State<HomeView> {
                               selected: i % 2 == 0 ? true : false,
                               cells: <DataCell>[
                                 DataCell(SelectableText(
-                                    history.uiList[i].employeeId)),
+                                  history.uiList[i].employeeId,
+                                  style: const TextStyle(fontSize: 13.0),
+                                )),
                                 DataCell(SelectableText(
-                                    '${history.uiList[i].lastName}, ${history.uiList[i].firstName} ${history.uiList[i].middleName}')),
-                                DataCell(SelectableText(DateFormat.yMMMEd()
-                                    .format(history.uiList[i].date))),
+                                  '${history.uiList[i].lastName}, ${history.uiList[i].firstName} ${history.uiList[i].middleName}',
+                                  style: const TextStyle(fontSize: 13.0),
+                                )),
+                                DataCell(SelectableText(
+                                  DateFormat.yMMMEd()
+                                      .format(history.uiList[i].date),
+                                  style: const TextStyle(fontSize: 13.0),
+                                )),
                                 DataCell(
                                     LogsWidget(logs: history.uiList[i].logs)),
                               ],
@@ -629,211 +636,228 @@ class _HomeViewState extends State<HomeView> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'From :',
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
+                              SizedBox(
+                                height: 35.0,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'From :',
+                                      style: TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width: 250.0,
-                                    child: TextField(
-                                      style: const TextStyle(fontSize: 18.0),
-                                      readOnly: true,
-                                      decoration: const InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.grey,
-                                            width: 1.0,
+                                    SizedBox(
+                                      width: 250.0,
+                                      child: TextField(
+                                        style: const TextStyle(fontSize: 18.0),
+                                        readOnly: true,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.grey,
+                                              width: 1.0,
+                                            ),
                                           ),
+                                          isDense: true,
+                                          contentPadding: EdgeInsets.fromLTRB(
+                                              12.0, 12.0, 12.0, 12.0),
                                         ),
-                                        isDense: true,
-                                        contentPadding: EdgeInsets.fromLTRB(
-                                            12.0, 12.0, 12.0, 12.0),
-                                      ),
-                                      controller: fromController,
-                                      onTap: () async {
-                                        history.selectedFrom =
-                                            await showDateFromDialog(
-                                                context: context);
-                                        setState(() {
-                                          fromController.text =
-                                              DateFormat.yMEd()
-                                                  .format(history.selectedFrom);
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10.0),
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'To :',
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 250.0,
-                                    child: TextField(
-                                      style: const TextStyle(fontSize: 18.0),
-                                      readOnly: true,
-                                      decoration: const InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.grey,
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                        isDense: true,
-                                        contentPadding: EdgeInsets.fromLTRB(
-                                            12.0, 12.0, 12.0, 12.0),
-                                      ),
-                                      controller: toController,
-                                      onTap: () async {
-                                        history.selectedTo =
-                                            await showDateToDialog(
-                                                context: context);
-                                        setState(() {
-                                          toController.text = DateFormat.yMEd()
-                                              .format(history.selectedTo);
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10.0),
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Department: ',
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 35.0,
-                                    width: 250.0,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      border: Border.all(
-                                        color: Colors.grey,
-                                        style: BorderStyle.solid,
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: DropdownButtonHideUnderline(
-                                      child: DropdownButton<DepartmentModel>(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10.0),
-                                        borderRadius: BorderRadius.circular(5),
-                                        value: dropdownValue,
-                                        onChanged:
-                                            (DepartmentModel? value) async {
-                                          if (value != null) {
-                                            setState(() {
-                                              dropdownValue = value;
-                                            });
-                                          }
+                                        controller: fromController,
+                                        onTap: () async {
+                                          history.selectedFrom =
+                                              await showDateFromDialog(
+                                                  context: context);
+                                          setState(() {
+                                            fromController.text =
+                                                DateFormat.yMEd().format(
+                                                    history.selectedFrom);
+                                          });
                                         },
-                                        items: department.departmentList.map<
-                                                DropdownMenuItem<
-                                                    DepartmentModel>>(
-                                            (DepartmentModel value) {
-                                          return DropdownMenuItem<
-                                              DepartmentModel>(
-                                            value: value,
-                                            child: Text(value.departmentName),
-                                          );
-                                        }).toList(),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 10.0),
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      style: const TextStyle(fontSize: 18.0),
-                                      decoration: const InputDecoration(
-                                        label: Text('ID no. or Name'),
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.grey,
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                        isDense: true,
-                                        contentPadding: EdgeInsets.fromLTRB(
-                                            12.0, 12.0, 12.0, 12.0),
+                              SizedBox(
+                                height: 35.0,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'To :',
+                                      style: TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      controller: idController,
-                                      onSubmitted: (data) async {
-                                        history.changeLoadingState(true);
-                                        await Future.delayed(
-                                            const Duration(seconds: 1));
-                                        if (idController.text.isEmpty) {
-                                          // get records all
-                                          await history.getRecordsAll(
-                                              department: dropdownValue);
-                                        } else {
-                                          // get records with id or name
-                                          await history.getRecords(
-                                              // employeeId: idController.text.trim(),
-                                              employeeId:
-                                                  idController.text.trim(),
-                                              department: dropdownValue);
-                                        }
-                                        history.changeLoadingState(false);
-                                      },
                                     ),
-                                  ),
-                                ],
+                                    SizedBox(
+                                      width: 250.0,
+                                      child: TextField(
+                                        style: const TextStyle(fontSize: 18.0),
+                                        readOnly: true,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.grey,
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          isDense: true,
+                                          contentPadding: EdgeInsets.fromLTRB(
+                                              12.0, 12.0, 12.0, 12.0),
+                                        ),
+                                        controller: toController,
+                                        onTap: () async {
+                                          history.selectedTo =
+                                              await showDateToDialog(
+                                                  context: context);
+                                          setState(() {
+                                            toController.text =
+                                                DateFormat.yMEd()
+                                                    .format(history.selectedTo);
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 10.0),
+                              SizedBox(
+                                height: 35.0,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Department: ',
+                                      style: TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 35.0,
+                                      width: 250.0,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        border: Border.all(
+                                          color: Colors.grey,
+                                          style: BorderStyle.solid,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<DepartmentModel>(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10.0),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          value: dropdownValue,
+                                          onChanged:
+                                              (DepartmentModel? value) async {
+                                            if (value != null) {
+                                              setState(() {
+                                                dropdownValue = value;
+                                              });
+                                            }
+                                          },
+                                          items: department.departmentList.map<
+                                                  DropdownMenuItem<
+                                                      DepartmentModel>>(
+                                              (DepartmentModel value) {
+                                            return DropdownMenuItem<
+                                                DepartmentModel>(
+                                              value: value,
+                                              child: Text(value.departmentName),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 10.0),
+                              SizedBox(
+                                height: 35.0,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        style: const TextStyle(fontSize: 18.0),
+                                        decoration: const InputDecoration(
+                                          label: Text('ID no. or Name'),
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.grey,
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          isDense: true,
+                                          contentPadding: EdgeInsets.fromLTRB(
+                                              12.0, 12.0, 12.0, 12.0),
+                                        ),
+                                        controller: idController,
+                                        onSubmitted: (data) async {
+                                          history.changeLoadingState(true);
+                                          await Future.delayed(
+                                              const Duration(seconds: 1));
+                                          if (idController.text.isEmpty) {
+                                            // get records all
+                                            await history.getRecordsAll(
+                                                department: dropdownValue);
+                                          } else {
+                                            // get records with id or name
+                                            await history.getRecords(
+                                                // employeeId: idController.text.trim(),
+                                                employeeId:
+                                                    idController.text.trim(),
+                                                department: dropdownValue);
+                                          }
+                                          history.changeLoadingState(false);
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 5.0),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    '24 Hour format: ',
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
+                              SizedBox(
+                                height: 30.0,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      '24 Hour format: ',
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                  ValueListenableBuilder(
-                                    valueListenable: is24HourFormat,
-                                    builder: (_, value, __) {
-                                      return Checkbox(
-                                        value: is24HourFormat.value,
-                                        onChanged: (newCheckboxState) {
-                                          is24HourFormat.value =
-                                              newCheckboxState!;
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ],
+                                    ValueListenableBuilder(
+                                      valueListenable: is24HourFormat,
+                                      builder: (_, value, __) {
+                                        return Checkbox(
+                                          value: is24HourFormat.value,
+                                          onChanged: (newCheckboxState) {
+                                            is24HourFormat.value =
+                                                newCheckboxState!;
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
                               if (history.historyList.isNotEmpty) ...[
                                 const SizedBox(height: 5.0),
@@ -909,7 +933,7 @@ class _HomeViewState extends State<HomeView> {
                                   ],
                                 ),
                               ],
-                              const SizedBox(height: 5.0),
+                              const SizedBox(height: 10.0),
                               Container(
                                 color: Colors.green[300],
                                 width: double.infinity,
@@ -974,6 +998,8 @@ class _HomeViewState extends State<HomeView> {
                                               .format(history.uiList[i].date),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
+                                          style:
+                                              const TextStyle(fontSize: 13.0),
                                         ),
                                       ],
                                     ),
@@ -1007,6 +1033,7 @@ class _HomeViewState extends State<HomeView> {
                                       '${history.uiList[i].lastName}, ${history.uiList[i].firstName} ${history.uiList[i].middleName}',
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
+                                      style: const TextStyle(fontSize: 13.0),
                                     ),
                                   ],
                                 ),

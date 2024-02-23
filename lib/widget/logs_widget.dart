@@ -16,10 +16,18 @@ class LogsWidget extends StatefulWidget {
 }
 
 class _LogsWidgetState extends State<LogsWidget> {
-  var textStyleImage = const TextStyle(
+  final textStyleImage = const TextStyle(
     color: Colors.blue,
     decoration: TextDecoration.underline,
+    fontSize: 13.0,
   );
+
+  TextStyle fontStyleFunc(String logType) {
+    return TextStyle(
+      color: logType == 'IN' ? Colors.green : Colors.red,
+      fontSize: 13.0,
+    );
+  }
 
   static const String imageFolder = 'http://103.62.153.74:53000/field_api/';
 
@@ -36,11 +44,8 @@ class _LogsWidgetState extends State<LogsWidget> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  widget.logs[j].logType,
-                  style: textStyleImage,
-                ),
-                const SizedBox(height: 5.0),
+                Text(widget.logs[j].logType,
+                    style: fontStyleFunc(widget.logs[j].logType)),
                 Text(
                   history.dateFormat12or24Web(widget.logs[j].timeStamp),
                   style: textStyleImage,
@@ -62,6 +67,7 @@ class _LogsWidgetState extends State<LogsWidget> {
                   );
                 }
               },
+              iconSize: 20.0,
               tooltip: 'Menu',
               splashRadius: 15.0,
               padding: const EdgeInsets.all(0.0),
@@ -78,12 +84,10 @@ class _LogsWidgetState extends State<LogsWidget> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  widget.logs[j].logType,
-                ),
-                Text(
-                  history.dateFormat12or24Web(widget.logs[j].timeStamp),
-                ),
+                Text(widget.logs[j].logType,
+                    style: fontStyleFunc(widget.logs[j].logType)),
+                Text(history.dateFormat12or24Web(widget.logs[j].timeStamp),
+                    style: fontStyleFunc(widget.logs[j].logType)),
               ],
             ),
             const SizedBox(width: 15.0),
