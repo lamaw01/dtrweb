@@ -1013,8 +1013,12 @@ class _HomeViewState extends State<HomeView> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        const Text('Id No: '),
-                                        Text(history.uiList[i].employeeId),
+                                        const Text('ID No: '),
+                                        Text(
+                                          history.uiList[i].employeeId,
+                                          style:
+                                              const TextStyle(fontSize: 13.0),
+                                        ),
                                       ],
                                     ),
                                   ),

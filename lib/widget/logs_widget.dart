@@ -52,33 +52,40 @@ class _LogsWidgetState extends State<LogsWidget> {
                 ),
               ],
             ),
-            PopupMenuButton<String>(
-              onSelected: (String value) {
-                String latlng = widget.logs[j].latlng.replaceAll(' ', ',');
-                log('kani $latlng');
+            SizedBox(
+              height: 20.0,
+              width: 20.0,
+              child: PopupMenuButton<String>(
+                onSelected: (String value) {
+                  String latlng = widget.logs[j].latlng.replaceAll(' ', ',');
+                  log('kani $latlng');
 
-                if (value == 'Show Image') {
-                  launchUrl(
-                    Uri.parse('$imageFolder${widget.logs[j].imagePath}'),
-                  );
-                } else {
-                  launchUrl(
-                    Uri.parse('$googleMapsUrl$latlng'),
-                  );
-                }
-              },
-              iconSize: 20.0,
-              tooltip: 'Menu',
-              splashRadius: 15.0,
-              padding: const EdgeInsets.all(0.0),
-              itemBuilder: (BuildContext context) {
-                return {'Show Image', 'Show Map'}.map((String choice) {
-                  return PopupMenuItem<String>(
-                    value: choice,
-                    child: Text(choice),
-                  );
-                }).toList();
-              },
+                  if (value == 'Show Image') {
+                    launchUrl(
+                      Uri.parse('$imageFolder${widget.logs[j].imagePath}'),
+                    );
+                  } else {
+                    launchUrl(
+                      Uri.parse('$googleMapsUrl$latlng'),
+                    );
+                  }
+                },
+                iconSize: 20.0,
+                tooltip: 'Menu',
+                splashRadius: 12.0,
+                padding: const EdgeInsets.all(0.0),
+                itemBuilder: (BuildContext context) {
+                  return {'Show Image', 'Show Map'}.map((String choice) {
+                    return PopupMenuItem<String>(
+                      value: choice,
+                      child: Text(
+                        choice,
+                        style: const TextStyle(fontSize: 13.0),
+                      ),
+                    );
+                  }).toList();
+                },
+              ),
             ),
           ] else ...[
             Column(
