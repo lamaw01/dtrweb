@@ -1,7 +1,7 @@
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert' show utf8;
+import 'package:charset/charset.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' show AnchorElement;
 
@@ -232,7 +232,7 @@ class HistoryProvider with ChangeNotifier {
     String data = '';
     const String space = '            ';
     String newLine = '\n';
-    const String filename = 'TESTEXF.exf';
+    const String filename = 'WINDOWS1252.exf';
 
     _historyList.sort((a, b) {
       var valueA = '${a.employeeId} ${a.date}';
@@ -247,7 +247,8 @@ class HistoryProvider with ChangeNotifier {
         // counter++;
         data = data +
             _historyList[i].employeeId +
-            logValue(_historyList[i].logs[j]).toString() +
+            logValue(_historyList[i].logs[j], _historyList[i].logs, j)
+                .toString() +
             _dateExf.format(_historyList[i].logs[j].timeStamp) +
             space;
         // int modulo = counter % 6;
@@ -267,9 +268,12 @@ class HistoryProvider with ChangeNotifier {
 
     final String decodedGarbleEnd = decode(sub);
 
+    // List<int> gbkData = windows1252.encode(decodedGarbleStart);
+    // log('${Charset.detect(gbkData)?.name}');
+
     AnchorElement()
       ..href =
-          '${Uri.dataFromString('$decodedGarbleStart$newLine$decodedGarbleNew${data.trim()}$decodedGarbleEnd', mimeType: 'text/plain', encoding: utf8)}'
+          '${Uri.dataFromString('$decodedGarbleStart$newLine$decodedGarbleNew${data.trim()}$decodedGarbleEnd', mimeType: 'text/plain', encoding: windows1252)}'
       ..download = filename
       ..style.display = 'none'
       ..click();
@@ -291,7 +295,15 @@ class HistoryProvider with ChangeNotifier {
         value.split(" ").map((v) => int.parse(v, radix: 2)));
   }
 
-  int logValue(Log logval) {
+  //CURRENT LOLOY = 1434
+  //CORRECT LOLOY = 1234
+  //CURRENT KEVIN 3212
+  //CORRECT KEVIN 3412
+  //1 = MORNING IN
+  //2 = MORNING OUT
+  //3 = AFTERNOON IN
+  //4 = AFTERNOON OUT
+  int logValue(Log logval, List<Log> logs, int index) {
     // log('hour ${logval.timeStamp.hour} ${logval.timeStamp}');
     switch (logval.timeStamp.hour) {
       case 0:
@@ -318,7 +330,11 @@ class HistoryProvider with ChangeNotifier {
         return logval.logType == 'IN' ? 1 : 2;
       case 11:
         return logval.logType == 'IN' ? 1 : 2;
+/////////////////////////////////////////////////////
       case 12:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 13:
         return logval.logType == 'IN' ? 3 : 4;
