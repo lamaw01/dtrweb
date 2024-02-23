@@ -247,7 +247,8 @@ class HistoryProvider with ChangeNotifier {
         // counter++;
         data = data +
             _historyList[i].employeeId +
-            logValue(_historyList[i].logs[j], _historyList[i].logs, j)
+            logValue(_historyList[i].logs[j], _historyList[i].logs, j,
+                    _historyList[i].currentSchedId)
                 .toString() +
             _dateExf.format(_historyList[i].logs[j].timeStamp) +
             space;
@@ -267,9 +268,6 @@ class HistoryProvider with ChangeNotifier {
         '$nul2 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1 $space1');
 
     final String decodedGarbleEnd = decode(sub);
-
-    // List<int> gbkData = windows1252.encode(decodedGarbleStart);
-    // log('${Charset.detect(gbkData)?.name}');
 
     AnchorElement()
       ..href =
@@ -303,32 +301,68 @@ class HistoryProvider with ChangeNotifier {
   //2 = MORNING OUT
   //3 = AFTERNOON IN
   //4 = AFTERNOON OUT
-  int logValue(Log logval, List<Log> logs, int index) {
-    // log('hour ${logval.timeStamp.hour} ${logval.timeStamp}');
+  int logValue(Log logval, List<Log> logs, int index, String schedId) {
+    final String schedFirstChar = schedId.substring(0, 1);
     switch (logval.timeStamp.hour) {
       case 0:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 1:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 2:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 3:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 4:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 5:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 6:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 7:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 8:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 9:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 10:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
       case 11:
+        if (index == 0 && logs.length >= 3 && schedFirstChar == 'E') {
+          return 4;
+        }
         return logval.logType == 'IN' ? 1 : 2;
 /////////////////////////////////////////////////////
       case 12:
@@ -337,26 +371,59 @@ class HistoryProvider with ChangeNotifier {
         }
         return logval.logType == 'IN' ? 3 : 4;
       case 13:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 14:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 15:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 16:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 17:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 18:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 19:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 20:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 21:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 22:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       case 23:
+        if (index == 1 && logs.length >= 4) {
+          return 2;
+        }
         return logval.logType == 'IN' ? 3 : 4;
       default:
         return 1;

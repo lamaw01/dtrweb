@@ -488,7 +488,6 @@ class _HomeViewState extends State<HomeView> {
                                           department: dropdownValue);
                                     }
                                     history.changeLoadingState(false);
-                                    debugPrint(history.isSoloUser().toString());
                                   },
                                   child: const Text(
                                     'View',
