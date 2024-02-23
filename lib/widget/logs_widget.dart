@@ -81,13 +81,12 @@ class _LogsWidgetState extends State<LogsWidget> {
                 Text(
                   widget.logs[j].logType,
                 ),
-                const SizedBox(height: 5.0),
                 Text(
                   history.dateFormat12or24Web(widget.logs[j].timeStamp),
                 ),
               ],
             ),
-            const SizedBox(width: 30.0),
+            const SizedBox(width: 15.0),
           ],
         ],
       ],

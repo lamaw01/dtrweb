@@ -193,6 +193,8 @@ class _HomeViewState extends State<HomeView> {
                           padding: const EdgeInsets.all(20.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -368,14 +370,14 @@ class _HomeViewState extends State<HomeView> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 5.0),
+                              // const SizedBox(height: 5.0),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Text(
                                     '24 Hour format: ',
                                     style: TextStyle(
-                                      fontSize: 16.0,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -404,7 +406,7 @@ class _HomeViewState extends State<HomeView> {
                                       },
                                       child: Ink(
                                         height: 30.0,
-                                        width: 160.0,
+                                        width: 150.0,
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(5.0),
@@ -438,7 +440,7 @@ class _HomeViewState extends State<HomeView> {
                                       },
                                       child: Ink(
                                         height: 30.0,
-                                        width: 160.0,
+                                        width: 150.0,
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(5.0),
@@ -617,13 +619,15 @@ class _HomeViewState extends State<HomeView> {
                     ]
                   ] else ...[
                     SizedBox(
-                      height: 345.0,
-                      width: 500.0,
+                      height: 350.0,
+                      width: 400.0,
                       child: Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(10.0),
+                          padding: const EdgeInsets.all(5.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -638,7 +642,7 @@ class _HomeViewState extends State<HomeView> {
                                     ),
                                   ),
                                   SizedBox(
-                                    width: 350.0,
+                                    width: 250.0,
                                     child: TextField(
                                       style: const TextStyle(fontSize: 18.0),
                                       readOnly: true,
@@ -682,7 +686,7 @@ class _HomeViewState extends State<HomeView> {
                                     ),
                                   ),
                                   SizedBox(
-                                    width: 350.0,
+                                    width: 250.0,
                                     child: TextField(
                                       style: const TextStyle(fontSize: 18.0),
                                       readOnly: true,
@@ -725,8 +729,8 @@ class _HomeViewState extends State<HomeView> {
                                     ),
                                   ),
                                   Container(
-                                    height: 40.0,
-                                    width: 350.0,
+                                    height: 35.0,
+                                    width: 250.0,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(5),
                                       border: Border.all(
@@ -833,43 +837,83 @@ class _HomeViewState extends State<HomeView> {
                               ),
                               if (history.historyList.isNotEmpty) ...[
                                 const SizedBox(height: 5.0),
-                                InkWell(
-                                  onTap: () {
-                                    // history.exportRawLogsExcel();
-                                  },
-                                  child: Ink(
-                                    height: 30.0,
-                                    width: 160.0,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5.0),
-                                      color: Colors.orange[300],
-                                    ),
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.download,
-                                          color: Colors.white,
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        history.exportRawLogsExcel();
+                                      },
+                                      child: Ink(
+                                        height: 30.0,
+                                        width: 150.0,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5.0),
+                                          color: Colors.orange[300],
                                         ),
-                                        Text(
-                                          'Export Raw Log excel',
-                                          style: TextStyle(
-                                            fontSize: 12.0,
-                                            color: Colors.white,
-                                          ),
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.download,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              'Export Raw Log excel',
+                                              style: TextStyle(
+                                                fontSize: 12.0,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 15.0),
+                                    InkWell(
+                                      onTap: () {
+                                        history.saveTextFile();
+                                        // history.testTime();
+                                      },
+                                      child: Ink(
+                                        height: 30.0,
+                                        width: 150.0,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5.0),
+                                          color: Colors.orange[300],
+                                        ),
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.download,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              'Export EXF File',
+                                              style: TextStyle(
+                                                fontSize: 12.0,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
-                              const SizedBox(height: 10.0),
+                              const SizedBox(height: 5.0),
                               Container(
                                 color: Colors.green[300],
                                 width: double.infinity,
-                                height: 50.0,
+                                height: 40.0,
                                 child: TextButton(
                                   onPressed: () async {
                                     history.changeLoadingState(true);
@@ -904,66 +948,74 @@ class _HomeViewState extends State<HomeView> {
                     ),
                     if (history.historyList.isNotEmpty) ...[
                       for (int i = 0; i < history.uiList.length; i++) ...[
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Container(
-                            height: 80.0,
-                            color: i % 2 == 0 ? null : Colors.grey[300],
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                        Container(
+                          height: 100.0,
+                          color: i % 2 == 0 ? null : Colors.grey[300],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  SizedBox(
+                                    width: 200.0,
+                                    // color: Colors.green,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Text('Date: '),
+                                        Text(
+                                          DateFormat.yMMMEd()
+                                              .format(history.uiList[i].date),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 150.0,
+                                    // color: Colors.blue,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Text('Id No: '),
+                                        Text(history.uiList[i].employeeId),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 5.0),
+                              SizedBox(
+                                width: 400.0,
+                                // color: Colors.red,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    SizedBox(
-                                      width: 150.0,
-                                      // color: Colors.green,
-                                      child: Row(
-                                        children: [
-                                          const Text('Date: '),
-                                          Text(
-                                            DateFormat.yMMMEd()
-                                                .format(history.uiList[i].date),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 100.0,
-                                      // color: Colors.blue,
-                                      child: Row(
-                                        children: [
-                                          const Text('Id No: '),
-                                          Text(history.uiList[i].employeeId),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 200.0,
-                                      // color: Colors.red,
-                                      child: Row(
-                                        children: [
-                                          const Text('Name: '),
-                                          Expanded(
-                                            child: Text(
-                                              '${history.uiList[i].lastName}, ${history.uiList[i].firstName} ${history.uiList[i].middleName}',
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                    const Text('Name: '),
+                                    Text(
+                                      '${history.uiList[i].lastName}, ${history.uiList[i].firstName} ${history.uiList[i].middleName}',
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                   ],
                                 ),
-                                // const SizedBox(height: 5.0),
-                                const Divider(),
-                                LogsWidget(logs: history.uiList[i].logs)
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 2.5),
+                              const Divider(height: 5.0),
+                              const SizedBox(height: 2.5),
+                              LogsWidget(logs: history.uiList[i].logs)
+                            ],
                           ),
                         ),
                       ],
