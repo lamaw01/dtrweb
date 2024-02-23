@@ -232,7 +232,7 @@ class HistoryProvider with ChangeNotifier {
     String data = '';
     const String space = '            ';
     String newLine = '\n';
-    const String filename = 'WINDOWS1252.exf';
+    const String filename = 'WIND1252.exf';
 
     _historyList.sort((a, b) {
       var valueA = '${a.employeeId} ${a.date}';
