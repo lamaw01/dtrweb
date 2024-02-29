@@ -7,6 +7,7 @@ import 'package:dtrweb/model/log_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../data/history_provider.dart';
 import '../data/schedule_provider.dart';
 import '../data/version_provider.dart';
 import '../model/clean_excel_model.dart';
@@ -394,6 +395,7 @@ class _ExcelViewState extends State<ExcelView> {
     var udiw = 110.0;
     // var udbw = 110.0;
     final schedule = Provider.of<ScheduleProvider>(context, listen: false);
+    final history = Provider.of<HistoryProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -446,7 +448,7 @@ class _ExcelViewState extends State<ExcelView> {
         actions: [
           InkWell(
             onTap: () {
-              excel.exportExcel();
+              excel.exportExcel(history.selectedFrom, history.selectedTo);
             },
             child: Ink(
               height: 50.0,

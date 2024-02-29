@@ -222,7 +222,16 @@ class HistoryProvider with ChangeNotifier {
           );
         }
       }
-      excel.save(fileName: 'DTR-raw.xlsx');
+      final String sfd = _dateYmd.format(selectedFrom);
+      final String std = _dateYmd.format(selectedTo);
+
+      var dur = selectedFrom.difference(selectedTo);
+
+      if (dur.inDays == 0) {
+        excel.save(fileName: '$std DTR-raw.xlsx');
+      } else {
+        excel.save(fileName: '$sfd-$std DTR-raw.xlsx');
+      }
     } catch (e) {
       debugPrint('$e exportRawLogsExcel');
     }

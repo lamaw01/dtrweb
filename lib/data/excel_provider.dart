@@ -24,6 +24,8 @@ class ExcelProvider with ChangeNotifier {
   final _dateFormat1 = DateFormat('yyyy-MM-dd HH:mm');
   DateFormat get dateFormat1 => _dateFormat1;
 
+  final _dateYmd = DateFormat('yyyy-MM-dd');
+
   var _lateThreshold = 300;
   int get lateThreshold => _lateThreshold;
 
@@ -868,7 +870,7 @@ class ExcelProvider with ChangeNotifier {
     return model;
   }
 
-  void exportExcel() {
+  void exportExcel(DateTime from, DateTime to) {
     try {
       var excel = Excel.createExcel();
       Sheet sheetObject = excel['Sheet1'];
@@ -1091,7 +1093,16 @@ class ExcelProvider with ChangeNotifier {
         //   cellStyle: cellStyleData,
         // );
       }
-      excel.save(fileName: 'DTR-excel.xlsx');
+      final String sfd = _dateYmd.format(from);
+      final String std = _dateYmd.format(to);
+
+      var dur = from.difference(to);
+
+      if (dur.inDays == 0) {
+        excel.save(fileName: '$std DTR-advanced.xlsx');
+      } else {
+        excel.save(fileName: '$sfd-$std DTR-advanced.xlsx');
+      }
     } catch (e) {
       debugPrint('exportExcel $e');
     }
