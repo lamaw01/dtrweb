@@ -10,7 +10,6 @@ import '../data/history_provider.dart';
 import '../data/schedule_provider.dart';
 import '../data/version_provider.dart';
 import '../model/department_model.dart';
-import '../services/http_service.dart';
 import '../widget/logs_widget.dart';
 import 'excel_view.dart';
 
@@ -49,8 +48,6 @@ class _HomeViewState extends State<HomeView> {
       await schedule.getSchedule();
       await excel.getSettings();
     });
-    title =
-        '$title---${HttpService.currentUri}---${HttpService.isSecured}---${HttpService.serverUrl}';
   }
 
   @override
