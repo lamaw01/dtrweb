@@ -10,6 +10,7 @@ import '../data/history_provider.dart';
 import '../data/schedule_provider.dart';
 import '../data/version_provider.dart';
 import '../model/department_model.dart';
+import '../services/http_service.dart';
 import '../widget/logs_widget.dart';
 import 'excel_view.dart';
 
@@ -32,6 +33,7 @@ class _HomeViewState extends State<HomeView> {
   final scrollController = ScrollController();
   var dropdownValue =
       DepartmentModel(departmentId: '000', departmentName: 'All');
+  String title = 'UC-1 DTR History';
 
   @override
   void initState() {
@@ -47,6 +49,8 @@ class _HomeViewState extends State<HomeView> {
       await schedule.getSchedule();
       await excel.getSettings();
     });
+    title =
+        '$title---${HttpService.currentUri}---${HttpService.isSecured}---${HttpService.serverUrl}';
   }
 
   @override
@@ -100,7 +104,6 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    const String title = 'UC-1 DTR History';
     final department = Provider.of<DepartmentProvider>(context, listen: false);
 
     final version = Provider.of<VersionProvider>(context);
@@ -109,7 +112,7 @@ class _HomeViewState extends State<HomeView> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Text(title),
+            Text(title),
             const SizedBox(
               width: 2.5,
             ),
